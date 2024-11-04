@@ -6,7 +6,7 @@
 #    By: marvin <marvin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/06 22:30:05 by alexafer          #+#    #+#              #
-#    Updated: 2024/09/25 19:47:53 by marvin           ###   ########.fr        #
+#    Updated: 2024/11/04 20:33:36 by Zerrino          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,8 +23,10 @@ MAIN = main
 HPP_FILES =
 
 #FILES
+FILES += BasicClass
 
 #INCLUDE
+INCLUDE += iostream
 
 SOURCES = $(MAIN:=.cpp) $(FILES:=.cpp)
 
@@ -83,15 +85,15 @@ create_files:
 			echo "# include <$$inc>" >> $(NAME).hpp; \
 		done; \
 		echo "" >> $(NAME).hpp; \
-		echo "class\t$(NAME)" >> $(NAME).hpp; \
-		echo "{" >> $(NAME).hpp; \
-		echo "\tprivate:" >> $(NAME).hpp; \
+		echo -e "class\t$(NAME)" >> $(NAME).hpp; \
+		echo -e "{" >> $(NAME).hpp; \
+		echo -e "\tprivate:" >> $(NAME).hpp; \
 		echo "" >> $(NAME).hpp; \
-		echo "\tpublic:" >> $(NAME).hpp; \
-		echo "\t\t$(NAME)();" >> $(NAME).hpp; \
-		echo "\t\t~$(NAME)();" >> $(NAME).hpp; \
-		echo "\t\t$(NAME)(const $(NAME) &cp);" >> $(NAME).hpp; \
-		echo "\t\t$(NAME)& operator= (const $(NAME) &cp);" >> $(NAME).hpp; \
+		echo -e "\tpublic:" >> $(NAME).hpp; \
+		echo -e "\t\t$(NAME)();" >> $(NAME).hpp; \
+		echo -e "\t\t~$(NAME)();" >> $(NAME).hpp; \
+		echo -e "\t\t$(NAME)(const $(NAME) &cp);" >> $(NAME).hpp; \
+		echo -e "\t\t$(NAME)& operator= (const $(NAME) &cp);" >> $(NAME).hpp; \
 		echo "};" >> $(NAME).hpp; \
 		echo "" >> $(NAME).hpp; \
 		echo "#endif" >> $(NAME).hpp; \
@@ -111,14 +113,14 @@ create_files:
 		echo "" >> $(NAME).cpp; \
 		echo "$(NAME)::$(NAME)(const $(NAME)& cp)" >> $(NAME).cpp; \
 		echo "{" >> $(NAME).cpp; \
-		echo "\t*this = cp;" >> $(NAME).cpp; \
+		echo -e "\t*this = cp;" >> $(NAME).cpp; \
 		echo "}" >> $(NAME).cpp; \
 		echo "" >> $(NAME).cpp; \
 		echo "$(NAME)& $(NAME)::operator= (const $(NAME)& cp)" >> $(NAME).cpp; \
 		echo "{" >> $(NAME).cpp; \
-		echo "\tif (this != &cp)" >> $(NAME).cpp; \
-		echo "\t\t*this = cp;" >> $(NAME).cpp; \
-		echo "\treturn (*this);" >> $(NAME).cpp; \
+		echo -e "\tif (this != &cp)" >> $(NAME).cpp; \
+		echo -e "\t\t*this = cp;" >> $(NAME).cpp; \
+		echo -e "\treturn (*this);" >> $(NAME).cpp; \
 		echo "}" >> $(NAME).cpp; \
 		make header/$(NAME).cpp; \
 	fi
@@ -130,13 +132,13 @@ main:
 		done; \
 		make header/main.cpp; \
 		echo "" >> main.cpp; \
-		echo "int\tmain(void)\n{" >> main.cpp; \
+		echo -e "int\tmain(void)\n{" >> main.cpp; \
 		for var in $(INCLUDE); do \
 			if [ "$$var" = iostream ]; then \
-				echo "\tstd::cout << \"Hello World !\" << std::endl;" >> main.cpp; \
+				echo -e "\tstd::cout << \"Hello World !\" << std::endl;" >> main.cpp; \
 			fi; \
 		done; \
-		echo "\treturn (0);\n}" >> main.cpp;\
+		echo -e "\treturn (0);\n}" >> main.cpp;\
 	fi
 
 # Prevent make from interpreting the command-line arguments as targets
