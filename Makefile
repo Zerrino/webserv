@@ -6,7 +6,7 @@
 #    By: marvin <marvin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/06 22:30:05 by alexafer          #+#    #+#              #
-#    Updated: 2024/11/04 20:33:36 by Zerrino          ###   ########.fr        #
+#    Updated: 2024/11/05 16:18:18 by Zerrino          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,10 +23,8 @@ MAIN = main
 HPP_FILES =
 
 #FILES
-FILES += BasicClass
 
 #INCLUDE
-INCLUDE += iostream
 
 SOURCES = $(MAIN:=.cpp) $(FILES:=.cpp)
 
