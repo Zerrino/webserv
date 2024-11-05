@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: marvin <marvin@student.42.fr>              +#+  +:+       +#+         #
+#    By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/06 22:30:05 by alexafer          #+#    #+#              #
-#    Updated: 2024/11/04 20:33:36 by Zerrino          ###   ########.fr        #
+#    Updated: 2024/11/05 14:41:09 by gdelvign         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ CXXFLAGS = -std=c++98 -Wall -Wextra -Werror
 
 OBJ_DIR = .objs
 
-TARGET = program
+TARGET = webserv
 
 MAIN = main
 
