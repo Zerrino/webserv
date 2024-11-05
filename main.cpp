@@ -1,30 +1,54 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/04 20:35:07 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/05 14:54:45 by gdelvign         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+#include <netinet/in.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/syscall.h>
+#include <iostream>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <cstring>
 
-#include "BasicClass.hpp"
-
-int main(int ac, char **av)
+int
+	main ()
 {
-	if (ac > 2)
+	std::cout << "Start!" << std::endl;
+	
+	int fd_socket = socket(AF_INET, SOCK_STREAM, 0); 
+	struct sockaddr_in addr = {
+		AF_INET,
+		0x901f, // 8080 -> le port hex(8080), ensuite big endian
+		0,
+		0
+	};	
+
+	bind(fd_socket, (struct sockaddr *)&addr, sizeof(addr));
+	
+	listen(fd_socket, 10);
+	int i = 0;
+	int max = 10;
+	while (i < max)
 	{
-		std::cout << "Invalid number of arguments !" << std::endl;
-		return (EXIT_FAILURE);
+		int fd_client = accept(fd_socket, 0, 0);
+
+		char buffer[1024] = {0};
+		read(fd_client, buffer, 1024);
+
+		std::cout << "Buffer : " << buffer << std::endl;
+		int fd_open = open("index.html", O_RDONLY);
+		
+
+		write(fd_client, "HTTP/1.0 200 OK\nContent-type: text/html\n", 40);
+		char buffer2[256];
+		ssize_t bytes;
+		while ((bytes = read(fd_open, buffer2, 256)) > 0)
+		{
+			write(fd_client, buffer2, bytes);
+			std::cout << "Loop" << std::endl;
+		}
+		close(fd_client);
+		close(fd_open);
+		i++;
 	}
-	else
-	{
-		if (ac == 1)
-			std::cout << "Using default config file." << std::endl;
-		else
-			std::cout << "Config file provided is : " << std::string(av[1]) << std::endl;
-	}
-	return (EXIT_SUCCESS);
+	close(fd_socket);
+	return 0;
+
 }
