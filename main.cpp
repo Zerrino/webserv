@@ -15,7 +15,7 @@ int
 	int fd_socket = socket(AF_INET, SOCK_STREAM, 0); 
 	struct sockaddr_in addr = {
 		AF_INET,
-		0x901f, // 8080 -> le port hex(8080), ensuite inverse bite
+		0x901f, // 8080 -> le port hex(8080), ensuite big endian
 		0,
 		0
 	};	
@@ -34,9 +34,9 @@ int
 
 		std::cout << "Buffer : " << buffer << std::endl;
 		int fd_open = open("index.html", O_RDONLY);
-		write(fd_client, "HTTP/1.0 200 OK\nContent-type: text/html\n", 40);
 		
 
+		write(fd_client, "HTTP/1.0 200 OK\nContent-type: text/html\n", 40);
 		char buffer2[256];
 		ssize_t bytes;
 		while ((bytes = read(fd_open, buffer2, 256)) > 0)
