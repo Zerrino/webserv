@@ -6,28 +6,22 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <cstring>
+#include "Socket.hpp"
+
 
 int
 	main ()
 {
 	std::cout << "Start!" << std::endl;
 	
-	int fd_socket = socket(AF_INET, SOCK_STREAM, 0); 
-	struct sockaddr_in addr = {
-		AF_INET,
-		0x901f, // 8080 -> le port hex(8080), ensuite big endian
-		0,
-		0
-	};	
-
-	bind(fd_socket, (struct sockaddr *)&addr, sizeof(addr));
+	Socket sock(AF_INET, SOCK_STREAM, 0);
+	sock.runSocket(8080, 10);
 	
-	listen(fd_socket, 10);
 	int i = 0;
 	int max = 10;
 	while (i < max)
 	{
-		int fd_client = accept(fd_socket, 0, 0);
+		int fd_client = accept(sock.get_fdSocket(), 0, 0);
 
 		char buffer[1024] = {0};
 		read(fd_client, buffer, 1024);
@@ -37,6 +31,7 @@ int
 		
 
 		write(fd_client, "HTTP/1.0 200 OK\nContent-type: text/html\n", 40);
+
 		char buffer2[256];
 		ssize_t bytes;
 		while ((bytes = read(fd_open, buffer2, 256)) > 0)
@@ -48,7 +43,6 @@ int
 		close(fd_open);
 		i++;
 	}
-	close(fd_socket);
 	return 0;
 
 }
