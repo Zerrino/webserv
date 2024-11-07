@@ -6,7 +6,7 @@
 #    By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/06 22:30:05 by alexafer          #+#    #+#              #
-#    Updated: 2024/11/05 22:02:38 by gdelvign         ###   ########.fr        #
+#    Updated: 2024/11/07 20:09:45 by gdelvign         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,6 +23,7 @@ MAIN = main
 HPP_FILES =
 
 #FILES
+FILES += ConfigLexer
 
 #INCLUDE
 

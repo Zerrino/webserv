@@ -8,51 +8,7 @@
 #include <cstring>
 #include "webserv.hpp"
 
-std::vector<std::string> splitInWords(std::ifstream &file)
-{
-	std::vector<std::string> words;
-	std::string word;
-	char ch;
 
-	while (file.get(ch))
-	{
-		if (ch == '#')
-		{
-			while (ch != '\n')
-				file.get(ch);
-		}
-		else if (!std::isspace(ch))
-			word += ch;
-		else
-		{
-			if (!word.empty())
-			{
-				words.push_back(word);
-				word.clear();
-			}
-		}
-	}
-	 std::cout << file.get(ch) << std::endl;
-	if (!word.empty())
-		words.push_back(word);
-	return (words);
-}
-
-std::vector<Token> tokenize(std::ifstream &file)
-{
-	std::vector<Token> tokens;
-	std::vector<std::string> words;
-
-	words = splitInWords(file);
-
-	// Print words for testing purpose
-	for (std::vector<std::string>::const_iterator i = words.begin(); i != words.end(); i++)
-		std::cout << *i << std::endl;
-
-	// Tokenization logic here
-
-	return (tokens);
-}
 
 int main(int ac, char **av)
 {
@@ -113,14 +69,14 @@ int main(int ac, char **av)
 		}
 		else
 		{
-			std::vector<Token> tokens;
+			ConfigLexer config(av[1]);
+			ConfigLexer::ConfigError status;
 
-			std::cout << "Config file provided is : " << std::string(av[1]) << std::endl;
-			std::string config_file = std::string(av[1]);
-			std::ifstream config_file_stream(config_file);
-			if (!config_file_stream.is_open())
-				return (EXIT_FAILURE);
-			tokenize(config_file_stream);
+			if ((status = config.checkPathvalidity()))
+				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
+			if ((status = config.open()))
+				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
+			config.tokenize();
 		}
 	}
 	return (EXIT_SUCCESS);
