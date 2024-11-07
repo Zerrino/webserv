@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alexafer <alexafer@student.s19.be>         +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:57:51 by alexafer          #+#    #+#             */
-/*   Updated: 2024/11/06 19:59:42 by alexafer         ###   ########.fr       */
+/*   Updated: 2024/11/07 23:48:00 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,5 +22,7 @@
  #include <netinet/in.h>
  #include <cstring>
  #include <string>
-
+ #include <vector>
+ #include <poll.h>
+ #include <algorithm>
 #endif

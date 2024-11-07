@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Zerrino <Zerrino@student.42.fr>            +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:35:13 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/06 19:35:13 by Zerrino          ###   ########.fr       */
+/*   Updated: 2024/11/07 23:59:14 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,6 @@ void	Socket::runSocket(uint16_t port, int backlog)
 	}
 	catch (const std::exception &e)
 	{
-		std::cout << "Error occured : " << &e << std::cout;
+		std::cout << "error occured : " << e.what() << std::cout;
 	}
 }

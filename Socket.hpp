@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Zerrino <Zerrino@student.42.fr>            +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:35:13 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/06 19:35:13 by Zerrino          ###   ########.fr       */
+/*   Updated: 2024/11/07 23:52:18 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ class	Socket
 
 		void	bindSocket(sa_family_t sin_family, in_port_t sin_port, struct in_addr sin_addr);
 		void	listenSocket(int backlog);
-		
+
 		void	runSocket(uint16_t port, int backlog);
 
 		uint16_t get_port();
