@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <cstring>
 #include "Socket.hpp"
-
+#include "ClientRequest.hpp"
 
 int
 	main ()
@@ -19,28 +19,24 @@ int
 	
 	int i = 0;
 	int max = 10;
+	//text/html
+	//text/css
+
 	while (i < max)
 	{
-		int fd_client = accept(sock.get_fdSocket(), 0, 0);
+		try {
+			ClientRequest request(sock.get_fdSocket());	
+			
+			std::cout << request.get_clientInfo() << std::endl;
+			std::string path = request.getRequest();
+			std::cout << "path : " << path << std::endl;
+			
+			request.sendClient("index.html", "text/html");
 
-		char buffer[1024] = {0};
-		read(fd_client, buffer, 1024);
-
-		std::cout << "Buffer : " << buffer << std::endl;
-		int fd_open = open("index.html", O_RDONLY);
-		
-
-		write(fd_client, "HTTP/1.0 200 OK\nContent-type: text/html\n", 40);
-
-		char buffer2[256];
-		ssize_t bytes;
-		while ((bytes = read(fd_open, buffer2, 256)) > 0)
-		{
-			write(fd_client, buffer2, bytes);
-			std::cout << "Loop" << std::endl;
 		}
-		close(fd_client);
-		close(fd_open);
+		catch (const std::exception &e) {
+			std::cout << "error : " << e.what() << std::endl;
+		}
 		i++;
 	}
 	return 0;

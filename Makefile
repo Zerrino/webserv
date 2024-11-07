@@ -23,6 +23,7 @@ MAIN = main
 HPP_FILES =
 
 #FILES
+FILES += ClientRequest
 FILES += Socket
 
 #INCLUDE
