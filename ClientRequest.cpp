@@ -80,7 +80,7 @@ void	ClientRequest::sendClient(std::string path, std::string content_type)
 		throw std::runtime_error("error open, probably path of file");
 	write(this->_fdClient, "HTTP/1.0 200 OK\nContent-type: ", 30);
 	write(this->_fdClient, content_type.c_str(), content_type.length());
-	write(this->_fdClient, "\n", 1);
+	write(this->_fdClient, "\n\n", 2);
 
 	while ((bytes = read(fdOpen, buffer, 256)) > 0)
 		write(this->_fdClient, buffer, bytes);
