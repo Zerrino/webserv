@@ -8,40 +8,46 @@
 #include <cstring>
 #include "webserv.hpp"
 
-int countChar(std::ifstream file)
-{
-	std::string line;
-	int count = 0;
-
-	while (std::getline(file, line))
-		count += line.length();
-	return (count);
-}
-
 std::vector<std::string> splitInWords(std::ifstream &file)
 {
 	std::vector<std::string> words;
-
 	std::string word;
-	while (!file.eof())
+	char ch;
+
+	while (file.get(ch))
 	{
-
-		while (!file.eof()) word.push_back(file.get());
-		// if ((file.get() != ' '))
-		// 	word += file.get();
+		if (ch == '#')
+		{
+			while (ch != '\n')
+				file.get(ch);
+		}
+		else if (!std::isspace(ch))
+			word += ch;
+		else
+		{
+			if (!word.empty())
+			{
+				words.push_back(word);
+				word.clear();
+			}
+		}
 	}
-	std::cout << word << std::endl;
-
+	 std::cout << file.get(ch) << std::endl;
+	if (!word.empty())
+		words.push_back(word);
 	return (words);
 }
 
 std::vector<Token> tokenize(std::ifstream &file)
 {
-
 	std::vector<Token> tokens;
 	std::vector<std::string> words;
 
 	words = splitInWords(file);
+
+	// Print words for testing purpose
+	for (std::vector<std::string>::const_iterator i = words.begin(); i != words.end(); i++)
+		std::cout << *i << std::endl;
 
 	// Tokenization logic here
 
