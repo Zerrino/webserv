@@ -30,9 +30,16 @@ int
 			std::cout << request.get_clientInfo() << std::endl;
 			std::string path = request.getRequest();
 			std::cout << "path : " << path << std::endl;
-			
-			request.sendClient("index.html", "text/html");
-
+			if (path == "style.css")
+				request.sendClient("./data/index/style.css", "text/css");
+			else if (path == "script.js")
+				request.sendClient("./data/index/script.js", "text/javascript");
+			else if (path == "favicon.ico")
+				request.sendClient("./data/icon/crown.ico", "image/x-icon");
+			else {
+				request.sendClient("./data/index/index.html", "text/html");
+				
+			}
 		}
 		catch (const std::exception &e) {
 			std::cout << "error : " << e.what() << std::endl;

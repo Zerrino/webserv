@@ -55,9 +55,10 @@ struct sockaddr_in ClientRequest::get_addr()
 
 std::string	ClientRequest::get_clientInfo()
 {
-	this->_clientInfo = "";
-	while (read(this->_fdClient, this->_buffer, 256) > 0)
-		this->_clientInfo.append(this->_buffer);
+	char buffer[1024] = {0};
+	read(this->_fdClient, buffer, 1024);
+	std::string str(buffer);
+	this->_clientInfo = str;
 	return (this->_clientInfo);
 }
 
@@ -74,20 +75,15 @@ void	ClientRequest::sendClient(std::string path, std::string content_type)
 {
 	int	fdOpen = open(path.c_str(), O_RDONLY);
 	ssize_t	bytes;
-
+	char	buffer[256] = {0};
 	if (fdOpen == -1)
 		throw std::runtime_error("error open, probably path of file");
-	write(1, "HTTP/1.0 200 OK\nContent-type: ", 31);
-	write(this->_fdClient, "HTTP/1.0 200 OK\nContent-type: ", 31);
-
-	write(1, content_type.c_str(), content_type.length());
+	write(this->_fdClient, "HTTP/1.0 200 OK\nContent-type: ", 30);
 	write(this->_fdClient, content_type.c_str(), content_type.length());
-	
-	write(1, "\n\n", 2);
-	write(this->_fdClient, "\n\n", 2);
+	write(this->_fdClient, "\n", 1);
 
-	while ((bytes = read(fdOpen, this->_buffer, 256)) > 0)
-		write(this->_fdClient, this->_buffer, bytes);
+	while ((bytes = read(fdOpen, buffer, 256)) > 0)
+		write(this->_fdClient, buffer, bytes);
 	close(fdOpen);
 }
 
