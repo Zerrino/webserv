@@ -117,8 +117,6 @@ ConfigParser::ConfigError ConfigParser::parse()
 	for (std::vector<std::string>::const_iterator i = words.begin(); i != words.end(); i++)
 		std::cout << *i << std::endl;
 
-	
-
 	return (SUCCESS);
 }
 
@@ -127,7 +125,7 @@ ConfigParser::ConfigError ConfigParser::parse()
 */
 
 /*
-** This function splits the whole config file in 'words' and skips the comments
+** This function splits the whole config file in 'words/tokens' and skips the comments
 */
 std::vector<std::string> ConfigParser::split(std::ifstream &file)
 {
@@ -152,6 +150,11 @@ std::vector<std::string> ConfigParser::split(std::ifstream &file)
 				words.push_back(word);
 				word.clear();
 			}
+			if (ch == ';')
+			{
+				words.push_back(";");
+				word.clear();
+			}
 		}
 	}
 	if (!word.empty())
@@ -161,41 +164,102 @@ std::vector<std::string> ConfigParser::split(std::ifstream &file)
 
 void ConfigParser::initTokenMap()
 {
-	_tokenMap["http"] = TOKEN_KEYWORD_HTTP;
-	_tokenMap["server"] = TOKEN_KEYWORD_SERVER;
-	_tokenMap["location"] = TOKEN_KEYWORD_LOCATION;
-	_tokenMap["include"] = TOKEN_KEYWORD_INCLUDE;
-	_tokenMap["limit_except"] = TOKEN_KEYWORD_LIMIT;
+	/* Blocks */
+	_tokenMap["http"] = TOKEN_BLOCK_HTTP;
+	_tokenMap["server"] = TOKEN_BLOCK_SERVER;
+	_tokenMap["location"] = TOKEN_BLOCK_LOCATION;
+
+	/* Symbols */
+	_tokenMap["{"] = TOKEN_SYMBOL_OPEN_BRACE;
+	_tokenMap["}"] = TOKEN_SYMBOL_CLOSE_BRACE;
+	_tokenMap[";"] = TOKEN_SYMBOL_SEMICOLON;
+	_tokenMap["="] = TOKEN_OPERATOR_EQUAL;
+	_tokenMap["!="] = TOKEN_OPERATOR_NOT_EQUAL;
+
+	/* Identifiers */
 	_tokenMap["client_max_body_size"] = TOKEN_IDENTIFIER;
 	_tokenMap["error_page"] = TOKEN_IDENTIFIER;
 	_tokenMap["listen"] = TOKEN_IDENTIFIER;
 	_tokenMap["server_name"] = TOKEN_IDENTIFIER;
 	_tokenMap["root"] = TOKEN_IDENTIFIER;
-	
+	_tokenMap["limit_except"] = TOKEN_IDENTIFIER;
+	_tokenMap["autoindex"] = TOKEN_IDENTIFIER;
+	_tokenMap["client_body_temp_path"] = TOKEN_IDENTIFIER;
+	_tokenMap["client_body_in_file_only"] = TOKEN_IDENTIFIER;
+	_tokenMap["client_max_body_size"] = TOKEN_IDENTIFIER;
+	_tokenMap["fastcgi_pass"] = TOKEN_IDENTIFIER;
+	_tokenMap["fastcgi_params"] = TOKEN_IDENTIFIER;
+	_tokenMap["include"] = TOKEN_IDENTIFIER;
+	_tokenMap["return"] = TOKEN_IDENTIFIER;
+}
 
+int ConfigParser::isNumber(const std::string &word)
+{
+	int i = 0;
+	int j = 0;
+
+	initializeUnits();
+	if (isdigit(word[i]))
+	{
+		for (i = 0; i < word.length(); i++)
+		{
+			if (isdigit(word[i]))
+				j++;
+			else
+				break;
+		}
+		if (j == word.length())
+			return (TOKEN_NUMBER);
+
+		// TODO:Find a best way to handle this...
+		if (j == (word.length() - 1) || j == (word.length() - 2))
+			return (TOKEN_NUMBER_WITH_UNIT);
+	}
+	return (NULL);
+}
+
+// TODO:This function has to be rewritten. (Not "ms" and "m" in both vectors...
+void ConfigParser::initializeUnits()
+{
+
+	// Size units
+	_sizeUnits.push_back('k');
+	_sizeUnits.push_back('K');
+	_sizeUnits.push_back('m');
+	_sizeUnits.push_back('M');
+	_sizeUnits.push_back('g');
+	_sizeUnits.push_back('G');
+
+	// Time units
+	_timeUnits.push_back('s');
+	_timeUnits.push_back('m');
+	_timeUnits.push_back('h');
+	_timeUnits.push_back('d');
+	_timeUnits.push_back('w');
+	_timeUnits.push_back('M');
+	_timeUnits.push_back('y');
+}
+
+bool ConfigParser::isSizeUnit(char c) const
+{
+	return std::find(_sizeUnits.begin(), _sizeUnits.end(), c) != _sizeUnits.end();
+}
+
+bool ConfigParser::isTimeUnit(char c) const
+{
+	return std::find(_timeUnits.begin(), _timeUnits.end(), c) != _timeUnits.end();
 }
 
 TokenType ConfigParser::getTokenType(const std::string &word)
 {
-	if (word == "{")
-		return TOKEN_SYMBOL_OPEN_BRACE;
-	else if (word == "}")
-		return TOKEN_SYMBOL_CLOSE_BRACE;
-	else if (word == ";")
-		return TOKEN_SYMBOL_SEMICOLON;
-	else if (word == "=")
-		return TOKEN_OPERATOR_EQUAL;
-	else if (word == "!=")
-		return TOKEN_OPERATOR_NOT_EQUAL;
-
 	initTokenMap();
 	std::map<std::string, TokenType>::iterator it = _tokenMap.find(word);
-	if (it !=_tokenMap.end())
+	if (it != _tokenMap.end())
 		return (it->second);
-
-	
-	
+	else if (int ret = isNumber(word))
+		return ((TokenType)ret);
 	// WIP
+	return (TOKEN_BLOCK_HTTP);
 }
 
 bool ConfigParser::expectedToken(const std::string &expected)
@@ -224,6 +288,7 @@ bool ConfigParser::expectedAndMove(const std::string &expected)
 bool ConfigParser::parsehttp()
 {
 	// WIP
+	return (true);
 }
 
 /* ************************************************************************** */

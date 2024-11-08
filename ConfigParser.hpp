@@ -7,11 +7,11 @@
 
 enum TokenType
 {
-	TOKEN_KEYWORD_HTTP,
-	TOKEN_KEYWORD_SERVER,
-	TOKEN_KEYWORD_LOCATION,
+	TOKEN_BLOCK_HTTP,
+	TOKEN_BLOCK_SERVER,
+	TOKEN_BLOCK_LOCATION,
 	TOKEN_KEYWORD_INCLUDE,
-	TOKEN_KEYWORD_LIMIT,
+	TOKEN_KEYWORD_RETURN,
 	TOKEN_SYMBOL_OPEN_BRACE,
 	TOKEN_SYMBOL_CLOSE_BRACE,
 	TOKEN_SYMBOL_SEMICOLON,
@@ -98,22 +98,31 @@ public:
 		NOT_OPEN,
 		EMPTY_FILE
 	};
+	
 	/* Constructors */
 	ConfigParser();
 	ConfigParser(char *path);
 	ConfigParser(ConfigParser const &src);
+
 	/* Destructor */
 	~ConfigParser();
+
 	/* Overload */
 	ConfigParser &operator=(ConfigParser const &rhs);
+
 	/* Methods */
 	ConfigError checkPathValidity();
 	ConfigError open();
 	ConfigError parse();
 	std::string fetchErrorMsg(ConfigError code);
+
 	/* Utils function for parsing : create a new class for that ??? */
 	std::vector<std::string> split(std::ifstream &file);
-	TokenType getTokenType(const std::string& word);
+	TokenType getTokenType(const std::string &word);
+	int isNumber(const std::string &word);
+	void initializeUnits();
+	bool isSizeUnit(char c) const;
+	bool isTimeUnit(char c) const;
 	void initTokenMap();
 	bool expectedToken(const std::string &expected);
 	void getNextToken();
@@ -126,6 +135,8 @@ private:
 	std::vector<Token> _tokens;
 	size_t _currentPosition;
 	std::map<std::string, TokenType> _tokenMap;
+	std::vector<char> _sizeUnits;
+	std::vector<char> _timeUnits;
 };
 
 std::ostream &operator<<(std::ostream &o, ConfigParser const &i);
