@@ -69,14 +69,14 @@ int main(int ac, char **av)
 		}
 		else
 		{
-			ConfigLexer config(av[1]);
-			ConfigLexer::ConfigError status;
+			ConfigParser config(av[1]);
+			ConfigParser::ConfigError status;
 
-			if ((status = config.checkPathvalidity()))
+			if ((status = config.checkPathValidity()))
 				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
 			if ((status = config.open()))
 				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
-			config.tokenize();
+			config.parse();
 		}
 	}
 	return (EXIT_SUCCESS);
