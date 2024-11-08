@@ -6,16 +6,16 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/08 00:24:36 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/08 22:26:41 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CLIENTREQUEST_HPP
 # define CLIENTREQUEST_HPP
 # include "includes/webserv.hpp"
+# include "SendToClient.hpp"
 
-
-class	ClientRequest
+class	ClientRequest : public SendToClient
 {
 	private:
 		std::vector<pollfd>	_fds;
@@ -28,8 +28,6 @@ class	ClientRequest
 	public:
 		ClientRequest(std::vector<int> fdSocket);
 		~ClientRequest();
-		ClientRequest(const ClientRequest &cp);
-		ClientRequest& operator= (const ClientRequest &cp);
 
 		void	pollRequest();
 		void	pollExecute();

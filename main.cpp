@@ -8,6 +8,7 @@
 #include <cstring>
 #include "Socket.hpp"
 #include "ClientRequest.hpp"
+#include "SendToClient.hpp"
 
 int
 	main ()
@@ -21,10 +22,11 @@ int
 	sock2.runSocket(8080, 10);
 
 	int i = 0;
-	int max = 1000;
+	int max = 10000000;
 	std::vector<int> ports;
 	ports.push_back(sock.get_fdSocket());
 	ports.push_back(sock2.get_fdSocket());
+
 	ClientRequest	request(ports);
 	while (i < max)
 	{
@@ -39,5 +41,4 @@ int
 		i++;
 	}
 	return 0;
-
 }

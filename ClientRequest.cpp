@@ -6,14 +6,14 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/08 00:31:20 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/08 22:29:16 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ClientRequest.hpp"
 
 ClientRequest::ClientRequest(std::vector<int> fdSocket)
-	:	_fdSocket(fdSocket)
+	:	SendToClient(), _fdSocket(fdSocket)
 {
 	for (std::vector<int>::iterator it = fdSocket.begin(); it != fdSocket.end(); ++it)
 	{
@@ -44,14 +44,15 @@ void	ClientRequest::pollExecute()
 			}
 			else
 			{
+				this->SayHey();
 				this->get_clientInfo(this->_fds[i].fd);
 				std::string str = this->_clientInfo;
 				std::size_t pos = str.find('\n');
-				if (pos != std::string::npos)
+				if (pos != std::string::npos && str.length() >= pos)
 					str = str.substr(0, pos);
 				std::cout << str << std::endl;
-
 				std::string path = this->getRequest();
+
 				if (path == "style.css")
 					this->sendClient(this->_fds[i].fd, "./data/test/style.css", "text/css");
 				else if (path == "script.js")
@@ -85,18 +86,6 @@ ClientRequest::~ClientRequest()
 {
 }
 
-ClientRequest::ClientRequest(const ClientRequest& cp)
-{
-	*this = cp;
-}
-
-ClientRequest& ClientRequest::operator= (const ClientRequest& cp)
-{
-	if (this != &cp)
-		*this = cp;
-	return (*this);
-}
-
 std::vector<int>	ClientRequest::get_fdSocket()
 {
 	return (this->_fdSocket);
@@ -125,6 +114,8 @@ std::string	ClientRequest::get_clientInfo(int fd)
 
 std::string	ClientRequest::getRequest()
 {
+	if (this->_clientInfo.length() < 6)
+		return ("");
 	std::string str = this->_clientInfo.substr(5);
 	std::size_t pos = str.find(' ');
 	if (pos != std::string::npos)

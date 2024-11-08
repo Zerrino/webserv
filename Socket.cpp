@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:35:13 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/07 23:59:14 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/08 03:21:50 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ void Socket::bindSocket(sa_family_t sin_family, in_port_t sin_port, struct in_ad
 	this->_addr = addr;
 	int ret = bind(this->_fdSocket, (struct sockaddr *)&addr, sizeof(addr));
 	if (ret == -1)
-		throw std::runtime_error("Echec de bind");
+		throw std::runtime_error("Echec de bind ");
 }
 
 void Socket::listenSocket(int backlog)
