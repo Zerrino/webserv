@@ -6,49 +6,40 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <cstring>
+#include "Socket.hpp"
+#include "ClientRequest.hpp"
+#include "SendToClient.hpp"
 
 int
 	main ()
 {
 	std::cout << "Start!" << std::endl;
-	
-	int fd_socket = socket(AF_INET, SOCK_STREAM, 0); 
-	struct sockaddr_in addr = {
-		AF_INET,
-		0x901f, // 8080 -> le port hex(8080), ensuite big endian
-		0,
-		0
-	};	
 
-	bind(fd_socket, (struct sockaddr *)&addr, sizeof(addr));
-	
-	listen(fd_socket, 10);
+	Socket sock(AF_INET, SOCK_STREAM, 0);
+	sock.runSocket(9000, 10);
+
+	Socket sock2(AF_INET, SOCK_STREAM, 0);
+	sock2.runSocket(8080, 10);
+
 	int i = 0;
-	int max = 10;
+	int max = 10000000;
+	std::vector<int> ports;
+	ports.push_back(sock.get_fdSocket());
+	ports.push_back(sock2.get_fdSocket());
+
+	ClientRequest	request(ports);
 	while (i < max)
 	{
-		int fd_client = accept(fd_socket, 0, 0);
-
-		char buffer[1024] = {0};
-		read(fd_client, buffer, 1024);
-
-		std::cout << "Buffer : " << buffer << std::endl;
-		int fd_open = open("index.html", O_RDONLY);
-		
-
-		write(fd_client, "HTTP/1.0 200 OK\nContent-type: text/html\n", 40);
-		char buffer2[256];
-		ssize_t bytes;
-		while ((bytes = read(fd_open, buffer2, 256)) > 0)
+		try
 		{
-			write(fd_client, buffer2, bytes);
-			std::cout << "Loop" << std::endl;
+			request.pollRequest();
+			request.pollExecute();
 		}
-		close(fd_client);
-		close(fd_open);
+		catch (const std::exception &e) {
+			std::cout << "error : " << e.what() << std::endl;
+		}
 		i++;
 	}
-	close(fd_socket);
-	return 0;
 
+	return 0;
 }

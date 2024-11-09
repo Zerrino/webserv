@@ -6,7 +6,7 @@
 #    By: marvin <marvin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/06 22:30:05 by alexafer          #+#    #+#              #
-#    Updated: 2024/11/05 16:18:18 by Zerrino          ###   ########.fr        #
+#    Updated: 2024/11/09 22:56:54 by marvin           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,13 +16,16 @@ CXXFLAGS = -std=c++98 -Wall -Wextra -Werror
 
 OBJ_DIR = .objs
 
-TARGET = program
+TARGET = webserv
 
 MAIN = main
 
 HPP_FILES =
 
 #FILES
+FILES += SendToClient
+FILES += ClientRequest
+FILES += Socket
 
 #INCLUDE
 
