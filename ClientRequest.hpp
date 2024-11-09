@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/08 22:26:41 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/09 22:58:53 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ class	ClientRequest : public SendToClient
 		void	pollRequest();
 		void	pollExecute();
 		void	acceptRequest(int fd);
-		void	sendClient(int fd, std::string path, std::string content_type);
+		void	sendClient(int fd, std::string path);
 		std::string	getRequest();
 		std::string get_clientInfo(int fd);
 		std::vector<int>	get_fdSocket();

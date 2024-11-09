@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 22:20:30 by zerrino           #+#    #+#             */
-/*   Updated: 2024/11/09 07:55:23 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/09 22:59:27 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 SendToClient::SendToClient()
 {
-	std::cout << "SendToClient created!" << std::endl;
 }
 
 SendToClient::~SendToClient()
@@ -38,7 +37,7 @@ void	SendToClient::SayHey()
 	std::cout << "Hey!" << std::endl;
 }
 
-void	SendToClient::requestOne(int request)
+std::string	SendToClient::requestOne(int request)
 {
 	this->_request = "";
 	switch (request)
@@ -51,12 +50,13 @@ void	SendToClient::requestOne(int request)
 		break;
 	}
 	this->_request.append(this->getDate());
+	this->_request.append("\r\n");
+	return (this->_request);
 }
 
 std::string	SendToClient::requestTwo(int request, std::string path)
 {
 	std::string file;
-	std::string ret;
 	this->_request = "";
 	this->_length = "";
 	switch (request)
@@ -67,20 +67,23 @@ std::string	SendToClient::requestTwo(int request, std::string path)
 		this->_request.append(this->getContentType(path));
 		file = getFile(path);
 		this->_request.append(this->_length);
-		this->_request.append("\r\n");
+		this->_request.append("\r\n\r\n");
 		this->_request.append(file);
 		break;
 	case 201:
-		ret = "";
-		break;
-	case 202:
-		ret = "";
+		this->_request = "HTTP/1.1 201 Created\r\n";
+		this->_request.append(this->getDate());
+		this->_request.append(this->getContentType(path));
+		this->_request.append("Location : ");
+		this->_request.append(_locationCreate);
+		this->_request.append("\r\n\r\n");
+		this->_request.append(file);
+		// TOUJOURS A FINIR ICI ENFIN SI ON UTILISE CE GENRE DE REQUETES
 		break;
 	case 204:
-		ret = "";
-		break;
-	case 206:
-		ret = "";
+		this->_request = "HTTP/1.1 204 No Content\r\n";
+		this->_request.append(this->getDate());
+		this->_request.append("\r\n");
 		break;
 	default:
 		throw std::runtime_error("error type not handled");
@@ -89,19 +92,93 @@ std::string	SendToClient::requestTwo(int request, std::string path)
 	return (this->_request);
 }
 
-void	SendToClient::requestThree(int request, std::string path)
+std::string	SendToClient::requestThree(int request, std::string path)
 {
-
+	this->_request = "";
+	this->_length = "";
+	switch (request)
+	{
+	case 301:
+		this->_request = "HTTP/1.1 301 Moved Permanently\r\n";
+		break;
+	case 302:
+		this->_request = "HTTP/1.1 302 Found\r\n";
+		break;
+	case 303:
+		this->_request = "HTTP/1.1 303 See Other\r\n";
+		break;
+	case 304:
+		this->_request = "HTTP/1.1 304 Not Modified\r\n";
+		this->_request.append(this->getDate());
+		this->_request.append("\r\nContent-Length: 0\r\n\r\n");
+		break;
+	default:
+		throw std::runtime_error("error type not handled");
+		break;
+	}
+	if (request != 304)
+	{
+		this->_request.append(this->getDate());
+		this->_request.append("Location: ");
+		this->_request.append(path);
+		this->_request.append("\r\nContent-Length: 0\r\n\r\n");
+	}
+	return (this->_request);
 }
 
-void	SendToClient::requestFour(int request, std::string path)
+std::string	SendToClient::requestFour(int request, std::string path)
 {
-
+	std::string file;
+	this->_request = "";
+	this->_length = "";
+	switch (request)
+	{
+	case 403:
+		this->_request = "HTTP/1.1 403 Forbidden\r\n";
+		break;
+	case 404:
+		this->_request = "HTTP/1.1 404 Not Found\r\n";
+		break;
+	default:
+		throw std::runtime_error("error type not handled");
+		break;
+	}
+	this->_request.append(this->getDate());
+	this->_request.append(this->getContentType(path));
+	file = getFile(path);
+	this->_request.append(this->_length);
+	this->_request.append("\r\n");
+	this->_request.append(file);
+	return (this->_request);
 }
 
-void	SendToClient::requestFive(int request, std::string path)
+std::string	SendToClient::requestFive(int request, std::string path)
 {
-
+	std::string file;
+	this->_request = "";
+	this->_length = "";
+	switch (request)
+	{
+	case 500:
+		this->_request = "HTTP/1.1 500 Internal Server Error\r\n";
+		break;
+	case 501:
+		this->_request = "HTTP/1.1 501 Not Implemented\r\n";
+		break;
+	case 502:
+		this->_request = "HTTP/1.1 502 Bad Gateway\r\n";
+		break;
+	default:
+		throw std::runtime_error("error type not handled");
+		break;
+	}
+	this->_request.append(this->getDate());
+	this->_request.append(this->getContentType(path));
+	file = getFile(path);
+	this->_request.append(this->_length);
+	this->_request.append("\r\n");
+	this->_request.append(file);
+	return (this->_request);
 }
 
 std::string	SendToClient::getDate()

@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 22:20:30 by zerrino           #+#    #+#             */
-/*   Updated: 2024/11/09 07:15:28 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/09 22:43:47 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,15 +21,16 @@ class	SendToClient
 	protected:
 		std::string _request;
 		std::string	_length;
+		std::string _locationCreate;
 	public:
 	SendToClient();
 	void	SayHey();
 
-	void	requestOne(int request);
+	std::string	requestOne(int request);
 	std::string	requestTwo(int request, std::string path);
-	void	requestThree(int request, std::string path);
-	void	requestFour(int request, std::string path);
-	void	requestFive(int request, std::string path);
+	std::string	requestThree(int request, std::string path);
+	std::string	requestFour(int request, std::string path);
+	std::string	requestFive(int request, std::string path);
 
 	std::string	getDate();
 	std::string getFile(std::string path);

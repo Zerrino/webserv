@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/09 07:48:27 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/09 22:55:45 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ void	ClientRequest::pollExecute()
 			}
 			else
 			{
-				this->SayHey();
 				this->get_clientInfo(this->_fds[i].fd);
 				std::string str = this->_clientInfo;
 				std::size_t pos = str.find('\n');
@@ -54,13 +53,13 @@ void	ClientRequest::pollExecute()
 				std::string path = this->getRequest();
 
 				if (path == "style.css")
-					this->sendClient(this->_fds[i].fd, "./data/test/style.css", "text/css");
+					this->sendClient(this->_fds[i].fd, "./data/test/style.css");
 				else if (path == "script.js")
-					this->sendClient(this->_fds[i].fd, "./data/test/script.js", "text/javascript");
+					this->sendClient(this->_fds[i].fd, "./data/test/script.js");
 				else if (path == "favicon.ico")
-					this->sendClient(this->_fds[i].fd, "./data/icon/crown.ico", "image/x-icon");
+					this->sendClient(this->_fds[i].fd, "./data/icon/crown.ico");
 				else
-					this->sendClient(this->_fds[i].fd, "./data/test/index.html", "text/html");
+					this->sendClient(this->_fds[i].fd, "./data/test/index.html");
 				close(this->_fds[i].fd);
 				this->_fds.erase(this->_fds.begin() + i);
 				--i;
@@ -123,14 +122,11 @@ std::string	ClientRequest::getRequest()
 	return (str);
 }
 
-void	ClientRequest::sendClient(int fd, std::string path, std::string content_type)
+void	ClientRequest::sendClient(int fd, std::string path)
 {
 	std::string	str;
-	(void)content_type;
 	str = this->requestTwo(200, path);
 	write(fd, str.c_str(), str.length());
-	std::cout << str.length() << std::endl;
-	//write(1, str.c_str(), str.length());
 }
 
 
