@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/08 22:29:16 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/09 07:48:27 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,18 +125,12 @@ std::string	ClientRequest::getRequest()
 
 void	ClientRequest::sendClient(int fd, std::string path, std::string content_type)
 {
-	int	fdOpen = open(path.c_str(), O_RDONLY);
-	ssize_t	bytes;
-	char	buffer[256] = {0};
-	if (fdOpen == -1)
-		throw std::runtime_error("error open, probably path of file");
-	write(fd, "HTTP/1.0 200 OK\nContent-type: ", 30);
-	write(fd, content_type.c_str(), content_type.length());
-	write(fd, "\n\n", 2);
-
-	while ((bytes = read(fdOpen, buffer, 256)) > 0)
-		write(fd, buffer, bytes);
-	close(fdOpen);
+	std::string	str;
+	(void)content_type;
+	str = this->requestTwo(200, path);
+	write(fd, str.c_str(), str.length());
+	std::cout << str.length() << std::endl;
+	//write(1, str.c_str(), str.length());
 }
 
 

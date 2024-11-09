@@ -6,13 +6,13 @@
 #    By: marvin <marvin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/06 22:30:05 by alexafer          #+#    #+#              #
-#    Updated: 2024/11/05 16:18:18 by Zerrino          ###   ########.fr        #
+#    Updated: 2024/11/09 05:37:02 by marvin           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 
 CXX = c++
-CXXFLAGS = -std=c++98 -Wall -Wextra -Werror
+CXXFLAGS = -std=c++98 #-Wall -Wextra -Werror
 
 OBJ_DIR = .objs
 

@@ -13,6 +13,12 @@
 int
 	main ()
 {
+	/*
+	SendToClient client;
+
+	client.SayHey();
+	std::cout << client.requestTwo(200, "./data/test/index.html") << std::endl;
+	*/
 	std::cout << "Start!" << std::endl;
 
 	Socket sock(AF_INET, SOCK_STREAM, 0);
@@ -40,5 +46,6 @@ int
 		}
 		i++;
 	}
+
 	return 0;
 }
