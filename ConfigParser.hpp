@@ -23,7 +23,8 @@ enum TokenType
 	TOKEN_REGEX,
 	TOKEN_VARIABLE,
 	TOKEN_OPERATOR_EQUAL,
-	TOKEN_OPERATOR_NOT_EQUAL
+	TOKEN_OPERATOR_NOT_EQUAL,
+	INVALID_TOKEN
 };
 
 struct Token
@@ -120,9 +121,10 @@ public:
 	std::vector<std::string> split(std::ifstream &file);
 	TokenType getTokenType(const std::string &word);
 	int isNumber(const std::string &word);
+	bool isUnit(char c) const;
+	int isOperator(const std::string &word);
+	bool isVariable(const std::string &word);
 	void initializeUnits();
-	bool isSizeUnit(char c) const;
-	bool isTimeUnit(char c) const;
 	void initTokenMap();
 	bool expectedToken(const std::string &expected);
 	void getNextToken();
@@ -135,8 +137,7 @@ private:
 	std::vector<Token> _tokens;
 	size_t _currentPosition;
 	std::map<std::string, TokenType> _tokenMap;
-	std::vector<char> _sizeUnits;
-	std::vector<char> _timeUnits;
+	std::vector<char> _units;
 };
 
 std::ostream &operator<<(std::ostream &o, ConfigParser const &i);

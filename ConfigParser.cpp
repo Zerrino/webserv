@@ -115,7 +115,14 @@ ConfigParser::ConfigError ConfigParser::parse()
 
 	// Print all words for testing purpose
 	for (std::vector<std::string>::const_iterator i = words.begin(); i != words.end(); i++)
-		std::cout << *i << std::endl;
+	{
+		Token 	token;
+
+		token.value = *i;
+		token.type = getTokenType(*i);
+		_tokens.push_back(token);
+		std::cout << token.value << " Type = " << token.type << std::endl;
+	}
 
 	return (SUCCESS);
 }
@@ -195,8 +202,8 @@ void ConfigParser::initTokenMap()
 
 int ConfigParser::isNumber(const std::string &word)
 {
-	int i = 0;
-	int j = 0;
+	size_t i = 0;
+	size_t j = 0;
 
 	initializeUnits();
 	if (isdigit(word[i]))
@@ -210,44 +217,57 @@ int ConfigParser::isNumber(const std::string &word)
 		}
 		if (j == word.length())
 			return (TOKEN_NUMBER);
-
-		// TODO:Find a best way to handle this...
 		if (j == (word.length() - 1) || j == (word.length() - 2))
-			return (TOKEN_NUMBER_WITH_UNIT);
+		{
+			if ((j == (word.length() - 1) && isUnit(word.back())) || (j == (word.length() - 2) && ((word.back() == 's' && (word.back() - 1) == 'm'))))
+				return (TOKEN_NUMBER_WITH_UNIT);
+		}
 	}
-	return (NULL);
+	return (0);
 }
 
-// TODO:This function has to be rewritten. (Not "ms" and "m" in both vectors...
+bool ConfigParser::isVariable(const std::string &word)
+{
+	if (word.front() == '$')
+	{
+		for (size_t i = 1; i < word.length(); i++)
+		{
+			if (!(isalnum(word[i]) || word[i] == '_'))
+				return (false);
+		}
+		return (true);
+	}
+	return (false);
+}
+
+int ConfigParser::isOperator(const std::string &word)
+{
+	if (word == "=")
+		return (TOKEN_OPERATOR_EQUAL);
+	else if (word == "!=")
+		return (TOKEN_OPERATOR_NOT_EQUAL);
+	return (0);
+}
+
 void ConfigParser::initializeUnits()
 {
-
-	// Size units
-	_sizeUnits.push_back('k');
-	_sizeUnits.push_back('K');
-	_sizeUnits.push_back('m');
-	_sizeUnits.push_back('M');
-	_sizeUnits.push_back('g');
-	_sizeUnits.push_back('G');
-
-	// Time units
-	_timeUnits.push_back('s');
-	_timeUnits.push_back('m');
-	_timeUnits.push_back('h');
-	_timeUnits.push_back('d');
-	_timeUnits.push_back('w');
-	_timeUnits.push_back('M');
-	_timeUnits.push_back('y');
+	_units.push_back('k');
+	_units.push_back('K');
+	_units.push_back('m');
+	_units.push_back('M');
+	_units.push_back('g');
+	_units.push_back('G');
+	_units.push_back('s');
+	_units.push_back('h');
+	_units.push_back('d');
+	_units.push_back('w');
+	_units.push_back('M');
+	_units.push_back('y');
 }
 
-bool ConfigParser::isSizeUnit(char c) const
+bool ConfigParser::isUnit(char c) const
 {
-	return std::find(_sizeUnits.begin(), _sizeUnits.end(), c) != _sizeUnits.end();
-}
-
-bool ConfigParser::isTimeUnit(char c) const
-{
-	return std::find(_timeUnits.begin(), _timeUnits.end(), c) != _timeUnits.end();
+	return std::find(_units.begin(), _units.end(), c) != _units.end();
 }
 
 TokenType ConfigParser::getTokenType(const std::string &word)
@@ -258,8 +278,12 @@ TokenType ConfigParser::getTokenType(const std::string &word)
 		return (it->second);
 	else if (int ret = isNumber(word))
 		return ((TokenType)ret);
-	// WIP
-	return (TOKEN_BLOCK_HTTP);
+	else if (int ret = isOperator(word))
+		return ((TokenType)ret);
+	else if (isVariable(word))
+		return (TOKEN_VARIABLE);
+
+	return (INVALID_TOKEN);
 }
 
 bool ConfigParser::expectedToken(const std::string &expected)
