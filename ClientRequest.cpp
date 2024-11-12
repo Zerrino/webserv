@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ClientRequest.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/09 22:55:45 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/12 20:33:43 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ void	ClientRequest::pollExecute()
 			}
 			else
 			{
+				runcgi(this->_fds[i].fd);
 				this->get_clientInfo(this->_fds[i].fd);
 				std::string str = this->_clientInfo;
 				std::size_t pos = str.find('\n');
@@ -52,14 +53,14 @@ void	ClientRequest::pollExecute()
 				std::cout << str << std::endl;
 				std::string path = this->getRequest();
 
-				if (path == "style.css")
-					this->sendClient(this->_fds[i].fd, "./data/test/style.css");
-				else if (path == "script.js")
-					this->sendClient(this->_fds[i].fd, "./data/test/script.js");
-				else if (path == "favicon.ico")
-					this->sendClient(this->_fds[i].fd, "./data/icon/crown.ico");
-				else
-					this->sendClient(this->_fds[i].fd, "./data/test/index.html");
+				// if (path == "style.css")
+				// 	this->sendClient(this->_fds[i].fd, "./data/test/style.css");
+				// else if (path == "script.js")
+				// 	this->sendClient(this->_fds[i].fd, "./data/test/script.js");
+				// else if (path == "favicon.ico")
+				// 	this->sendClient(this->_fds[i].fd, "./data/icon/crown.ico");
+				// else
+				// 	this->sendClient(this->_fds[i].fd, "./data/test/index.html");
 				close(this->_fds[i].fd);
 				this->_fds.erase(this->_fds.begin() + i);
 				--i;
