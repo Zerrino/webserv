@@ -3,147 +3,77 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: marvin <marvin@student.42.fr>              +#+  +:+       +#+         #
+#    By: root <root@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/05/06 22:30:05 by alexafer          #+#    #+#              #
-#    Updated: 2024/11/09 22:56:54 by marvin           ###   ########.fr        #
+#    Created: 2024/01/02 23:04:50 by lolemmen          #+#    #+#              #
+#    Updated: 2024/11/12 19:49:02 by root             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
+.SILENT:
+.PHONY: NAME re all fclean clean run
 
+NAME := btc
+
+# Compilation
+
+RM = rm -rf
 CXX = c++
-CXXFLAGS = -std=c++98 -Wall -Wextra -Werror
+CXXFLAGS = -std=c++98 #-Wall -Werror -Wextra -Wno-shadow
 
-OBJ_DIR = .objs
+SOURCES := \
+	 SendToClient.cpp \
+	 ClientRequest.cpp \
+	 cgi.cpp \
+	 Socket.cpp \
+	 main.cpp
+	 
+# **************************************************************************** #
 
-TARGET = webserv
+# Special Chars
 
-MAIN = main
+LOG_CLEAR = \033[2K
+LOG_UP = \033[A
+LOG_NOCOLOR = \033[0m
+LOG_BLACK = \033[1;30m
+LOG_RED = \033[1;31m
+LOG_GREEN = \033[1;32m
+LOG_YELLOW = \033[1;33m
+LOG_BLUE = \033[1;34m
+LOG_VIOLET = \033[1;35m
+LOG_CYAN = \033[1;36m
+LOG_WHITE = \033[1;37m
 
-HPP_FILES =
+# **************************************************************************** #
 
-#FILES
-FILES += SendToClient
-FILES += ClientRequest
-FILES += Socket
+OBJDIR := objects
+OBJECTS := $(addprefix $(OBJDIR)/,$(SOURCES:.cpp=.o))
+DEPENDS := $(addprefix $(OBJDIR)/,$(SOURCES:.cpp=.d))
 
-#INCLUDE
+all: $(OBJDIR) $(NAME)
 
-SOURCES = $(MAIN:=.cpp) $(FILES:=.cpp)
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
 
-HEADER  = $(FILES:=.hpp) $(HPP_FILES:=.hpp)
-
-OBJECTS = $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
-
-
-all: $(TARGET)
-
-$(TARGET): $(OBJECTS) $(HEADER)
-	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(TARGET)
-
-$(OBJ_DIR)/%.o: %.cpp $(HEADER)
-	@mkdir -p $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+$(NAME): $(OBJECTS)
+	echo "$(LOG_CLEAR)$(NAME)... $(LOG_CYAN)assembling... $(LOG_NOCOLOR)$(LOG_UP)"
+	$(CXX) $(CXXFLAGS) $^ -o $@
+	echo "$(LOG_CLEAR)$(NAME)... $(LOG_GREEN)compiled $(LOG_GREEN)✓$(LOG_NOCOLOR)"
 
 clean:
-	rm -f $(OBJECTS)
-	@if [ -d $(OBJ_DIR) ]; then rmdir $(OBJ_DIR); fi
+	$(RM) $(OBJECTS) $(DEPENDS) $(OBJDIR)
 
 fclean: clean
-	rm -f $(TARGET)
+	$(RM) $(NAME)
 
-re: fclean all
+re : fclean all
 
-header/%:
-		@vim -c 'Stdheader' -c 'wq' $*
+run: all 
+		./$(NAME)
 
+-include $(DEPENDS)
 
-include:
-	@for name in $(filter-out $@,$(MAKECMDGOALS)); do \
-		$(MAKE) update_includes NAME=$$name; \
-	done
-
-create:
-	@for name in $(filter-out $@,$(MAKECMDGOALS)); do \
-		$(MAKE) update_file NAME=$$name; \
-		$(MAKE) create_files NAME=$$name; \
-	done
-
-update_file:
-	@grep -qxF "FILES += $(NAME)" Makefile || (awk '/#FI\
-	LES/ {print; print "FILES += $(NAME)"; next}1' Makefile > Makefile.tmp && mv Makefile.tmp Makefile)
-
-update_includes:
-	@grep -qxF "INCLUDE += $(NAME)" Makefile || (awk '/#INC\
-	LUDE/ {print; print "INCLUDE += $(NAME)"; next}1' Makefile > Makefile.tmp && mv Makefile.tmp Makefile)
-
-create_files:
-	@if [ ! -f "$(NAME).hpp" ]; then \
-		echo "#ifndef $$(echo $(NAME) | tr 'a-z' 'A-Z')_HPP" >> $(NAME).hpp; \
-		echo "# define $$(echo $(NAME) | tr 'a-z' 'A-Z')_HPP" >> $(NAME).hpp; \
-		echo "" >> $(NAME).hpp; \
-		for inc in $(INCLUDE); do \
-			echo "# include <$$inc>" >> $(NAME).hpp; \
-		done; \
-		echo "" >> $(NAME).hpp; \
-		echo -e "class\t$(NAME)" >> $(NAME).hpp; \
-		echo -e "{" >> $(NAME).hpp; \
-		echo -e "\tprivate:" >> $(NAME).hpp; \
-		echo "" >> $(NAME).hpp; \
-		echo -e "\tpublic:" >> $(NAME).hpp; \
-		echo -e "\t\t$(NAME)();" >> $(NAME).hpp; \
-		echo -e "\t\t~$(NAME)();" >> $(NAME).hpp; \
-		echo -e "\t\t$(NAME)(const $(NAME) &cp);" >> $(NAME).hpp; \
-		echo -e "\t\t$(NAME)& operator= (const $(NAME) &cp);" >> $(NAME).hpp; \
-		echo "};" >> $(NAME).hpp; \
-		echo "" >> $(NAME).hpp; \
-		echo "#endif" >> $(NAME).hpp; \
-		make header/$(NAME).hpp; \
-	fi
-
-	@if [ ! -f "$(NAME).cpp" ]; then \
-		echo "#include \"$(NAME).hpp\"" >> $(NAME).cpp; \
-		echo "" >> $(NAME).cpp; \
-		echo "$(NAME)::$(NAME)()" >> $(NAME).cpp; \
-		echo "{" >> $(NAME).cpp; \
-		echo "}" >> $(NAME).cpp; \
-		echo "" >> $(NAME).cpp; \
-		echo "$(NAME)::~$(NAME)()" >> $(NAME).cpp; \
-		echo "{" >> $(NAME).cpp; \
-		echo "}" >> $(NAME).cpp; \
-		echo "" >> $(NAME).cpp; \
-		echo "$(NAME)::$(NAME)(const $(NAME)& cp)" >> $(NAME).cpp; \
-		echo "{" >> $(NAME).cpp; \
-		echo -e "\t*this = cp;" >> $(NAME).cpp; \
-		echo "}" >> $(NAME).cpp; \
-		echo "" >> $(NAME).cpp; \
-		echo "$(NAME)& $(NAME)::operator= (const $(NAME)& cp)" >> $(NAME).cpp; \
-		echo "{" >> $(NAME).cpp; \
-		echo -e "\tif (this != &cp)" >> $(NAME).cpp; \
-		echo -e "\t\t*this = cp;" >> $(NAME).cpp; \
-		echo -e "\treturn (*this);" >> $(NAME).cpp; \
-		echo "}" >> $(NAME).cpp; \
-		make header/$(NAME).cpp; \
-	fi
-
-main:
-	@if [ ! -f "main.cpp" ]; then \
-		for file in $(FILES); do \
-			echo "#include \"$$file.hpp\"" >> main.cpp; \
-		done; \
-		make header/main.cpp; \
-		echo "" >> main.cpp; \
-		echo -e "int\tmain(void)\n{" >> main.cpp; \
-		for var in $(INCLUDE); do \
-			if [ "$$var" = iostream ]; then \
-				echo -e "\tstd::cout << \"Hello World !\" << std::endl;" >> main.cpp; \
-			fi; \
-		done; \
-		echo -e "\treturn (0);\n}" >> main.cpp;\
-	fi
-
-# Prevent make from interpreting the command-line arguments as targets
-%:
-	@:
-
-.PHONY: all clean fclean re
+$(OBJDIR)/%.o: %.cpp Makefile
+	@echo "$(LOG_CLEAR)$(NAME)... $(LOG_YELLOW)$<$(LOG_NOCOLOR)$(LOG_UP)"
+	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
+	
