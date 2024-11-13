@@ -5,6 +5,8 @@
 #include <map>
 #include <sstream>
 #include <unistd.h>
+#include <iostream>
+# include "includes/webserv.hpp"
 
 class HTTPRequest {
 	public:
@@ -13,7 +15,8 @@ class HTTPRequest {
 		~HTTPRequest();
 
 		void send(int fd) const;
-			
+		void setENVs() const;
+
 		std::string getMethod() const;
 		std::string getUrl() const;
 		std::string getVersion() const;

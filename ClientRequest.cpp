@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/12 20:33:43 by root             ###   ########.fr       */
+/*   Updated: 2024/11/13 14:52:31 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void	ClientRequest::pollExecute()
 			}
 			else
 			{
-				runcgi(this->_fds[i].fd);
+				runcgi(this->_fds[i].fd, "PYTHON");
 				this->get_clientInfo(this->_fds[i].fd);
 				std::string str = this->_clientInfo;
 				std::size_t pos = str.find('\n');

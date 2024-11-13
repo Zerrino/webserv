@@ -22,6 +22,28 @@ void HTTPRequest::send(int fd) const {
     }
 	frequest.append("\r\n" + getBody());
 	write(fd, frequest.c_str(), frequest.length());
+    std::cout << frequest << std::endl;
+}
+
+void HTTPRequest::setENVs() const {
+    setenv("REQUEST_METHOD", _method.c_str(), 1);
+    setenv("REDIRECT_STATUS", "", 1);
+    std::map<std::string, std::string>::const_iterator it = _headers.begin();
+    while (it != _headers.end()) {
+		if(it->first == "User-Agent")
+            setenv("HTTP_USER_AGENT", (it->second).c_str(), 1);
+        else if(it->first == "Connection")
+            setenv("HTTP_CONNECTION", (it->second).c_str(), 1);
+        else if(it->first == "Host")
+            setenv("HTTP_HOST", (it->second).c_str(), 1);
+        else if(it->first == "Content-Type")
+            setenv("CONTENT_TYPE", (it->second).c_str(), 1);
+        else if(it->first == "Content-Length"){
+            if(_method == "POST")
+                setenv("CONTENT_LENGTH", (it->second).c_str(), 1);
+        }
+        it++;
+    }
 }
 
 void HTTPRequest::parseRequest(const std::string& request) {

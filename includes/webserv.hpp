@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:57:51 by alexafer          #+#    #+#             */
-/*   Updated: 2024/11/12 21:21:22 by root             ###   ########.fr       */
+/*   Updated: 2024/11/13 15:39:32 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@
 # include <fstream>
 # include <map>
 # include <sstream>
+#include <cstdlib>
 
-int runcgi(int fd);
+int runcgi(int fd, std::string requestType);
 
 #endif
