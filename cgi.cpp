@@ -59,9 +59,9 @@ int runcgi(int fd) {
 			setenv("REQUEST_METHOD", method.c_str(), 1);
 			setenv("SCRIPT_FILENAME", fileToExecute.c_str(), 1);
 			setenv("REDIRECT_STATUS", "", 1);
-			setenv("CONTENT_TYPE", request.getContentType().c_str(), 1);
+			setenv("CONTENT_TYPE", request.getHeader("Content-Type").c_str(), 1);
 			if (method == "POST")
-				setenv("CONTENT_LENGTH", (request.getContentLength()).c_str(), 1);
+				setenv("CONTENT_LENGTH", (request.getHeader("Content-Length")).c_str(), 1);
 
             if (execlp("php-cgi", "php-cgi", fileToExecute, (char*)NULL));
 			exit(1);

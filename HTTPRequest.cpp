@@ -36,20 +36,20 @@ void HTTPRequest::parseRequest(const std::string& request) {
         _body = line;
 }
 
-std::string HTTPRequest::getContentType() const {
-    std::map<std::string, std::string>::const_iterator it = _headers.find("Content-Type");
+std::string HTTPRequest::getHeader(std::string headerName) const {
+    std::map<std::string, std::string>::const_iterator it = _headers.find(headerName);
     if (it != _headers.end()) {
         return it->second;
     }
     return "";
 }
 
-std::string HTTPRequest::getContentLength() const {
-    std::map<std::string, std::string>::const_iterator it = _headers.find("Content-Length");
-    if (it != _headers.end()) {
-        return it->second;
-    }
-    return "";
+void HTTPRequest::setHeader(std::string headerName, std::string headerValue){
+std::map<std::string, std::string>::const_iterator it = _headers.find(headerName);
+	if (it != _headers.end()) 
+		_headers[headerName] = headerValue;
+	else 
+		_headers.insert(std::make_pair(headerName, headerValue));
 }
 
 std::string HTTPRequest::getMethod() const { return _method; }
