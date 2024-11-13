@@ -80,24 +80,22 @@ int runcgi(int fd) {
 				result += buffer;
 			}
 			close(pipe_out[0]);
-			std::cout << "result" << std::endl;
-			std::cout << result << std::endl;
-			std::cout << std::endl;
+
 			int status;
 			waitpid(pid, &status, 0);
-			std::string frequest = request.getVersion()+" 200 OK\r\n";
-			frequest.append(getDate()+"\r\n");
-			std::string header = result.substr(0, result.find("\n"));
-			frequest.append(header+"\r\n");
+			HTTPRequest resultRequest = HTTPRequest();
+			resultRequest.setStatusCode(200);
+			resultRequest.setStatusMessage("OK");
+			resultRequest.setVersion("HTTP/1.1");
+			resultRequest.setHeader(result.substr(0, result.find("\n")));
 			std::stringstream ss;
 			ss << result.length();
 			std::string lengthStr = ss.str();
-			frequest.append(lengthStr+"\r\n");
-			frequest.append("\r\n\r\n");
+			resultRequest.setHeader("Content-Length", lengthStr);
 			result = result.substr(result.find("\n") + 1, result.length() - 1);
-			frequest.append(result);
-			std::cout << frequest << std::endl;
-			write(fd, frequest.c_str(), frequest.length());
+			resultRequest.setBody(result);
+
+			resultRequest.send(fd);
         } else {
             std::cerr << "fork failed\n";
             return 1;

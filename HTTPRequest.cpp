@@ -12,6 +12,18 @@ HTTPRequest::HTTPRequest(const std::string& request) {
 }
 HTTPRequest::~HTTPRequest() {}
 
+void HTTPRequest::send(int fd) const {
+	std::string frequest;
+	frequest.append(getVersion() + " " + getStatusCodeString() + " " + getStatusMessage() + "\r\n");
+	std::map<std::string, std::string>::const_iterator it = _headers.begin();
+    while (it != _headers.end()) {
+		frequest.append(it->first + ": " + it->second + "\r\n");
+        it++;
+    }
+	frequest.append("\r\n" + getBody());
+	write(fd, frequest.c_str(), frequest.length());
+}
+
 void HTTPRequest::parseRequest(const std::string& request) {
     std::istringstream stream(request);
     std::string line;
@@ -52,14 +64,39 @@ std::map<std::string, std::string>::const_iterator it = _headers.find(headerName
 		_headers.insert(std::make_pair(headerName, headerValue));
 }
 
+void HTTPRequest::setHeader(std::string fullValue){
+	std::string key;
+	std::string value;
+	size_t colonPos = fullValue.find(":");
+    if (colonPos != std::string::npos) {
+        key = fullValue.substr(0, colonPos);
+		value = fullValue.substr(colonPos + 1);
+		size_t start = value.find_first_not_of(" \t");
+        size_t end = value.find_last_not_of(" \t");
+        if (start != std::string::npos && end != std::string::npos)
+            value = value.substr(start, end - start + 1);
+    }
+	setHeader(key, value);
+}
+
+
 std::string HTTPRequest::getMethod() const { return _method; }
 std::string HTTPRequest::getUrl() const { return _url; }
 std::string HTTPRequest::getVersion() const { return _version; }
 const std::map<std::string, std::string>& HTTPRequest::getHeaders() const { return _headers; }
 std::string HTTPRequest::getBody() const { return _body; }
+int HTTPRequest::getStatusCode() const { return _status_code; }
+std::string HTTPRequest::getStatusCodeString() const { 
+	std::stringstream ss;
+	ss << _status_code;
+	return ss.str();
+}
+std::string HTTPRequest::getStatusMessage() const { return _status_message; }
 
 void HTTPRequest::setMethod(std::string method) { _method = method; }
 void HTTPRequest::setUrl(std::string url) { _url = url; }
 void HTTPRequest::setVersion(std::string version) { _version = version; }
 void HTTPRequest::setHeaders(const std::map<std::string, std::string>& headers) { _headers = headers; }
 void HTTPRequest::setBody(std::string body) { _body = body; }
+void HTTPRequest::setStatusCode(int code) { _status_code = code; }
+void HTTPRequest::setStatusMessage(std::string message) { _status_message = message; }
