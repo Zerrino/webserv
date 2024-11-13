@@ -6,6 +6,8 @@
 #include <map>
 #include <sstream>  // for std::istringstream
 #include "SendToClient.hpp"
+#include <map>
+#include "HTTPRequest.hpp"
 
 std::string getTestRequest() {
     return "POST /info.php HTTP/1.1\n"
@@ -32,50 +34,67 @@ std::string	getDate()
 
 
 int runcgi(int fd) {
-	std::string request = getTestRequest();
-	std::string method = request.substr(0, request.find(" "));
-	std::cout << "method: " << method << std::endl;
+	HTTPRequest request = HTTPRequest(getTestRequest());
+	std::string method = request.getMethod();
 	std::string localPath = "/var/www/html";
-	int start = request.find(" ");
-	int end = request.find(" ", start + 1);
-	std::string fileToExecute = localPath + request.substr(start + 1, end - start - 1);
-	std::cout << "filepath to execute: " << fileToExecute << std::endl;
-	setenv("REQUEST_METHOD", method.c_str(), 1);
-	setenv("SCRIPT_FILENAME", fileToExecute.c_str(), 1);
-	setenv("REDIRECT_STATUS", "", 1);
+	std::string fileToExecute = localPath + request.getUrl();
 
-	int pipefd[2];
-    if (pipe(pipefd) == -1) {
-        std::cerr << "Pipe failed\n";
+	int pipe_in[2], pipe_out[2];
+    if (pipe(pipe_in) == -1 || pipe(pipe_out) == -1) {
+        std::cerr << "Pipe creation failed\n";
         return 1;
     }
     if (method == "POST" || method == "GET") {
         pid_t pid = fork();
         if (pid == 0) {
-			close(pipefd[0]);
-			dup2(pipefd[1], STDOUT_FILENO);
-			close(pipefd[1]);
-            if (execlp("php-cgi", "php-cgi", fileToExecute, (char*)NULL) == -1) {
-                exit(1);
-            }
+			close(pipe_in[1]);
+			close(pipe_out[0]);
+
+			dup2(pipe_in[0], STDIN_FILENO);
+			dup2(pipe_out[1], STDOUT_FILENO);
+
+			close(pipe_in[0]);
+			close(pipe_out[1]);
+
+			setenv("REQUEST_METHOD", method.c_str(), 1);
+			setenv("SCRIPT_FILENAME", fileToExecute.c_str(), 1);
+			setenv("REDIRECT_STATUS", "", 1);
+			setenv("CONTENT_TYPE", request.getContentType().c_str(), 1);
+			if (method == "POST")
+				setenv("CONTENT_LENGTH", (request.getContentLength()).c_str(), 1);
+
+            if (execlp("php-cgi", "php-cgi", fileToExecute, (char*)NULL));
+			exit(1);
         } else if (pid > 0) {
-			close(pipefd[1]);
+			close(pipe_in[0]);
+			close(pipe_out[1]);
+			if (method == "POST")
+         	   write(pipe_in[1], request.getBody().c_str(), request.getBody().length());
+			close(pipe_in[1]);
+
 			char buffer[4096];
 			std::string result;
 			ssize_t bytesRead;
-			while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
+			while ((bytesRead = read(pipe_out[0], buffer, sizeof(buffer) - 1)) > 0) {
 				buffer[bytesRead] = '\0';
 				result += buffer;
 			}
-			close(pipefd[0]);
+			close(pipe_out[0]);
+			std::cout << "result" << std::endl;
+			std::cout << result << std::endl;
+			std::cout << std::endl;
 			int status;
 			waitpid(pid, &status, 0);
-			std::string frequest = "HTTP/1.1 200 OK\r\n";
+			std::string frequest = request.getVersion()+" 200 OK\r\n";
 			frequest.append(getDate()+"\r\n");
-			frequest.append("Content-Type: text/html; charset=utf-8\r\n");
-			frequest.append(result.length()+"\r\n");
+			std::string header = result.substr(0, result.find("\n"));
+			frequest.append(header+"\r\n");
+			std::stringstream ss;
+			ss << result.length();
+			std::string lengthStr = ss.str();
+			frequest.append(lengthStr+"\r\n");
 			frequest.append("\r\n\r\n");
-			result = result.substr(result.find("Content-type: text/html; charset=UTF-8") + 39, result.length() - 1);
+			result = result.substr(result.find("\n") + 1, result.length() - 1);
 			frequest.append(result);
 			std::cout << frequest << std::endl;
 			write(fd, frequest.c_str(), frequest.length());

@@ -56,6 +56,18 @@
 		"fstream": "cpp",
 		"map": "cpp",
 		"xtree": "cpp",
-		"sstream": "cpp"
+		"sstream": "cpp",
+		"unordered_map": "cpp",
+		"array": "cpp",
+		"*.tcc": "cpp",
+		"cstdarg": "cpp",
+		"cwctype": "cpp",
+		"deque": "cpp",
+		"functional": "cpp",
+		"memory_resource": "cpp",
+		"numeric": "cpp",
+		"random": "cpp",
+		"string_view": "cpp",
+		"numbers": "cpp"
 	}
 }
