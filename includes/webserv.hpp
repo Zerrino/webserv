@@ -5,18 +5,31 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/06 12:07:59 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/08 13:36:55 by gdelvign         ###   ########.fr       */
+/*   Created: 2024/11/06 19:57:51 by alexafer          #+#    #+#             */
+/*   Updated: 2024/11/14 15:02:11 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#pragma once
+#ifndef WEBSERV_HPP
+# define WEBSERV_HPP
 
-#include <unistd.h>
-#include <fstream>
-#include <sys/stat.h>
-#include <map>
-#include "ConfigParser.hpp"
+# include <netinet/in.h>
+# include <unistd.h>
+# include <fcntl.h>
+# include <sys/syscall.h>
+# include <sys/stat.h>
+# include <iostream>
+# include <sys/socket.h>
+# include <netinet/in.h>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <poll.h>
+# include <algorithm>
+# include <ctime>
+# include <fstream>
+# include <map>
+# include <sstream>
+# include "ConfigParser.hpp"
 
-#define BACKLOG 128
-#define BUFFER_SIZE 1024
+#endif

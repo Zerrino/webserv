@@ -1,9 +1,21 @@
-#pragma once
-#include <iostream>
-#include <string>
-#include "webserv.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ConfigParser.hpp                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/14 15:12:33 by gdelvign          #+#    #+#             */
+/*   Updated: 2024/11/14 15:13:13 by gdelvign         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#define DEFAULT_CONFIG_PATH "Config/default.conf"
+
+#pragma once
+
+# include "webserv.hpp"
+
+# define DEFAULT_CONFIG_PATH "Config/default.conf"
 
 enum TokenType
 {

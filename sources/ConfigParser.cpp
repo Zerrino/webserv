@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ConfigParser.hpp"
-#include "webserv.hpp"
+#include "../includes/ConfigParser.hpp"
+#include "../includes/webserv.hpp"
 
 /*
 ** ------------------------------- CONSTRUCTOR --------------------------------
