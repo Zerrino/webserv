@@ -17,6 +17,7 @@ const dropZone = document.getElementById("drop-zone");
 const fileInput = document.getElementById("chooseFile");
 const sendBtn = document.getElementById("import-btn");
 let dragCounter = 0;
+let nbOfFiles = 0;
 
 dropZone.addEventListener("dragenter", (event) => {
   event.preventDefault();
@@ -45,7 +46,7 @@ dropZone.addEventListener("drop", (event) => {
 
   const files = event.dataTransfer.files;
 
-  if (files.length && files.length < 3) {
+  if (files.length && files.length < 4) {
     console.log("File(s) dropped");
     uploadFiles(files);
   } else alert("Too many files");
@@ -57,26 +58,41 @@ fileInput.addEventListener("change", (event) => {
 });
 
 const uploadFiles = (files) => {
-  [...files].forEach((file, i) => {
+  [...files].forEach((file) => {
     formData.append("file", file);
-    createFileDetails(file);
+    createFileDetails(file, nbOfFiles);
+    nbOfFiles++;
   });
-  console.log(formData.getAll("file"));
 };
 
-const createFileDetails = (file) => {
-  let temp = document.getElementById("dropped-file-details");
+const removeFile = (event) => {
+  console.log(formData.getAll("file"));
+  console.log(event.currentTarget.id);
+	let index =
+
+  //fileDiv.remove();
+};
+
+const createFileDetails = (file, nb) => {
+  let temp = document.getElementById("clone-template");
   let fileDetails = temp.content.cloneNode(true);
+
+  let fileDiv = fileDetails.getElementById("fileDetails");
+  fileDiv.id = "fileDetails_" + nb;
   let fileNameZone = fileDetails.getElementById("fileName");
+  fileNameZone.id = "fileName_" + nb;
   let fileSizeZone = fileDetails.getElementById("fileSize");
+  fileSizeZone.id = "fileSize_" + nb;
+  let cross = fileDetails.getElementById("fileCross");
+  cross.id = "fileCross_" + nb;
 
-  let cross = fileDetails.getElementById("file-cross");
-
+  cross.addEventListener("click", (event) => {
+	event.stopPropagation();
+    removeFile(event);
+  });
   const fileSizeInKb = (file.size / 1000).toFixed(2);
   fileSizeZone.innerHTML = `${fileSizeInKb} kB`;
-
   fileNameZone.innerHTML = file.name;
-
   dropZone.parentNode.insertBefore(fileDetails, dropZone.nextSibling);
 };
 
@@ -94,15 +110,18 @@ const createRequest = () => {
 
 const sendRequest = () => {
   const request = createRequest();
-  request.send(formData);
 
   request.upload.addEventListener("progress", (event) => {
+    console.log(event);
     if (event.lengthComputable) {
       const pourcentage = (event.loaded / event.total) * 100;
-      console.log(pourcentage);
+      console.log(`Progression de l'upload : ${pourcentage}%`);
+
       // Mettre à jour la barre de progression avec 'pourcentage'
     }
   });
+
+  request.send(formData);
 };
 
 sendBtn.addEventListener("click", sendRequest);
