@@ -10,6 +10,7 @@
 #include "../includes/ClientRequest.hpp"
 #include "../includes/SendToClient.hpp"
 #include "../includes/Cookie.hpp"
+# include "../includes/ConfigParser.hpp"
 
 int main(int ac, char **av)
 {
