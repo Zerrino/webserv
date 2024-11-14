@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cookie.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 04:06:02 by zerrino           #+#    #+#             */
-/*   Updated: 2024/11/14 15:09:52 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/14 21:42:04 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ std::string Cookie::createCookieId()
 
 
 	std::string tmp;
-	std::string path = "./data/cookies/";
+	std::string path = "./data/ressources/cookies/";
 	tmp.reserve(8);
 	for (size_t i = 0; i < 8; i++)
 	{
@@ -108,7 +108,7 @@ int	Cookie::isCookies(std::string myKey, std::string myVal, std::string CookiedI
 {
 	std::string	file_data;
 	std::stringstream ss;
-	std::string path = "./data/cookies/";
+	std::string path = "./data/ressources/cookies/";
 	path.append(CookiedID);
 	std::ifstream file(path.c_str());
 	if (!file.is_open())
@@ -125,7 +125,7 @@ void Cookie::cookiedUpdate(std::string myKey, std::string myVal, std::string Coo
 {
 	std::string	file_data;
 	std::stringstream ss;
-	std::string path = "./data/cookies/";
+	std::string path = "./data/ressources/cookies/";
 	path.append(CookiedID);
 	std::ifstream file(path.c_str());
 	if (!file.is_open())
@@ -165,7 +165,7 @@ int	Cookie::isRegister(std::map<std::string, std::string> myData)
 	}
 	else
 		return 0;
-	std::ifstream file("./data/database/profiles.txt");
+	std::ifstream file("./data/ressources/database/profiles.txt");
 	if (!file.is_open())
 		return 0;
 	ss << file.rdbuf();

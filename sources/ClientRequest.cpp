@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ClientRequest.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/14 15:10:06 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/14 21:44:03 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ void	ClientRequest::pollExecute()
 				this->get_clientInfo(this->_fds[i].fd);
 
 				std::string str = this->_clientInfo;
+				std::cout << this->_clientInfo << std::endl;
 				std::size_t pos = str.find('/');
 				std::string rest;
 				std::string cook;

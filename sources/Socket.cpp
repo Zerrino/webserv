@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:35:13 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/14 15:27:07 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/14 21:35:43 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ uint16_t Socket::get_port()
 void Socket::bindSocket(sa_family_t sin_family, in_port_t sin_port, struct in_addr sin_addr)
 {
 	struct sockaddr_in addr = {
-		0, // <-- remove this argument (sin_len, required on macOS) on Linux...
+		//0, // <-- remove this argument (sin_len, required on macOS) on Linux...
 		sin_family,
 		sin_port,
 		sin_addr,
@@ -114,6 +114,6 @@ void	Socket::runSocket(uint16_t port, int backlog)
 	}
 	catch (const std::exception &e)
 	{
-		std::cout << "error occured : " << e.what() << std::cout;
+		std::cout << "error occured : " << e.what() << std::endl;
 	}
 }
