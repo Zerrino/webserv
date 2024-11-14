@@ -3,147 +3,54 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: marvin <marvin@student.42.fr>              +#+  +:+       +#+         #
+#    By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/05/06 22:30:05 by alexafer          #+#    #+#              #
-#    Updated: 2024/11/09 22:56:54 by marvin           ###   ########.fr        #
+#    Created: 2024/11/14 15:23:12 by gdelvign          #+#    #+#              #
+#    Updated: 2024/11/14 15:51:24 by gdelvign         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
+CC			:= c++
+CPPFLAGS	:= -Wall -Wextra -Werror -std=c++98
+SRC_DIR		:= sources/
+BUILD_DIR	:= .build/
+SRC			:= $(addsuffix .cpp, $(addprefix $(SRC_DIR), main ConfigParser Socket SendToClient ClientRequest Cookie))
+OBJ			:= $(addprefix $(BUILD_DIR), $(notdir $(SRC:.cpp=.o)))
+DEP			:= $(OBJ:.o=.d)
+NAME		:= webserv
 
-CXX = c++
-CXXFLAGS = -std=c++98 -Wall -Wextra -Werror
+# Cible principale
+all: $(NAME)
 
-OBJ_DIR = .objs
+# Compilation de l'exécutable à partir des objets
+$(NAME): $(OBJ)
+	@$(CC) $(CPPFLAGS) -o $@ $(OBJ)
+	@printf "Compiling..."
+	@sleep 1
+	@printf "\r$(NAME) compiled successfully!\n"
 
-TARGET = webserv
+# Inclusion des fichiers de dépendances
+-include $(DEP)
 
-MAIN = main
+# Compilation des fichiers objets et génération des fichiers de dépendances
+$(BUILD_DIR)%.o: $(SRC_DIR)%.cpp | MKDIR
+	@$(CC) $(CPPFLAGS) -MMD -c $< -o $@
 
-HPP_FILES =
+# Création du répertoire de build si nécessaire
+MKDIR:
+	@mkdir -p $(BUILD_DIR)
 
-#FILES
-FILES += SendToClient
-FILES += ClientRequest
-FILES += Socket
-
-#INCLUDE
-
-SOURCES = $(MAIN:=.cpp) $(FILES:=.cpp)
-
-HEADER  = $(FILES:=.hpp) $(HPP_FILES:=.hpp)
-
-OBJECTS = $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
-
-
-all: $(TARGET)
-
-$(TARGET): $(OBJECTS) $(HEADER)
-	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(TARGET)
-
-$(OBJ_DIR)/%.o: %.cpp $(HEADER)
-	@mkdir -p $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
+# Nettoyage des objets et des fichiers de dépendances
 clean:
-	rm -f $(OBJECTS)
-	@if [ -d $(OBJ_DIR) ]; then rmdir $(OBJ_DIR); fi
+	@rm -rf $(BUILD_DIR)
+	@printf "$(BUILD_DIR) folder removed.\n"
 
+# Nettoyage complet
 fclean: clean
-	rm -f $(TARGET)
+	@rm -rf $(NAME)
+	@printf "$(NAME) deleted.\nProject fully cleaned.\n"
 
+# Recompilation complète
 re: fclean all
-
-header/%:
-		@vim -c 'Stdheader' -c 'wq' $*
-
-
-include:
-	@for name in $(filter-out $@,$(MAKECMDGOALS)); do \
-		$(MAKE) update_includes NAME=$$name; \
-	done
-
-create:
-	@for name in $(filter-out $@,$(MAKECMDGOALS)); do \
-		$(MAKE) update_file NAME=$$name; \
-		$(MAKE) create_files NAME=$$name; \
-	done
-
-update_file:
-	@grep -qxF "FILES += $(NAME)" Makefile || (awk '/#FI\
-	LES/ {print; print "FILES += $(NAME)"; next}1' Makefile > Makefile.tmp && mv Makefile.tmp Makefile)
-
-update_includes:
-	@grep -qxF "INCLUDE += $(NAME)" Makefile || (awk '/#INC\
-	LUDE/ {print; print "INCLUDE += $(NAME)"; next}1' Makefile > Makefile.tmp && mv Makefile.tmp Makefile)
-
-create_files:
-	@if [ ! -f "$(NAME).hpp" ]; then \
-		echo "#ifndef $$(echo $(NAME) | tr 'a-z' 'A-Z')_HPP" >> $(NAME).hpp; \
-		echo "# define $$(echo $(NAME) | tr 'a-z' 'A-Z')_HPP" >> $(NAME).hpp; \
-		echo "" >> $(NAME).hpp; \
-		for inc in $(INCLUDE); do \
-			echo "# include <$$inc>" >> $(NAME).hpp; \
-		done; \
-		echo "" >> $(NAME).hpp; \
-		echo -e "class\t$(NAME)" >> $(NAME).hpp; \
-		echo -e "{" >> $(NAME).hpp; \
-		echo -e "\tprivate:" >> $(NAME).hpp; \
-		echo "" >> $(NAME).hpp; \
-		echo -e "\tpublic:" >> $(NAME).hpp; \
-		echo -e "\t\t$(NAME)();" >> $(NAME).hpp; \
-		echo -e "\t\t~$(NAME)();" >> $(NAME).hpp; \
-		echo -e "\t\t$(NAME)(const $(NAME) &cp);" >> $(NAME).hpp; \
-		echo -e "\t\t$(NAME)& operator= (const $(NAME) &cp);" >> $(NAME).hpp; \
-		echo "};" >> $(NAME).hpp; \
-		echo "" >> $(NAME).hpp; \
-		echo "#endif" >> $(NAME).hpp; \
-		make header/$(NAME).hpp; \
-	fi
-
-	@if [ ! -f "$(NAME).cpp" ]; then \
-		echo "#include \"$(NAME).hpp\"" >> $(NAME).cpp; \
-		echo "" >> $(NAME).cpp; \
-		echo "$(NAME)::$(NAME)()" >> $(NAME).cpp; \
-		echo "{" >> $(NAME).cpp; \
-		echo "}" >> $(NAME).cpp; \
-		echo "" >> $(NAME).cpp; \
-		echo "$(NAME)::~$(NAME)()" >> $(NAME).cpp; \
-		echo "{" >> $(NAME).cpp; \
-		echo "}" >> $(NAME).cpp; \
-		echo "" >> $(NAME).cpp; \
-		echo "$(NAME)::$(NAME)(const $(NAME)& cp)" >> $(NAME).cpp; \
-		echo "{" >> $(NAME).cpp; \
-		echo -e "\t*this = cp;" >> $(NAME).cpp; \
-		echo "}" >> $(NAME).cpp; \
-		echo "" >> $(NAME).cpp; \
-		echo "$(NAME)& $(NAME)::operator= (const $(NAME)& cp)" >> $(NAME).cpp; \
-		echo "{" >> $(NAME).cpp; \
-		echo -e "\tif (this != &cp)" >> $(NAME).cpp; \
-		echo -e "\t\t*this = cp;" >> $(NAME).cpp; \
-		echo -e "\treturn (*this);" >> $(NAME).cpp; \
-		echo "}" >> $(NAME).cpp; \
-		make header/$(NAME).cpp; \
-	fi
-
-main:
-	@if [ ! -f "main.cpp" ]; then \
-		for file in $(FILES); do \
-			echo "#include \"$$file.hpp\"" >> main.cpp; \
-		done; \
-		make header/main.cpp; \
-		echo "" >> main.cpp; \
-		echo -e "int\tmain(void)\n{" >> main.cpp; \
-		for var in $(INCLUDE); do \
-			if [ "$$var" = iostream ]; then \
-				echo -e "\tstd::cout << \"Hello World !\" << std::endl;" >> main.cpp; \
-			fi; \
-		done; \
-		echo -e "\treturn (0);\n}" >> main.cpp;\
-	fi
-
-# Prevent make from interpreting the command-line arguments as targets
-%:
-	@:
 
 .PHONY: all clean fclean re

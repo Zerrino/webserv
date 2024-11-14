@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:57:51 by alexafer          #+#    #+#             */
-/*   Updated: 2024/11/09 07:10:20 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/14 15:51:59 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include <sys/syscall.h>
+# include <sys/stat.h>
 # include <iostream>
 # include <sys/socket.h>
 # include <netinet/in.h>
@@ -29,5 +30,6 @@
 # include <fstream>
 # include <map>
 # include <sstream>
+# include "ConfigParser.hpp"
 
 #endif
