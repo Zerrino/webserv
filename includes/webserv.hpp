@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:57:51 by alexafer          #+#    #+#             */
-/*   Updated: 2024/11/14 15:51:59 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/14 16:56:41 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,5 @@
 # include <fstream>
 # include <map>
 # include <sstream>
-# include "ConfigParser.hpp"
 
 #endif
