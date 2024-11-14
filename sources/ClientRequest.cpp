@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/14 15:10:06 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/14 23:10:33 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ void	ClientRequest::pollExecute()
 					cook = isCookied(this->_clientInfo);
 					if (cook.length() != 0)
 					{
-						//std::cout << "Cookie is " << cook << std::endl;
+						std::cout << "Cookie is " << cook << std::endl;
 						flag = 0;
 					}
 					else
@@ -104,7 +104,7 @@ void	ClientRequest::pollExecute()
 						std::string file = getFile(PATH_ABS);
 						req.append(getContentType(PATH_ABS));
 						req.append(this->_length);
-						req.append("\r\n\r\n");
+						req.append("\r\n");
 						req.append(file);
 						write(this->_fds[i].fd, req.c_str(), req.length());
 						flag = 0;

@@ -27,14 +27,14 @@ int main(int ac, char **av)
 			// std::cout << test.getFile("./data/index.html") << std::endl;
 
 			Socket sock(AF_INET, SOCK_STREAM, 0);
-			sock.runSocket(7000, 10);
+			sock.runSocket(80, 10);
 
-			Socket sock2(AF_INET, SOCK_STREAM, 0);
-			sock2.runSocket(5000, 10);
+			// Socket sock2(AF_INET, SOCK_STREAM, 0);
+			// sock2.runSocket(5000, 10);
 
 			std::vector<int> ports;
 			ports.push_back(sock.get_fdSocket());
-			ports.push_back(sock2.get_fdSocket());
+			// ports.push_back(sock2.get_fdSocket());
 
 			ClientRequest request(ports);
 			while (true)
