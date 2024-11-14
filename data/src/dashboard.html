@@ -1,283 +1,206 @@
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard</title>
-    <link rel="shortcut icon" type="image/png" href="../img/19_logo.svg" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="../css/style.css" />
-    <script defer src="../js/auth.js"></script>
-    <script defer src="../js/init.js"></script>
-    <script defer src="../js/navBar.js"></script>
-    <script defer src="../js/modal.js"></script>
-  </head>
-  <body class="flex flex-col">
-    <header
-      class="flex shadow-md py-4 px-4 sm:px-10 bg-white font-[sans-serif] min-h-[70px] tracking-wide relative z-50"
-    >
-      <div class="flex flex-wrap items-center justify-between gap-5 w-full">
-        <div class="flex items-center space-x-3 flex-row">
-          <img
-            class="bg-black w-[45px] h-[45px]"
-            src="../img/19_logo.svg"
-            alt="Campus 19 logo"
-          />
-          <div class="">
-            <h1 class="font-extrabold sm:text-2xl text-xl">Webserv</h1>
-            <p class="text-xs">
-              by <strong>jtollena</strong>, <strong>alexafer</strong> and
-              <strong>gdelvign</strong>
-            </p>
-          </div>
-        </div>
 
-        <div
-          id="collapseMenu"
-          class="max-lg:hidden lg:!block max-lg:before:fixed max-lg:before:bg-black max-lg:before:opacity-50 max-lg:before:inset-0 max-lg:before:z-50"
-        >
-          <button
-            id="toggleClose"
-            class="lg:hidden fixed top-2 right-4 z-[100] rounded-full bg-white p-3"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-4 fill-black"
-              viewBox="0 0 320.591 320.591"
-            >
-              <path
-                d="M30.391 318.583a30.37 30.37 0 0 1-21.56-7.288c-11.774-11.844-11.774-30.973 0-42.817L266.643 10.665c12.246-11.459 31.462-10.822 42.921 1.424 10.362 11.074 10.966 28.095 1.414 39.875L51.647 311.295a30.366 30.366 0 0 1-21.256 7.288z"
-                data-original="#000000"
-              ></path>
-              <path
-                d="M287.9 318.583a30.37 30.37 0 0 1-21.257-8.806L8.83 51.963C-2.078 39.225-.595 20.055 12.143 9.146c11.369-9.736 28.136-9.736 39.504 0l259.331 257.813c12.243 11.462 12.876 30.679 1.414 42.922-.456.487-.927.958-1.414 1.414a30.368 30.368 0 0 1-23.078 7.288z"
-                data-original="#000000"
-              ></path>
-            </svg>
-          </button>
+<head>
+	<meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Dashboard</title>
+	<link rel="shortcut icon" type="image/png" href="../img/19_logo.svg" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="../css/style.css" />
+	<script defer src="../js/auth.js"></script>
+	<script defer src="../js/init.js"></script>
+	<script defer src="../js/navBar.js"></script>
+	<script defer src="../js/modal.js"></script>
+</head>
 
-          <ul
-            class="lg:flex gap-x-5 max-lg:space-y-3 max-lg:fixed max-lg:bg-white max-lg:w-1/2 max-lg:min-w-[300px] max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-full max-lg:shadow-md max-lg:overflow-auto z-50"
-          >
-            <li class="mb-6 hidden max-lg:block">
-              <div class="flex space-x-2">
-                <div>
-                  <a href="javascript:void(0)"
-                    ><img
-                      class="bg-black w-[45px] h-[45px]"
-                      src="../img/19_logo.svg"
-                      alt="Campus 19 logo"
-                    />
-                  </a>
-                </div>
-                <div>
-                  <h1 class="font-extrabold sm:text-2xl text-xl">Webserv</h1>
-                  <p class="text-[10px]">
-                    by <strong>jtollena</strong>, <strong>alexafer</strong> and
-                    <strong>gdelvign</strong>
-                  </p>
-                </div>
-              </div>
-            </li>
-            <li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
-              <a
-                href="javascript:void(0)"
-                class="hover:text-teal-600 text-teal-600 block font-semibold text-[15px]"
-                >Home</a
-              >
-            </li>
-            <li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
-              <a
-                href="javascript:void(0)"
-                class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]"
-                >jtollena</a
-              >
-            </li>
-            <li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
-              <a
-                href="javascript:void(0)"
-                class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]"
-                >alexafer</a
-              >
-            </li>
-            <li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
-              <a
-                href="javascript:void(0)"
-                class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]"
-                >gdelvign</a
-              >
-            </li>
-            <li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
-              <a
-                onclick="toggleModal()"
-                href="javascript:void(0)"
-                class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]"
-                >Upload a file</a
-              >
-            </li>
-          </ul>
-        </div>
+<body class="flex flex-col">
+	<header
+		class="flex shadow-md py-4 px-4 sm:px-10 bg-white font-[sans-serif] min-h-[70px] tracking-wide relative z-50">
+		<div class="flex flex-wrap items-center justify-between gap-5 w-full">
+			<div class="flex items-center space-x-3 flex-row">
+				<img class="bg-black w-[45px] h-[45px]" src="../img/19_logo.svg" alt="Campus 19 logo" />
+				<div class="">
+					<h1 class="font-extrabold sm:text-2xl text-xl">Webserv</h1>
+					<p class="text-xs">
+						by <strong>jtollena</strong>, <strong>alexafer</strong> and
+						<strong>gdelvign</strong>
+					</p>
+				</div>
+			</div>
 
-        <div class="flex max-lg:ml-auto space-x-3">
-          <button
-            class="logout px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-teal-600 bg-teal-600 transition-all ease-in-out duration-300 hover:bg-transparent hover:text-teal-600"
-            href="#"
-          >
-            Log Out
-          </button>
+			<div id="collapseMenu"
+				class="max-lg:hidden lg:!block max-lg:before:fixed max-lg:before:bg-black max-lg:before:opacity-50 max-lg:before:inset-0 max-lg:before:z-50">
+				<button id="toggleClose" class="lg:hidden fixed top-2 right-4 z-[100] rounded-full bg-white p-3">
+					<svg xmlns="http://www.w3.org/2000/svg" class="w-4 fill-black" viewBox="0 0 320.591 320.591">
+						<path
+							d="M30.391 318.583a30.37 30.37 0 0 1-21.56-7.288c-11.774-11.844-11.774-30.973 0-42.817L266.643 10.665c12.246-11.459 31.462-10.822 42.921 1.424 10.362 11.074 10.966 28.095 1.414 39.875L51.647 311.295a30.366 30.366 0 0 1-21.256 7.288z"
+							data-original="#000000"></path>
+						<path
+							d="M287.9 318.583a30.37 30.37 0 0 1-21.257-8.806L8.83 51.963C-2.078 39.225-.595 20.055 12.143 9.146c11.369-9.736 28.136-9.736 39.504 0l259.331 257.813c12.243 11.462 12.876 30.679 1.414 42.922-.456.487-.927.958-1.414 1.414a30.368 30.368 0 0 1-23.078 7.288z"
+							data-original="#000000"></path>
+					</svg>
+				</button>
 
-          <button id="toggleOpen" class="lg:hidden">
-            <svg
-              class="w-7 h-7"
-              fill="#000"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                clip-rule="evenodd"
-              ></path>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </header>
-    <div id="content-container" class="flex items-center justify-center shrink">
-      <h1 class="text-center m-y-auto">Welcome to the Dashboard</h1>
-    </div>
-    <div
-      id="modal"
-      class="hidden fixed inset-0 p-4 flex flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]"
-    >
-      <div class="w-full max-w-lg bg-white shadow-lg rounded-lg p-6 relative">
-        <div class="flex items-center pb-3 border-b border-gray-200">
-          <div class="flex-1">
-            <h3 class="text-gray-800 text-xl font-bold">Upload File</h3>
-            <p class="text-gray-600 text-xs mt-1">
-              Upload file to this project
-            </p>
-          </div>
+				<ul
+					class="lg:flex gap-x-5 max-lg:space-y-3 max-lg:fixed max-lg:bg-white max-lg:w-1/2 max-lg:min-w-[300px] max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-full max-lg:shadow-md max-lg:overflow-auto z-50">
+					<li class="mb-6 hidden max-lg:block">
+						<div class="flex space-x-2">
+							<div>
+								<a href="javascript:void(0)"><img class="bg-black w-[45px] h-[45px]"
+										src="../img/19_logo.svg" alt="Campus 19 logo" />
+								</a>
+							</div>
+							<div>
+								<h1 class="font-extrabold sm:text-2xl text-xl">Webserv</h1>
+								<p class="text-[10px]">
+									by <strong>jtollena</strong>, <strong>alexafer</strong> and
+									<strong>gdelvign</strong>
+								</p>
+							</div>
+						</div>
+					</li>
+					<li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
+						<a href="javascript:void(0)"
+							class="hover:text-teal-600 text-teal-600 block font-semibold text-[15px]">Home</a>
+					</li>
+					<li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
+						<a href="javascript:void(0)"
+							class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]">jtollena</a>
+					</li>
+					<li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
+						<a href="javascript:void(0)"
+							class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]">alexafer</a>
+					</li>
+					<li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
+						<a href="javascript:void(0)"
+							class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]">gdelvign</a>
+					</li>
+					<li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
+						<a onclick="toggleModal()" href="javascript:void(0)"
+							class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]">Upload a file</a>
+					</li>
+				</ul>
+			</div>
 
-          <svg
-            id="close-button"
-            onclick="toggleModal()"
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-3 ml-2 cursor-pointer shrink-0 fill-gray-400 hover:fill-red-500"
-            viewBox="0 0 320.591 320.591"
-          >
-            <path
-              d="M30.391 318.583a30.37 30.37 0 0 1-21.56-7.288c-11.774-11.844-11.774-30.973 0-42.817L266.643 10.665c12.246-11.459 31.462-10.822 42.921 1.424 10.362 11.074 10.966 28.095 1.414 39.875L51.647 311.295a30.366 30.366 0 0 1-21.256 7.288z"
-              data-original="#000000"
-            ></path>
-            <path
-              d="M287.9 318.583a30.37 30.37 0 0 1-21.257-8.806L8.83 51.963C-2.078 39.225-.595 20.055 12.143 9.146c11.369-9.736 28.136-9.736 39.504 0l259.331 257.813c12.243 11.462 12.876 30.679 1.414 42.922-.456.487-.927.958-1.414 1.414a30.368 30.368 0 0 1-23.078 7.288z"
-              data-original="#000000"
-            ></path>
-          </svg>
-        </div>
+			<div class="flex max-lg:ml-auto space-x-3">
+				<button
+					class="logout px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-teal-600 bg-teal-600 transition-all ease-in-out duration-300 hover:bg-transparent hover:text-teal-600"
+					href="#">
+					Log Out
+				</button>
 
-        <div class="rounded-lg border-2 border-gray-200 border-dashed mt-6">
-          <div
-            id="drop-zone"
-            class="p-4 min-h-[180px] flex flex-col items-center justify-center text-center cursor-pointer"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-10 mb-4 fill-gray-600 inline-block"
-              viewBox="0 0 32 32"
-            >
-              <path
-                d="M23.75 11.044a7.99 7.99 0 0 0-15.5-.009A8 8 0 0 0 9 27h3a1 1 0 0 0 0-2H9a6 6 0 0 1-.035-12 1.038 1.038 0 0 0 1.1-.854 5.991 5.991 0 0 1 11.862 0A1.08 1.08 0 0 0 23 13a6 6 0 0 1 0 12h-3a1 1 0 0 0 0 2h3a8 8 0 0 0 .75-15.956z"
-                data-original="#000000"
-              />
-              <path
-                d="M20.293 19.707a1 1 0 0 0 1.414-1.414l-5-5a1 1 0 0 0-1.414 0l-5 5a1 1 0 0 0 1.414 1.414L15 16.414V29a1 1 0 0 0 2 0V16.414z"
-                data-original="#000000"
-              />
-            </svg>
+				<button id="toggleOpen" class="lg:hidden">
+					<svg class="w-7 h-7" fill="#000" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+						<path fill-rule="evenodd"
+							d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+							clip-rule="evenodd"></path>
+					</svg>
+				</button>
+			</div>
+		</div>
+	</header>
+	<div id="content-container" class="flex items-center justify-center shrink">
+		<h1 class="text-center m-y-auto">Welcome to the Dashboard</h1>
+	</div>
+	<form>
+		<div id="modal"
+			class="hidden fixed inset-0 p-4 flex flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]">
+			<div class="w-full max-w-lg bg-white shadow-lg rounded-lg p-6 relative">
+				<div class="flex items-center pb-3 border-b border-gray-200">
+					<div class="flex-1">
+						<h3 class="text-gray-800 text-xl font-bold">Upload File</h3>
+						<p class="text-gray-600 text-xs mt-1">
+							Upload file to this project
+						</p>
+					</div>
 
-            <h4 class="text-sm text-gray-600">
-              Drag & Drop or
-              <label for="chooseFile" class="text-teal-600 cursor-pointer"
-                >Choose file</label
-              >
-              to upload
-            </h4>
-            <input type="file" id="chooseFile" class="hidden" />
-          </div>
-        </div>
+					<svg id="close-button" onclick="toggleModal()" xmlns="http://www.w3.org/2000/svg"
+						class="w-3 ml-2 cursor-pointer shrink-0 fill-gray-400 hover:fill-red-500"
+						viewBox="0 0 320.591 320.591">
+						<path
+							d="M30.391 318.583a30.37 30.37 0 0 1-21.56-7.288c-11.774-11.844-11.774-30.973 0-42.817L266.643 10.665c12.246-11.459 31.462-10.822 42.921 1.424 10.362 11.074 10.966 28.095 1.414 39.875L51.647 311.295a30.366 30.366 0 0 1-21.256 7.288z"
+							data-original="#000000"></path>
+						<path
+							d="M287.9 318.583a30.37 30.37 0 0 1-21.257-8.806L8.83 51.963C-2.078 39.225-.595 20.055 12.143 9.146c11.369-9.736 28.136-9.736 39.504 0l259.331 257.813c12.243 11.462 12.876 30.679 1.414 42.922-.456.487-.927.958-1.414 1.414a30.368 30.368 0 0 1-23.078 7.288z"
+							data-original="#000000"></path>
+					</svg>
+				</div>
+				<div id="drop-zone" class="rounded-lg border-2 border-gray-200 border-dashed mt-6 z-50">
+					<label for="chooseFile">
+						<div
+							class="p-4 min-h-[180px] flex flex-col items-center justify-center text-center cursor-pointer">
+							<svg xmlns="http://www.w3.org/2000/svg" class="w-10 mb-4 fill-gray-600 inline-block"
+								viewBox="0 0 32 32">
+								<path
+									d="M23.75 11.044a7.99 7.99 0 0 0-15.5-.009A8 8 0 0 0 9 27h3a1 1 0 0 0 0-2H9a6 6 0 0 1-.035-12 1.038 1.038 0 0 0 1.1-.854 5.991 5.991 0 0 1 11.862 0A1.08 1.08 0 0 0 23 13a6 6 0 0 1 0 12h-3a1 1 0 0 0 0 2h3a8 8 0 0 0 .75-15.956z"
+									data-original="#000000" />
+								<path
+									d="M20.293 19.707a1 1 0 0 0 1.414-1.414l-5-5a1 1 0 0 0-1.414 0l-5 5a1 1 0 0 0 1.414 1.414L15 16.414V29a1 1 0 0 0 2 0V16.414z"
+									data-original="#000000" />
+							</svg>
 
-        <div
-          id="dropped-file-details"
-          class="hidden flex flex-col bg-gray-50 p-4 rounded-lg mt-4"
-        >
-          <div class="flex">
-            <p class="text-xs text-gray-600 flex-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 512 512"
-                class="w-5 mr-2 fill-current inline-block"
-              >
-                <path
-                  d="m433.798 106.268-96.423-91.222C327.119 5.343 313.695 0 299.577 0H116C85.673 0 61 24.673 61 55v402c0 30.327 24.673 55 55 55h280c30.327 0 55-24.673 55-55V146.222c0-15.049-6.27-29.612-17.202-39.954zM404.661 120H330c-2.757 0-5-2.243-5-5V44.636zM396 482H116c-13.785 0-25-11.215-25-25V55c0-13.785 11.215-25 25-25h179v85c0 19.299 15.701 35 35 35h91v307c0 13.785-11.215 25-25 25z"
-                  data-original="#000000"
-                />
-                <path
-                  d="M363 200H143c-8.284 0-15 6.716-15 15s6.716 15 15 15h220c8.284 0 15-6.716 15-15s-6.716-15-15-15zm0 80H143c-8.284 0-15 6.716-15 15s6.716 15 15 15h220c8.284 0 15-6.716 15-15s-6.716-15-15-15zm-147.28 80H143c-8.284 0-15 6.716-15 15s6.716 15 15 15h72.72c8.284 0 15-6.716 15-15s-6.716-15-15-15z"
-                  data-original="#000000"
-                />
-              </svg>
-              <span id="fileName"></span
-              ><span id="fileSize" class="ml-2"></span>
-            </p>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-3 cursor-pointer shrink-0 fill-gray-400 hover:fill-red-500"
-              viewBox="0 0 320.591 320.591"
-            >
-              <path
-                d="M30.391 318.583a30.37 30.37 0 0 1-21.56-7.288c-11.774-11.844-11.774-30.973 0-42.817L266.643 10.665c12.246-11.459 31.462-10.822 42.921 1.424 10.362 11.074 10.966 28.095 1.414 39.875L51.647 311.295a30.366 30.366 0 0 1-21.256 7.288z"
-                data-original="#000000"
-              ></path>
-              <path
-                d="M287.9 318.583a30.37 30.37 0 0 1-21.257-8.806L8.83 51.963C-2.078 39.225-.595 20.055 12.143 9.146c11.369-9.736 28.136-9.736 39.504 0l259.331 257.813c12.243 11.462 12.876 30.679 1.414 42.922-.456.487-.927.958-1.414 1.414a30.368 30.368 0 0 1-23.078 7.288z"
-                data-original="#000000"
-              ></path>
-            </svg>
-          </div>
+							<h4 class="text-sm text-gray-600">
+								Drag & Drop or
+								<span class="text-teal-600 cursor-pointer">Choose file</span>
+								to upload
+							</h4>
+						</div>
+					</label>
+				</div>
+				<input type="file" id="chooseFile" class="hidden" />
 
-          <div class="bg-gray-300 rounded-full w-full h-2 my-2">
-            <div
-              class="w-1/3 h-full rounded-full bg-blue-600 flex items-center relative"
-            >
-              <span
-                class="absolute text-xs right-0 bg-white w-2 h-2 rounded-full"
-              ></span>
-            </div>
-          </div>
 
-          <p class="text-xs text-gray-600 flex-1">35% done</p>
-        </div>
+				<template id="dropped-file-details">
+					<div class="flex flex-col bg-gray-50 p-4 rounded-lg mt-4">
+						<div class="flex">
+							<p class="text-xs text-gray-600 flex-1">
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+									class="w-5 mr-2 fill-current inline-block">
+									<path
+										d="m433.798 106.268-96.423-91.222C327.119 5.343 313.695 0 299.577 0H116C85.673 0 61 24.673 61 55v402c0 30.327 24.673 55 55 55h280c30.327 0 55-24.673 55-55V146.222c0-15.049-6.27-29.612-17.202-39.954zM404.661 120H330c-2.757 0-5-2.243-5-5V44.636zM396 482H116c-13.785 0-25-11.215-25-25V55c0-13.785 11.215-25 25-25h179v85c0 19.299 15.701 35 35 35h91v307c0 13.785-11.215 25-25 25z"
+										data-original="#000000" />
+									<path
+										d="M363 200H143c-8.284 0-15 6.716-15 15s6.716 15 15 15h220c8.284 0 15-6.716 15-15s-6.716-15-15-15zm0 80H143c-8.284 0-15 6.716-15 15s6.716 15 15 15h220c8.284 0 15-6.716 15-15s-6.716-15-15-15zm-147.28 80H143c-8.284 0-15 6.716-15 15s6.716 15 15 15h72.72c8.284 0 15-6.716 15-15s-6.716-15-15-15z"
+										data-original="#000000" />
+								</svg>
+								<span id="fileName"></span><span id="fileSize" class="ml-2"></span>
+							</p>
+							<svg id="file-cross" xmlns="http://www.w3.org/2000/svg"
+								class="w-3 cursor-pointer shrink-0 fill-gray-400 hover:fill-red-500"
+								viewBox="0 0 320.591 320.591">
+								<path
+									d="M30.391 318.583a30.37 30.37 0 0 1-21.56-7.288c-11.774-11.844-11.774-30.973 0-42.817L266.643 10.665c12.246-11.459 31.462-10.822 42.921 1.424 10.362 11.074 10.966 28.095 1.414 39.875L51.647 311.295a30.366 30.366 0 0 1-21.256 7.288z"
+									data-original="#000000"></path>
+								<path
+									d="M287.9 318.583a30.37 30.37 0 0 1-21.257-8.806L8.83 51.963C-2.078 39.225-.595 20.055 12.143 9.146c11.369-9.736 28.136-9.736 39.504 0l259.331 257.813c12.243 11.462 12.876 30.679 1.414 42.922-.456.487-.927.958-1.414 1.414a30.368 30.368 0 0 1-23.078 7.288z"
+									data-original="#000000"></path>
+							</svg>
+						</div>
 
-        <div
-          class="border-t border-gray-200 pt-6 flex justify-between gap-4 mt-6"
-        >
-          <button
-            onclick="toggleModal()"
-            type="button"
-            class="w-full px-4 py-2 rounded-lg text-gray-800 text-sm border-none outline-none tracking-wide bg-gray-200 hover:bg-gray-300 active:bg-gray-200"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            class="w-full px-4 py-2 rounded-lg text-white text-sm border-none outline-none tracking-wide bg-teal-600 hover:bg-teal-700 active:bg-teal-600"
-          >
-            Import
-          </button>
-        </div>
-      </div>
-    </div>
-  </body>
+						<div class="bg-gray-300 rounded-full w-full h-2 my-2">
+							<div class="w-0 h-full rounded-full bg-blue-600 flex items-center relative">
+								<span class="absolute text-xs right-0 bg-white w-2 h-2 rounded-full"></span>
+							</div>
+						</div>
+
+						<p class="text-xs text-gray-600 flex-1">0% done</p>
+					</div>
+				</template>
+
+				<div class="border-t border-gray-200 pt-6 flex justify-between gap-4 mt-6">
+					<button onclick="toggleModal()" type="button"
+						class="w-full px-4 py-2 rounded-lg text-gray-800 text-sm border-none outline-none tracking-wide bg-gray-200 hover:bg-gray-300 active:bg-gray-200">
+						Cancel
+					</button>
+					<button id="import-btn" type="button"
+						class="w-full px-4 py-2 rounded-lg text-white text-sm border-none outline-none tracking-wide bg-teal-600 hover:bg-teal-700 active:bg-teal-600">
+						Import
+					</button>
+				</div>
+			</div>
+		</div>
+	</form>
+</body>
+
 </html>
