@@ -30,22 +30,24 @@
 				<div class="space-y-6">
 					<div>
 						<label class="text-gray-800 text-sm mb-2 block">Email</label>
-						<input name="email" type="email"
+						<input id="email" name="email" type="email"
 							class="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-3 rounded-md outline-blue-500"
 							placeholder="username@student.s19.be" pattern=".+@student.s19.be"
 							title="username@student.s19.be" />
 					</div>
 					<div>
 						<label class="text-gray-800 text-sm mb-2 block">Password</label>
-						<input name="password" type="password"
+						<input id="password" name="password" type="password"
 							class="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-3 rounded-md outline-blue-500"
 							placeholder="Enter password" />
+						<div class="error-message text-red-600 text-sm w-full h-6 pt-2"></div>
 					</div>
 					<div>
 						<label class="text-gray-800 text-sm mb-2 block">Confirm Password</label>
-						<input name="cpassword" type="password"
+						<input id="cpassword" name="cpassword" type="password"
 							class="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-3 rounded-md outline-blue-500"
 							placeholder="Enter confirm password" />
+						<div class="error-message text-red-600 text-sm w-full h-6 pt-2"></div>
 					</div>
 				</div>
 				<div class="!mt-12">

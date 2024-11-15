@@ -24,14 +24,10 @@ class Register {
 
   validateFields(field) {
     if (field.type == "password") {
-		if (field.value.trim() === "") {
-			this.setStatus(
-				field,
-				`${field.name} should not be blank`,
-				"error"
-			  );
-			  return false;
-		}
+      if (field.value.trim() === "") {
+        this.setStatus(field, `This field should not be blank`, "error");
+        return false;
+      }
       if (field.value.length < 8) {
         this.setStatus(
           field,
@@ -62,7 +58,6 @@ class Register {
   }
 }
 
-
 const createRequest = () => {
   const request = new XMLHttpRequest();
   const API_ENDPOINT = "http://localhost:80/data/ressources/database/"; // http://localhost:80/data/ressources/uploads/
@@ -77,7 +72,7 @@ const createRequest = () => {
 
 const form = document.getElementById("register-form");
 if (form) {
-  const fields = ["email", "password"];
+  const fields = ["email", "password", "cpassword"];
   const request = createRequest();
   const validator = new Register(form, fields, request);
 }
