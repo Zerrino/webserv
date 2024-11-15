@@ -1,4 +1,4 @@
-objects/CGI.o: CGI.cpp CGI.hpp HTTPRequest.hpp includes/webserv.hpp
+objects/CGI.o: CGI.cpp CGI.hpp HTTPRequest.hpp webserv.hpp
 CGI.hpp:
 HTTPRequest.hpp:
-includes/webserv.hpp:
+webserv.hpp:

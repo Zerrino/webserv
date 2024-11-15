@@ -1,8 +1,10 @@
-objects/main.o: main.cpp Socket.hpp includes/webserv.hpp \
- ClientRequest.hpp SendToClient.hpp CGI.hpp HTTPRequest.hpp
+objects/main.o: main.cpp Socket.hpp webserv.hpp ClientRequest.hpp \
+ SendToClient.hpp Cookie.hpp HTTPRequest.hpp CGI.hpp ConfigParser.hpp
 Socket.hpp:
-includes/webserv.hpp:
+webserv.hpp:
 ClientRequest.hpp:
 SendToClient.hpp:
-CGI.hpp:
+Cookie.hpp:
 HTTPRequest.hpp:
+CGI.hpp:
+ConfigParser.hpp:

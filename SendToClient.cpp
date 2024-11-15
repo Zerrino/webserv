@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SendToClient.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 22:20:30 by zerrino           #+#    #+#             */
-/*   Updated: 2024/11/09 22:59:27 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/15 13:48:48 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ std::string	SendToClient::requestTwo(int request, std::string path)
 		this->_request.append(this->getContentType(path));
 		file = getFile(path);
 		this->_request.append(this->_length);
-		this->_request.append("\r\n\r\n");
+		this->_request.append("\r\n");
 		this->_request.append(file);
 		break;
 	case 201:
@@ -76,7 +76,7 @@ std::string	SendToClient::requestTwo(int request, std::string path)
 		this->_request.append(this->getContentType(path));
 		this->_request.append("Location : ");
 		this->_request.append(_locationCreate);
-		this->_request.append("\r\n\r\n");
+		this->_request.append("\r\n");
 		this->_request.append(file);
 		// TOUJOURS A FINIR ICI ENFIN SI ON UTILISE CE GENRE DE REQUETES
 		break;
@@ -217,18 +217,21 @@ std::string SendToClient::getContentType(std::string path)
 
 std::string	SendToClient::getFile(std::string path)
 {
+	std::ifstream file(path.c_str(), std::ios::binary);
 	std::stringstream ss;
-	std::string str;
-	std::ifstream file(path.c_str());
+	std::stringstream len_ss;
+	std::string file_data;
+
 	if (!file.is_open())
 		throw std::runtime_error("couldn't open the file");
-	std::getline(file, str, '\0');
-	this->_length = "Content-Length: ";
-	ss << str.size();
-	this->_length.append((ss.str()));
-	this->_length.append("\r\n");
+	ss << file.rdbuf();
+	file_data = ss.str();
 	file.close();
-	return (str);
+	len_ss << file_data.size();
+	this->_length = "Content-Length: ";
+	this->_length.append((len_ss.str()));
+	this->_length.append("\r\n");
+	return (file_data);
 }
 
 const std::map<std::string, std::string>& SendToClient::getContentTypesMap()

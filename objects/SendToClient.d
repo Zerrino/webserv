@@ -1,4 +1,3 @@
-objects/SendToClient.o: SendToClient.cpp SendToClient.hpp \
- includes/webserv.hpp
+objects/SendToClient.o: SendToClient.cpp SendToClient.hpp webserv.hpp
 SendToClient.hpp:
-includes/webserv.hpp:
+webserv.hpp:

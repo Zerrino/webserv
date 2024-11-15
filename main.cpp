@@ -9,37 +9,58 @@
 #include "Socket.hpp"
 #include "ClientRequest.hpp"
 #include "SendToClient.hpp"
+#include "Cookie.hpp"
+#include "ConfigParser.hpp"
 
-int
-	main ()
+int main(int ac, char **av)
 {
-	std::cout << "Start!" << std::endl;
-
-	Socket sock(AF_INET, SOCK_STREAM, 0);
-	sock.runSocket(9000, 10);
-
-	Socket sock2(AF_INET, SOCK_STREAM, 0);
-	sock2.runSocket(8080, 10);
-
-	int i = 0;
-	int max = 10000000;
-	std::vector<int> ports;
-	ports.push_back(sock.get_fdSocket());
-	ports.push_back(sock2.get_fdSocket());
-
-	ClientRequest	request(ports);
-	while (i < max)
+	if (ac > 2)
+		return (std::cout << "Invalid number of arguments !" << std::endl, EXIT_FAILURE);
+	else
 	{
-		try
+		if (ac == 1)
 		{
-			request.pollRequest();
-			request.pollExecute();
-		}
-		catch (const std::exception &e) {
-			std::cout << "error : " << e.what() << std::endl;
-		}
-		i++;
-	}
+			srand((unsigned)time(NULL) * getpid());
+			std::cout << "Start!" << std::endl;
+			/// std::cout << cook.createCookieId() << std::endl;
+			// SendToClient test;
+			// std::cout << test.getFile("./data/index.html") << std::endl;
 
-	return 0;
+			Socket sock(AF_INET, SOCK_STREAM, 0);
+			sock.runSocket(7000, 10);
+
+			Socket sock2(AF_INET, SOCK_STREAM, 0);
+			sock2.runSocket(5000, 10);
+
+			std::vector<int> ports;
+			ports.push_back(sock.get_fdSocket());
+			ports.push_back(sock2.get_fdSocket());
+
+			ClientRequest request(ports);
+			while (true)
+			{
+				try
+				{
+					request.pollRequest();
+					request.pollExecute();
+				}
+				catch (const std::exception &e)
+				{
+					std::cout << "error : " << e.what() << std::endl;
+				}
+			}
+		}
+		else
+		{
+			ConfigParser config(av[1]);
+			ConfigParser::ConfigError status;
+
+			if ((status = config.checkPathValidity()))
+				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
+			if ((status = config.open()))
+				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
+			config.parse();
+		}
+	}
+	return EXIT_SUCCESS;
 }

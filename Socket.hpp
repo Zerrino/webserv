@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:35:13 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/07 23:52:18 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/14 15:11:44 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SOCKET_HPP
 # define SOCKET_HPP
 
-#include "includes/webserv.hpp"
+#include "webserv.hpp"
 
 class	Socket
 {

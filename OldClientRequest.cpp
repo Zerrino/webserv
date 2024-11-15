@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/15 14:10:19 by root             ###   ########.fr       */
+/*   Updated: 2024/11/15 13:35:58 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ std::string getTestRequestPOSTPHP() {
            "Connection: keep-alive\n\n"
            "user=alice&age=25&city=Matis";
 }
+
 
 ClientRequest::ClientRequest(std::vector<int> fdSocket)
 	:	SendToClient(), _fdSocket(fdSocket)
@@ -64,104 +65,27 @@ void	ClientRequest::pollExecute()
 			}
 			else
 			{
-				int	flag;
-				int	request_done;
-				request_done = 0;
-				this->get_clientInfo(this->_fds[i].fd);
-
 				HTTPRequest request(getTestRequestPOSTPHP());
 				CGI cgi("PHP", request, this->_fds[i].fd);
     			if (cgi.execute() != 0)
 					std::cerr << "CGI execution failed.\n";
-					
+
+				this->get_clientInfo(this->_fds[i].fd);
 				std::string str = this->_clientInfo;
-				std::size_t pos = str.find('/');
-				std::string rest;
-				std::string cook;
+				std::size_t pos = str.find('\n');
+				if (pos != std::string::npos && str.length() >= pos)
+					str = str.substr(0, pos);
+				std::cout << str << std::endl;
+				std::string path = this->getRequest();
 
-				// if (pos != std::string::npos && str.length() >= pos)
-				// 	str = str.substr(pos);
-				// pos = str.find(' ');
-				// if (pos != std::string::npos && str.length() >= pos)
-				// 	str = str.substr(0, pos);
-				// pos = str.find('?');
-				// if (pos != std::string::npos && str.length() >= pos)
-				// {
-				// 	request_done = 1;
-				// 	rest = str.substr(pos + 1);
-				// 	str = str.substr(0, pos);
-				// }
-				// if (this->_clientInfo.length() > 10)
-				// {
-				// 	cook = isCookied(this->_clientInfo);
-				// 	if (cook.length() != 0)
-				// 	{
-				// 		//std::cout << "Cookie is " << cook << std::endl;
-				// 		flag = 0;
-				// 	}
-				// 	else
-				// 	{
-				// 		std::cout << "No Cookies..." << std::endl;
-				// 		flag = 1;
-				// 	}
-				// }
-				// // STR = le PATH de la requete
-
-				// std::string PATH_ABS = "./data";
-				// PATH_ABS.append(str);
-				// //std::cout << PATH_ABS << std::endl;
-				// std::cout << PATH_ABS << std::endl;
-				// if (str == "")
-				// {}
-				// else if (str == "/")
-				// {
-				// 	std::string file_index = "index.html";
-				// 	PATH_ABS.append(file_index);
-				// 	if (!flag)
-				// 		this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
-				// 	else
-				// 	{
-				// 		std::string req = "HTTP/1.1 200 OK\r\n";
-				// 		req.append(getDate());
-				// 		req.append("Set-Cookie: session_id=");
-				// 		req.append(createCookieId());
-				// 		req.append("; HttpOnly\r\n");
-				// 		std::string file = getFile(PATH_ABS);
-				// 		req.append(getContentType(PATH_ABS));
-				// 		req.append(this->_length);
-				// 		req.append("\r\n\r\n");
-				// 		req.append(file);
-				// 		write(this->_fds[i].fd, req.c_str(), req.length());
-				// 		flag = 0;
-				// 	}
-				// }
-				// else if (request_done)
-				// {
-				// 	cook = isCookied(this->_clientInfo);
-				// 	//std::cout << isRegister(getRequestData(rest)) << std::endl;
-				// 	//std::cout << "cookie : " << cook << std::endl;
-				// 	if ((isRegister(getRequestData(rest))) && (cook.length() > 0))
-				// 	{
-				// 		cookiedUpdate("login", "true", cook);
-				// 		this->sendClient(this->_fds[i].fd, 200, "./data/src/dashboard.html");
-				// 	}
-				// 	else
-				// 	{
-				// 		cookiedUpdate("login", "false", cook);
-				// 		this->sendClient(this->_fds[i].fd, 302, "/"); // Ici si il a pas mis un bon mdp ?
-				// 	}
-				// }
-				// else // SI aucune informations en plus
-				// {
-				// 	std::string content = getContentType(PATH_ABS);
-				// 	cook = isCookied(this->_clientInfo);
-				// 	//std::cout << "Cookie " << cook << " is " << isCookies("login", "true", cook) << std::endl;
-				// 	//std::cout << PATH_ABS << std::endl;
-				// 	if ((content != "Content-Type: text/html\r\n") || (isCookies("login", "true", cook) == 1))
-				// 		this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
-				// 	else
-				// 		this->sendClient(this->_fds[i].fd, 302, "/"); // redirige si il essaye d'aller autre pars que le debut .html et est pas login
-				// }
+				// if (path == "style.css")
+				// 	this->sendClient(this->_fds[i].fd, "./data/test/style.css");
+				// else if (path == "script.js")
+				// 	this->sendClient(this->_fds[i].fd, "./data/test/script.js");
+				// else if (path == "favicon.ico")
+				// 	this->sendClient(this->_fds[i].fd, "./data/icon/crown.ico");
+				// else
+				// 	this->sendClient(this->_fds[i].fd, "./data/test/index.html");
 				close(this->_fds[i].fd);
 				this->_fds.erase(this->_fds.begin() + i);
 				--i;
@@ -224,19 +148,10 @@ std::string	ClientRequest::getRequest()
 	return (str);
 }
 
-void	ClientRequest::sendClient(int fd, int request, std::string path)
+void	ClientRequest::sendClient(int fd, std::string path)
 {
-	std::string	str = "";
-	if ((request >= 100) && (request < 200))
-		str = this->requestOne(request);
-	else if ((request >= 200) && (request < 300))
-		str = this->requestTwo(request, path);
-	else if ((request >= 300) && (request < 400))
-		str = this->requestThree(request, path);
-	else if ((request >= 400) && (request < 500))
-		str = this->requestFour(request, path);
-	else if ((request >= 500) && (request < 600))
-		str = this->requestFive(request, path);
+	std::string	str;
+	str = this->requestTwo(200, path);
 	write(fd, str.c_str(), str.length());
 }
 

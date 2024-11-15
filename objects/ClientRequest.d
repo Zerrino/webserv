@@ -1,7 +1,8 @@
-objects/ClientRequest.o: ClientRequest.cpp ClientRequest.hpp \
- includes/webserv.hpp SendToClient.hpp CGI.hpp HTTPRequest.hpp
+objects/ClientRequest.o: ClientRequest.cpp ClientRequest.hpp webserv.hpp \
+ SendToClient.hpp Cookie.hpp HTTPRequest.hpp CGI.hpp
 ClientRequest.hpp:
-includes/webserv.hpp:
+webserv.hpp:
 SendToClient.hpp:
-CGI.hpp:
+Cookie.hpp:
 HTTPRequest.hpp:
+CGI.hpp:

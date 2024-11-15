@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   SendToClient.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 22:20:30 by zerrino           #+#    #+#             */
-/*   Updated: 2024/11/09 22:43:47 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/14 15:11:59 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SENDTOCLIENT_HPP
 # define SENDTOCLIENT_HPP
-# include "includes/webserv.hpp"
+# include "webserv.hpp"
 
 class	SendToClient
 {

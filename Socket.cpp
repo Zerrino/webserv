@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:35:13 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/08 03:21:50 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/15 14:06:01 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,12 @@
 Socket::Socket(int domain, int type, int protocol)
 	: _domain(domain), _type(type), _protocol(protocol)
 {
+	int opt = 1;
 	this->_fdSocket = socket(this->_domain, this->_type, this->_protocol);
 	if (this->_fdSocket == -1)
 		throw std::runtime_error("Socket failed");
+
+	setsockopt(this->_fdSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)); // a delete
 }
 
 
@@ -81,12 +84,12 @@ uint16_t Socket::get_port()
 
 void Socket::bindSocket(sa_family_t sin_family, in_port_t sin_port, struct in_addr sin_addr)
 {
-	struct sockaddr_in addr = {
-		sin_family,
-		sin_port,
-		sin_addr,
-		0
-	};
+	struct sockaddr_in addr = {0};
+	addr.sin_family = sin_family;
+	addr.sin_port = sin_port;
+	addr.sin_addr = sin_addr;
+	memset(addr.sin_zero, 0, sizeof(addr.sin_zero)); // Initialiser sin_zero explicitement à 0
+
 	this->_addr = addr;
 	int ret = bind(this->_fdSocket, (struct sockaddr *)&addr, sizeof(addr));
 	if (ret == -1)

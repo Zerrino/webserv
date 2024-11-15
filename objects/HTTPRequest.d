@@ -1,4 +1,3 @@
-objects/HTTPRequest.o: HTTPRequest.cpp HTTPRequest.hpp \
- includes/webserv.hpp
+objects/HTTPRequest.o: HTTPRequest.cpp HTTPRequest.hpp webserv.hpp
 HTTPRequest.hpp:
-includes/webserv.hpp:
+webserv.hpp:

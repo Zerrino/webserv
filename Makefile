@@ -6,7 +6,7 @@
 #    By: root <root@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/02 23:04:50 by lolemmen          #+#    #+#              #
-#    Updated: 2024/11/15 13:23:13 by root             ###   ########.fr        #
+#    Updated: 2024/11/15 13:54:01 by root             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,6 +24,8 @@ CXXFLAGS = -std=c++98 #-Wall -Werror -Wextra -Wno-shadow
 SOURCES := \
 	 SendToClient.cpp \
 	 ClientRequest.cpp \
+	 ConfigParser.cpp \
+	 Cookie.cpp \
 	 CGI.cpp \
 	 Socket.cpp \
 	 HTTPRequest.cpp \
