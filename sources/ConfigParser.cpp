@@ -82,7 +82,7 @@ ConfigParser::ConfigError ConfigParser::checkPathValidity()
 
 ConfigParser::ConfigError ConfigParser::open()
 {
-	_configFile.open(_configPath);
+	_configFile.open(_configPath.c_str());
 	if (!_configFile.is_open())
 		return (NOT_OPEN);
 	if (_configFile.peek() == std::ifstream::traits_type::eof())
@@ -219,7 +219,7 @@ int ConfigParser::isNumber(const std::string &word)
 			return (TOKEN_NUMBER);
 		if (j == (word.length() - 1) || j == (word.length() - 2))
 		{
-			if ((j == (word.length() - 1) && isUnit(word.back())) || (j == (word.length() - 2) && ((word.back() == 's' && (word.back() - 1) == 'm'))))
+			if ((j == (word.length() - 1) && isUnit(word[word.length()])) || (j == (word.length() - 2) && ((word[word.length()] == 's' && (word[word.length()] - 1) == 'm'))))
 				return (TOKEN_NUMBER_WITH_UNIT);
 		}
 	}
@@ -228,7 +228,7 @@ int ConfigParser::isNumber(const std::string &word)
 
 bool ConfigParser::isVariable(const std::string &word)
 {
-	if (word.front() == '$')
+	if (word[0] == '$')
 	{
 		for (size_t i = 1; i < word.length(); i++)
 		{

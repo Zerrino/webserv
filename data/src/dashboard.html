@@ -11,7 +11,7 @@
 	<script defer src="../js/auth.js"></script>
 	<script defer src="../js/init.js"></script>
 	<script defer src="../js/navBar.js"></script>
-	<script defer src="../js/modal.js"></script>
+	<script defer src="../js/upload.js"></script>
 </head>
 
 <body class="flex flex-col">
@@ -105,7 +105,24 @@
 	</div>
 	<form>
 		<div id="modal"
-			class="hidden fixed inset-0 p-4 flex flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]">
+			class="hidden fixed inset-0 p-4 flex flex-col flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]">
+			<div id="notification"
+				class="bg-white shadow-[0_3px_10px_-3px_rgba(6,81,237,0.3)] text-gray-800 w-full max-w-lg flex items-center p-4 rounded-md z-50 mb-6 opacity-0 transition-opacity transition-transform duration-300"
+				role="alert">
+				<svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] shrink-0 fill-yellow-500 inline mr-3"
+					viewBox="0 0 128 128">
+					<path
+						d="M56.463 14.337 6.9 106.644C4.1 111.861 8.173 118 14.437 118h99.126c6.264 0 10.338-6.139 7.537-11.356L71.537 14.337c-3.106-5.783-11.968-5.783-15.074 0z" />
+					<g class="fill-white">
+						<path
+							d="M64 31.726a5.418 5.418 0 0 0-5.5 5.45l1.017 44.289A4.422 4.422 0 0 0 64 85.726a4.422 4.422 0 0 0 4.482-4.261L69.5 37.176a5.418 5.418 0 0 0-5.5-5.45z"
+							data-original="#fff" />
+						<circle cx="64" cy="100.222" r="6" data-original="#fff" />
+					</g>
+				</svg>
+				<span class="text-sm font-semibold tracking-wide"></span>
+			</div>
+
 			<div class="w-full max-w-lg bg-white shadow-lg rounded-lg p-6 relative">
 				<div class="flex items-center pb-3 border-b border-gray-200">
 					<div class="flex-1">
@@ -149,7 +166,15 @@
 					</label>
 				</div>
 				<input name="files" type="file" id="chooseFile" class="hidden" multiple />
-
+				<div id="progress-bar" class="hidden py-4 flex flex-col">
+					<div class="bg-gray-300 rounded-full w-full h-2 my-2">
+						<div id="loading" class="h-full rounded-full bg-blue-600 flex items-center relative">
+						</div>
+					</div>
+					<div>
+						<span class="text-xs left -0 bg-white w-2 h-2 rounded-full"></span>
+					</div>
+				</div>
 
 				<template id="clone-template">
 					<div id="fileDetails" class=" flex flex-col bg-gray-50 p-4 rounded-lg mt-4">
@@ -179,14 +204,6 @@
 								</svg>
 							</div>
 						</div>
-
-						<div class="bg-gray-300 rounded-full w-full h-2 my-2">
-							<div class="w-0 h-full rounded-full bg-blue-600 flex items-center relative">
-								<span class="absolute text-xs right-0 bg-white w-2 h-2 rounded-full"></span>
-							</div>
-						</div>
-
-						<p id="file-percentage" class="text-xs text-gray-600 flex-1">0% done</p>
 					</div>
 				</template>
 
