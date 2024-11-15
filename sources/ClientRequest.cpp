@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/15 10:03:34 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/15 10:40:41 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ ClientRequest::ClientRequest(std::vector<int> fdSocket)
 
 void	ClientRequest::pollRequest()
 {
-	int	ret = poll(this->_fds.data(), this->_fds.size(), 3000);
+	int	ret = poll(this->_fds.data(), this->_fds.size(), 30000);
 	if (ret == -1)
 		throw std::runtime_error("poll failed");
 }
@@ -185,7 +185,7 @@ struct sockaddr_in ClientRequest::get_addr()
 
 std::string	ClientRequest::get_clientInfo(int fd)
 {
-	char buffer[256] = {0};
+	char buffer[2048] = {0};
 	std::size_t len;
 	std::string str;
 	while (true)
