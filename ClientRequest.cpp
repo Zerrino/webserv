@@ -6,11 +6,32 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/13 14:52:31 by root             ###   ########.fr       */
+/*   Updated: 2024/11/15 13:35:58 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ClientRequest.hpp"
+
+std::string getTestRequestGETPYTHON() {
+    return "POST /hello.py HTTP/1.1\n"
+           "Host: example.com\n"
+           "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36\n"
+           "Content-Type: application/x-www-form-urlencoded\n"
+           "Content-Length: 28\n"
+           "Connection: keep-alive\n\n"
+           "body=alice";
+}
+
+std::string getTestRequestPOSTPHP() {
+    return "POST /info.php HTTP/1.1\n"
+           "Host: example.com\n"
+           "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36\n"
+           "Content-Type: application/x-www-form-urlencoded\n"
+           "Content-Length: 28\n"
+           "Connection: keep-alive\n\n"
+           "user=alice&age=25&city=Matis";
+}
+
 
 ClientRequest::ClientRequest(std::vector<int> fdSocket)
 	:	SendToClient(), _fdSocket(fdSocket)
@@ -44,7 +65,11 @@ void	ClientRequest::pollExecute()
 			}
 			else
 			{
-				runcgi(this->_fds[i].fd, "PYTHON");
+				HTTPRequest request(getTestRequestPOSTPHP());
+				CGI cgi("PHP", request, this->_fds[i].fd);
+    			if (cgi.execute() != 0)
+					std::cerr << "CGI execution failed.\n";
+
 				this->get_clientInfo(this->_fds[i].fd);
 				std::string str = this->_clientInfo;
 				std::size_t pos = str.find('\n');
