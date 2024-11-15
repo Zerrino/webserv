@@ -1,7 +1,8 @@
-class Login {
-  constructor(form, fields) {
+class Register {
+  constructor(form, fields, request) {
     this.form = form;
     this.fields = fields;
+    this.request = request;
     this.validateonSubmit();
   }
 
@@ -16,13 +17,11 @@ class Login {
         }
       });
       if (error == 0) {
-        localStorage.setItem("auth", 1);
         this.form.submit();
-        console.log("clicked");
       }
     });
   }
-  
+
   validateFields(field) {
     if (field.type == "password") {
 		if (field.value.trim() === "") {
@@ -63,8 +62,22 @@ class Login {
   }
 }
 
-const form = document.querySelector(".loginForm");
+
+const createRequest = () => {
+  const request = new XMLHttpRequest();
+  const API_ENDPOINT = "http://localhost:80/data/ressources/database/"; // http://localhost:80/data/ressources/uploads/
+  request.open("POST", API_ENDPOINT, true);
+  request.onreadystatechange = () => {
+    if (request.readyState === 4 && request.status === 200) {
+      console.log(request.responseText);
+    }
+  };
+  return request;
+};
+
+const form = document.getElementById("register-form");
 if (form) {
   const fields = ["email", "password"];
-  const validator = new Login(form, fields);
+  const request = createRequest();
+  const validator = new Register(form, fields, request);
 }

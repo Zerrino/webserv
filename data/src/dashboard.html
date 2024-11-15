@@ -14,7 +14,7 @@
 	<script defer src="../js/upload.js"></script>
 </head>
 
-<body class="flex flex-col">
+<body class="flex flex-col h-screen">
 	<header
 		class="flex shadow-md py-4 px-4 sm:px-10 bg-white font-[sans-serif] min-h-[70px] tracking-wide relative z-50">
 		<div class="flex flex-wrap items-center justify-between gap-5 w-full">
@@ -76,10 +76,6 @@
 						<a href="javascript:void(0)"
 							class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]">gdelvign</a>
 					</li>
-					<li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
-						<a onclick="toggleModal()" href="javascript:void(0)"
-							class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]">Upload a file</a>
-					</li>
 				</ul>
 			</div>
 
@@ -100,8 +96,21 @@
 			</div>
 		</div>
 	</header>
-	<div id="content-container" class="flex items-center justify-center shrink">
-		<h1 class="text-center m-y-auto">Welcome to the Dashboard</h1>
+	<div id="content-container" class="flex items-center justify-center grow">
+		<div
+			class="bg-white shadow-[0_4px_12px_-5px_rgba(0,0,0,0.4)] w-full max-w-sm rounded-lg overflow-hidden mx-auto font-[sans-serif] mt-4">
+			<div class="min-h-[256px] bg-teal-600">
+				<img src="../img/file-hosting.png" class="w-full" />
+			</div>
+
+			<div class="p-6">
+				<h3 class="text-gray-800 text-xl font-bold">Upload Files to Our Server</h3>
+				<p class="mt-4 text-sm text-gray-500 leading-relaxed">Need to upload files on our server? Use the button below to proceed.
+				</p>
+				<button onclick="toggleModal()" type="button"
+					class="mt-6 px-5 py-2.5 rounded-lg text-white text-sm tracking-wider border-none outline-none bg-teal-600 hover:bg-teal-700 active:bg-teal-600">Upload files</button>
+			</div>
+		</div>
 	</div>
 	<form>
 		<div id="modal"

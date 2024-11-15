@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" type="image/png" href="../img/19_logo.svg" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script defer src="../js/register.js"></script>
+	<title>Register to Webserv</title>
+</head>
+
+<body class="bg-teal-600">
+	<div class="flex flex-col justify-center font-[sans-serif] sm:h-screen p-4">
+		<div class="bg-white max-w-md w-full mx-auto border border-gray-300 rounded-2xl p-8">
+			<div class="mb-12">
+				<div class="flex items-center justify-center space-x-3 flex-row">
+					<img class="bg-black w-[45px] h-[45px]" src="../img/19_logo.svg" alt="Campus 19 logo" />
+					<div class="">
+						<h1 class="font-extrabold sm:text-2xl text-xl">Webserv</h1>
+						<p class="text-xs">
+							by <strong>jtollena</strong>, <strong>alexafer</strong> and
+							<strong>gdelvign</strong>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<form id="register-form">
+				<div class="space-y-6">
+					<div>
+						<label class="text-gray-800 text-sm mb-2 block">Email</label>
+						<input name="email" type="email"
+							class="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-3 rounded-md outline-blue-500"
+							placeholder="username@student.s19.be" pattern=".+@student.s19.be"
+							title="username@student.s19.be" />
+					</div>
+					<div>
+						<label class="text-gray-800 text-sm mb-2 block">Password</label>
+						<input name="password" type="password"
+							class="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-3 rounded-md outline-blue-500"
+							placeholder="Enter password" />
+					</div>
+					<div>
+						<label class="text-gray-800 text-sm mb-2 block">Confirm Password</label>
+						<input name="cpassword" type="password"
+							class="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-3 rounded-md outline-blue-500"
+							placeholder="Enter confirm password" />
+					</div>
+				</div>
+				<div class="!mt-12">
+					<button type="submit"
+						class="w-full py-3 px-4 text-sm tracking-wider font-semibold rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none">
+						Create an account
+					</button>
+				</div>
+				<p class="text-gray-800 text-sm mt-6 text-center">Already have an account? <a href="../index.html"
+						class="text-teal-600 font-semibold hover:underline ml-1">Login here</a></p>
+			</form>
+		</div>
+	</div>
+
+</body>
+
+</html>
