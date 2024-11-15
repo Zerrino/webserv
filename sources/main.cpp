@@ -10,7 +10,8 @@
 #include "../includes/ClientRequest.hpp"
 #include "../includes/SendToClient.hpp"
 #include "../includes/Cookie.hpp"
-# include "../includes/ConfigParser.hpp"
+#include "../includes/ConfigParser.hpp"
+#include "../includes/Request.hpp"
 
 int main(int ac, char **av)
 {
@@ -27,10 +28,10 @@ int main(int ac, char **av)
 			// std::cout << test.getFile("./data/index.html") << std::endl;
 
 			Socket sock(AF_INET, SOCK_STREAM, 0);
-			sock.runSocket(7000, 10);
+			sock.runSocket(8080, 10);
 
 			Socket sock2(AF_INET, SOCK_STREAM, 0);
-			sock2.runSocket(5000, 10);
+			sock2.runSocket(8000, 10);
 
 			std::vector<int> ports;
 			ports.push_back(sock.get_fdSocket());

@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 04:06:02 by zerrino           #+#    #+#             */
-/*   Updated: 2024/11/14 21:42:04 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/15 06:25:17 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,12 @@ std::map<std::string, std::string> Cookie::getRequestData(std::string data)
 		}
 		pos = data.find('&');
 		data = data.substr(pos + 1);
+	}
+	pos = myVal.find("\r");
+	if (pos != std::string::npos)
+	{
+		myVal = myVal.substr(0, pos);
+		myData[myKey] = myVal;
 	}
 	this->_requestData = myData;
 	return (myData);

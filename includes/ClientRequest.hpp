@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ClientRequest.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/14 15:27:42 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/15 06:15:16 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,9 @@
 # include "webserv.hpp"
 # include "SendToClient.hpp"
 # include "Cookie.hpp"
+# include "Request.hpp"
 
-class	ClientRequest : public SendToClient, public Cookie
+class	ClientRequest : public SendToClient, public Cookie, public Request
 {
 	private:
 		std::vector<pollfd>	_fds;

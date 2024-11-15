@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/14 21:44:03 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/15 10:03:34 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,9 @@ void	ClientRequest::pollExecute()
 				this->get_clientInfo(this->_fds[i].fd);
 
 				std::string str = this->_clientInfo;
-				std::cout << this->_clientInfo << std::endl;
+				//std::cout << this->_clientInfo << std::endl;
+				printMap(reformat(parseRequest(this->_clientInfo)));
+				//printMap(parseRequest(this->_clientInfo));
 				std::size_t pos = str.find('/');
 				std::string rest;
 				std::string cook;
@@ -86,7 +88,8 @@ void	ClientRequest::pollExecute()
 				std::string PATH_ABS = "./data";
 				PATH_ABS.append(str);
 				//std::cout << PATH_ABS << std::endl;
-				std::cout << PATH_ABS << std::endl;
+				//cook = isCookied(this->_clientInfo);
+				//std::cout << "cookie : " << cook << std::endl;
 				if (str == "")
 				{}
 				else if (str == "/")
@@ -182,9 +185,16 @@ struct sockaddr_in ClientRequest::get_addr()
 
 std::string	ClientRequest::get_clientInfo(int fd)
 {
-	char buffer[1024] = {0};
-	read(fd, buffer, 1024);
-	std::string str(buffer);
+	char buffer[256] = {0};
+	std::size_t len;
+	std::string str;
+	while (true)
+	{
+		len = read(fd, buffer, sizeof(buffer));
+		str.append(buffer, len);
+		if (len != sizeof(buffer))
+			break;
+	}
 	this->_clientInfo = str;
 	return (this->_clientInfo);
 }
