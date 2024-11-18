@@ -1,8 +1,7 @@
-class Register {
-  constructor(form, fields, request) {
+class ChangePassword {
+  constructor(form, fields) {
     this.form = form;
     this.fields = fields;
-    this.request = request;
     this.validateonSubmit();
   }
 
@@ -13,8 +12,7 @@ class Register {
         return;
       } else {
         const formData = new FormData(this.form);
-        this.request.send(formData);
-        this.showModal();
+        createRequest(formData);
       }
     });
   }
@@ -61,33 +59,44 @@ class Register {
       field.classList.add("input-error");
     }
   }
+}
 
-  showModal() {
-    const modal = document.getElementById("register-modal");
-    const btn = modal.getElementsByTagName("button")[0];
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      window.location.replace("/");
-    });
-    modal.classList.remove("hidden");
+const showModal = (status) => {
+  let modal;
+  if (status === "success") {
+    modal = document.getElementById("success-modal");
+  } else modal = document.getElementById("failure-modal");
+  const btn = modal.getElementsByTagName("button")[0];
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    window.location.replace("/");
+  });
+  modal.classList.remove("hidden");
+};
+
+async function createRequest(data) {
+  try {
+    const request = await fetch(
+      "/data/ressources/database/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
+    if (request.ok) {
+      showModal("success");
+    } else if (request.status === 404) showModal("error");
+    else throw new Error(`Server error: ${request.status}`);
+  } catch (error) {
+    console.error("An error occurred:", error.message);
   }
 }
 
-const createRequest = () => {
-  const request = new XMLHttpRequest();
-  const API_ENDPOINT = "/data/ressources/uploads/";
-  request.open("POST", API_ENDPOINT, true);
-  request.onreadystatechange = () => {
-    if (request.readyState === 4 && request.status === 200) {
-      console.log(request.responseText);
-    }
-  };
-  return request;
-};
-
-const form = document.getElementById("register-form");
+const form = document.getElementById("recovery-form");
 if (form) {
   const fields = ["email", "password", "cpassword"];
-  const request = createRequest();
-  const validator = new Register(form, fields, request);
+  const validator = new ChangePassword(form, fields);
 }
