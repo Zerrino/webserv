@@ -1,15 +1,19 @@
-#include <netinet/in.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/syscall.h>
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <cstring>
-#include "../includes/Socket.hpp"
-#include "../includes/ClientRequest.hpp"
-#include "../includes/SendToClient.hpp"
-#include "../includes/Cookie.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/18 20:12:32 by gdelvign          #+#    #+#             */
+/*   Updated: 2024/11/18 20:12:50 by gdelvign         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+# include "../includes/Socket.hpp"
+# include "../includes/ClientRequest.hpp"
+# include "../includes/SendToClient.hpp"
+# include "../includes/Cookie.hpp"
 # include "../includes/ConfigParser.hpp"
 
 int main(int ac, char **av)

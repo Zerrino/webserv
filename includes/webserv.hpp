@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:57:51 by alexafer          #+#    #+#             */
-/*   Updated: 2024/11/14 16:50:37 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/18 20:14:51 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,5 +30,6 @@
 # include <fstream>
 # include <map>
 # include <sstream>
+# include <cstdlib>
 
 #endif
