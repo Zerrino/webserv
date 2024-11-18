@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/15 06:15:16 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/18 05:25:10 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ class	ClientRequest : public SendToClient, public Cookie, public Request
 		// char				_buffer[256];
 		std::string			_clientInfo;
 		struct sockaddr_in 	_addr;
+		std::map<std::string, std::string>	_clMap;
 
 	public:
 		ClientRequest(std::vector<int> fdSocket);

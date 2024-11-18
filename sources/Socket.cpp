@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:35:13 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/14 21:35:43 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/18 06:18:44 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,12 @@
 Socket::Socket(int domain, int type, int protocol)
 	: _domain(domain), _type(type), _protocol(protocol)
 {
-	int opt = 1;
+	//int opt = 1;
 	this->_fdSocket = socket(this->_domain, this->_type, this->_protocol);
 	if (this->_fdSocket == -1)
 		throw std::runtime_error("Socket failed");
 
-	setsockopt(this->_fdSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)); // a delete
+	//setsockopt(this->_fdSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)); // a delete
 }
 
 

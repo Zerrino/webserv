@@ -28,10 +28,10 @@ int main(int ac, char **av)
 			// std::cout << test.getFile("./data/index.html") << std::endl;
 
 			Socket sock(AF_INET, SOCK_STREAM, 0);
-			sock.runSocket(6000, 10);
+			sock.runSocket(52000, 10);
 
 			Socket sock2(AF_INET, SOCK_STREAM, 0);
-			sock2.runSocket(2000, 10);
+			sock2.runSocket(50000, 10);
 
 			std::vector<int> ports;
 			ports.push_back(sock.get_fdSocket());

@@ -71,6 +71,7 @@ std::map<std::string, std::string> Request::parseRequest(std::string request)
 	tmp = "";
 	if (pos0 != std::string::npos)
 	{
+		req["end"] = "false";
 		boundary = request.substr(pos0);
 		pos0 = boundary.find("\r\n");
 		tmp = request.substr(pos0);
@@ -84,8 +85,11 @@ std::map<std::string, std::string> Request::parseRequest(std::string request)
 		link = tmp.substr(0, pos0);
 		tmp = tmp.substr(pos0 + 4);
 		pos0 = tmp.find(boundary);
-		tmp = tmp.substr(0, pos0 - 8);
-		this->_this_file = tmp;
+		if (pos0 != std::string::npos)
+		{
+			tmp = tmp.substr(0, pos0 - 8);
+			req["end"] = "true";
+		}
 		pos0 = request.find("\r\n\r\n");
 		request = request.substr(0, pos0);
 		request.append(link);
