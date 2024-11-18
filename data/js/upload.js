@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 15:17:23 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/15 15:28:13 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/18 10:01:24 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,7 +192,6 @@ const sendRequest = () => {
     const request = createRequest();
 
     request.upload.addEventListener("progress", (event) => {
-      console.log(event);
       if (event.lengthComputable) {
         let pourcentage = ((event.loaded / event.total) * 100).toFixed(1);
         let done = "";
