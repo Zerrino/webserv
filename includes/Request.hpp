@@ -25,7 +25,7 @@ class	Request
 		~Request();
 		Request(const Request &cp);
 		Request& operator= (const Request &cp);
-
+		void	parseContent(std::map<std::string, std::string> &myMap);
 		std::map<std::string, std::string>	parseRequest(std::string request);
 		std::map<std::string, std::string>	reParseRequest(std::map<std::string, std::string> myMap);
 		std::map<std::string, std::string>	parseInd(std::string key, std::string content);

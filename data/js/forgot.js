@@ -1,4 +1,4 @@
-class Login {
+class ChangePassword {
   constructor(form, fields) {
     this.form = form;
     this.fields = fields;
@@ -8,52 +8,55 @@ class Login {
   validateonSubmit() {
     this.form.addEventListener("submit", (e) => {
       e.preventDefault();
-      var error = 0;
-      this.fields.forEach((field) => {
-        const input = document.querySelector(`#${field}`);
-        if (this.validateFields(input) == false) {
-          error++;
-        }
-      });
-      if (error == 0) {
+      if (this.validateFields() == false) {
+        return;
+      } else {
         const formData = new FormData(this.form);
-        const params = Object.fromEntries(formData.entries());
+		const params = Object.fromEntries(formData.entries());
         createRequest(params);
       }
     });
   }
 
-  validateFields(field) {
-    if (field.type == "password") {
-      if (field.value.trim() === "") {
-        this.setStatus(field, `${field.name} should not be blank`, "error");
-        return false;
-      }
-      if (field.value.length < 8) {
-        this.setStatus(
-          field,
-          `${field.name} must be at least 8 characters`,
-          "error"
-        );
-        return false;
-      } else {
-        this.setStatus(field, null, "success");
-        return true;
-      }
+  validateFields() {
+    const password = document.getElementById("password");
+    const repeated = document.getElementById("cpassword");
+
+    if (password.value.trim() === "") {
+      this.setStatus(password, "Password field should not be blank", "error");
+      return false;
+    } else if (password.value.length < 8) {
+      this.setStatus(
+        password,
+        "Password must be at least 8 characters",
+        "error"
+      );
+      return false;
+    } else this.setStatus(password, "", "success");
+    return this.checkPasswordEquality(password, repeated);
+  }
+
+  checkPasswordEquality(password, repeated) {
+    if (password.value != repeated.value) {
+      this.setStatus(repeated, "Passwords are not corresponding", "error");
+      return false;
+    } else {
+      this.setStatus(password, "", "success");
+      return true;
     }
   }
 
   setStatus(field, message, status) {
-    const errorMessage = field.parentElement.lastElementChild;
+    const errorMessageDiv = field.parentElement.lastElementChild;
 
     if (status == "success") {
-      if (errorMessage) {
-        errorMessage.innerText = "";
+      if (errorMessageDiv) {
+        errorMessageDiv.innerText = "";
       }
       field.classList.remove("input-error");
     }
     if (status == "error") {
-      errorMessage.innerText = message;
+      errorMessageDiv.innerText = message;
       field.classList.add("input-error");
     }
   }
@@ -82,7 +85,7 @@ async function createRequest(data) {
       body: JSON.stringify(data),
     });
     if (request.ok) {
-		localStorage.setItem("auth", 1);
+      showModal("success");
     } else if (request.status === 404) showModal("error");
     else throw new Error(`Server error: ${request.status}`);
   } catch (error) {
@@ -90,8 +93,8 @@ async function createRequest(data) {
   }
 }
 
-const form = document.querySelector(".loginForm");
+const form = document.getElementById("recovery-form");
 if (form) {
-  const fields = ["email", "password"];
-  const validator = new Login(form, fields);
+  const fields = ["email", "password", "cpassword"];
+  const validator = new ChangePassword(form, fields);
 }

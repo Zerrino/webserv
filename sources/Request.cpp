@@ -34,11 +34,12 @@ Request& Request::operator= (const Request& cp)
 
 void	Request::printMap(std::map<std::string, std::string> myMap)
 {
+	if (myMap.size() == 0)
+		return;
 	std::cout << "-------------------New Request--------------------" << std::endl;
 	for (std::map<std::string, std::string>::iterator it = myMap.begin(); it != myMap.end(); ++it)
 	{
-		if (it->first != "Content")
-			std::cout << "[\"" << it->first << "\"] = \"" << it->second << "\"" << std::endl;
+		std::cout << "[\"" << it->first << "\"] = \"" << it->second << "\"" << std::endl;
 	}
 	std::cout << "--------------------------------------------------" << std::endl << std::endl;
 }
@@ -52,7 +53,7 @@ std::map<std::string, std::string> Request::parseRequest(std::string request)
 	std::string link;
 	std::size_t pos0;
 	std::size_t pos1;
-	if (request.length() == 0) return req;
+	if (request.length() < 5) return req;
 	pos0 = request.find(' ');
 	if (pos0 == std::string::npos) return req;
 	tmp = request.substr(pos0 + 1);
@@ -93,8 +94,17 @@ std::map<std::string, std::string> Request::parseRequest(std::string request)
 		pos0 = request.find("\r\n\r\n");
 		request = request.substr(0, pos0);
 		request.append(link);
+		req["Content"] = tmp;
 	}
-	req["Content"] = tmp;
+	else
+	{
+		pos0 = request.find("\r\n\r\n");
+		req["Content"] = "";
+		if (pos0 != std::string::npos)
+		{
+			req["Content"] = request.substr(pos0 + 4);
+		}
+	}
 	pos0 = request.find("\r\n");
 	if (pos0 == std::string::npos) return req;
 	request = request.substr(pos0 + 2);
@@ -122,6 +132,31 @@ std::map<std::string, std::string> Request::mergeMap(std::map<std::string, std::
 		myMap[it->first] = it->second;
 	}
 	return myMap;
+}
+
+void	Request::parseContent(std::map<std::string, std::string> &myMap)
+{
+	std::string content = myMap["Content"];
+	if (content.length() == 0)
+		return;
+	content.erase(std::remove(content.begin(), content.end(), '{'), content.end());
+	content.erase(std::remove(content.begin(), content.end(), '}'), content.end());
+
+	std::istringstream ss(content);
+	std::string pair;
+	while (std::getline(ss, pair, ','))
+	{
+		size_t delimiterPos = pair.find(':');
+		if (delimiterPos != std::string::npos)
+		{
+			std::string key = pair.substr(0, delimiterPos);
+			std::string value = pair.substr(delimiterPos + 1);
+
+			key.erase(std::remove(key.begin(), key.end(), '\"'), key.end());
+			value.erase(std::remove(value.begin(), value.end(), '\"'), value.end());
+			myMap[key] = value;
+		}
+	}
 }
 
 std::map<std::string, std::string> Request::parseInd(std::string key, std::string content)

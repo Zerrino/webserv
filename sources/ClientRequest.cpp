@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/18 07:39:08 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/19 14:22:46 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,33 +44,10 @@ void	ClientRequest::pollExecute()
 			}
 			else
 			{
-				int	flag;
-
 				std::string str = this->get_clientInfo(this->_fds[i].fd);
-				//std::cout << this->_clientInfo << std::endl;
-				//printMap(reformat(parseRequest(this->_clientInfo)));
-				//printMap(parseRequest(this->_clientInfo));
-				//std::size_t pos;
 				std::string rest;
 				std::string cook;
-
-
-				if (_clMap.find("Cookie") != _clMap.end())
-				{
-					//std::cout << "Cookie is " << cook << std::endl;
-					flag = 0;
-				}
-				else
-				{
-					std::cout << "No Cookies..." << std::endl;
-					flag = 1;
-				}
-				// STR = le PATH de la requete
-
 				std::string PATH_ABS = "./data";
-				//std::cout << PATH_ABS << std::endl;
-				//cook = isCookied(this->_clientInfo);
-				//std::cout << "cookie : " << cook << std::endl;
 				if (_clMap.find("GET") != _clMap.end())
 				{
 					PATH_ABS.append(_clMap["GET"]);
@@ -78,7 +55,7 @@ void	ClientRequest::pollExecute()
 					{
 						std::string file_index = "index.html";
 						PATH_ABS.append(file_index);
-						if (!flag)
+						if (_clMap.find("Cookie") != _clMap.end())
 							this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
 						else
 						{
@@ -93,35 +70,13 @@ void	ClientRequest::pollExecute()
 							req.append("\r\n\r\n");
 							req.append(file);
 							write(this->_fds[i].fd, req.c_str(), req.length());
-							flag = 0;
-						}
-					}
-					else if (_clMap.find("email") != _clMap.end())
-					{
-						cook = _clMap["Cookie_ID"];
-						//std::cout << isRegister(getRequestData(rest)) << std::endl;
-						//std::cout << "cookie : " << cook << std::endl;
-						if ((isRegister(_clMap)) && (cook.length() > 0))
-						{
-							cookiedUpdate("login", "true", cook);
-							this->sendClient(this->_fds[i].fd, 200, "./data/src/dashboard.html");
-						}
-						else
-						{
-							cookiedUpdate("login", "false", cook);
-							this->sendClient(this->_fds[i].fd, 302, "/"); // Ici si il a pas mis un bon mdp ?
 						}
 					}
 					else // SI aucune informations en plus
 					{
 						std::string content = getContentType(PATH_ABS);
 						cook = _clMap["Cookie_ID"];
-						//std::cout << "Cookie " << cook << " is " << isCookies("login", "true", cook) << std::endl;
-						//std::cout << PATH_ABS << std::endl;
-						if ((content != "Content-Type: text/html\r\n") || (isCookies("login", "true", cook) == 1))
-							this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
-						//else
-						//	this->sendClient(this->_fds[i].fd, 302, "/"); // redirige si il essaye d'aller autre pars que le debut .html et est pas login
+						this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
 					}
 				}
 				close(this->_fds[i].fd);
@@ -176,16 +131,15 @@ std::string	ClientRequest::get_clientInfo(int fd)
 	int	i = 0;
 	str = "";
 	res = "";
-	std::cout << "Hey" << std::endl;
 	while (true)
 	{
 		len = read(fd, buffer, sizeof(buffer));
-		//std::cout << len << std::endl;
 		if (i == 0)
 		{
 			str.append(buffer, sizeof(buffer));
 			res = str;
 			_clMap = reformat(parseRequest(str));
+			parseContent(_clMap);
 			printMap(_clMap);
 		}
 		if ((_clMap.find("POST") != _clMap.end()) && _clMap["end"] == "false")
@@ -213,15 +167,12 @@ std::string	ClientRequest::get_clientInfo(int fd)
 			if (pos != std::string::npos)
 				break;
 		}
-		if (len != sizeof(buffer))
+		else if (len != sizeof(buffer))
 		{
-			if (_clMap.find("POST") == _clMap.end())
-				break;
+			break;
 		}
 		i++;
 	}
-	std::cout << "end!" << std::endl;
-	std::cout << i << std::endl;
 	this->_clientInfo = res;
 	return (res);
 }
@@ -252,18 +203,3 @@ void	ClientRequest::sendClient(int fd, int request, std::string path)
 		str = this->requestFive(request, path);
 	write(fd, str.c_str(), str.length());
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

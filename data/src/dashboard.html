@@ -7,14 +7,14 @@
 	<title>Dashboard</title>
 	<link rel="shortcut icon" type="image/png" href="../img/19_logo.svg" />
 	<script src="https://cdn.tailwindcss.com"></script>
-	<link rel="stylesheet" href="../css/style.css" />
+	<link rel="stylesheet" href="../css/styles.css" />
 	<script defer src="../js/auth.js"></script>
 	<script defer src="../js/init.js"></script>
 	<script defer src="../js/navBar.js"></script>
-	<script defer src="../js/modal.js"></script>
+	<script defer src="../js/upload.js"></script>
 </head>
 
-<body class="flex flex-col">
+<body class="flex flex-col h-screen">
 	<header
 		class="flex shadow-md py-4 px-4 sm:px-10 bg-white font-[sans-serif] min-h-[70px] tracking-wide relative z-50">
 		<div class="flex flex-wrap items-center justify-between gap-5 w-full">
@@ -61,24 +61,20 @@
 						</div>
 					</li>
 					<li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
-						<a href="javascript:void(0)"
+						<a href="./dashboard.html"
 							class="hover:text-teal-600 text-teal-600 block font-semibold text-[15px]">Home</a>
 					</li>
 					<li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
-						<a href="javascript:void(0)"
+						<a href="./jtollena.html"
 							class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]">jtollena</a>
 					</li>
 					<li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
-						<a href="javascript:void(0)"
+						<a href="./alexafer.html"
 							class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]">alexafer</a>
 					</li>
 					<li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
-						<a href="javascript:void(0)"
+						<a href="./gdelvign.html"
 							class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]">gdelvign</a>
-					</li>
-					<li class="max-lg:border-b border-gray-300 max-lg:py-3 px-3">
-						<a onclick="toggleModal()" href="javascript:void(0)"
-							class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]">Upload a file</a>
 					</li>
 				</ul>
 			</div>
@@ -100,12 +96,44 @@
 			</div>
 		</div>
 	</header>
-	<div id="content-container" class="flex items-center justify-center shrink">
-		<h1 class="text-center m-y-auto">Welcome to the Dashboard</h1>
+	<div id="content-container" class="flex items-center justify-center grow">
+		<div
+			class="bg-white shadow-[0_4px_12px_-5px_rgba(0,0,0,0.4)] w-full max-w-sm rounded-lg overflow-hidden mx-auto font-[sans-serif] mt-4">
+			<div class="min-h-[256px] bg-teal-600">
+				<img src="../img/file-hosting.png" class="w-full" />
+			</div>
+
+			<div class="p-6">
+				<h3 class="text-gray-800 text-xl font-bold">Upload Files to Our Server</h3>
+				<p class="mt-4 text-sm text-gray-500 leading-relaxed">Need to upload files on our server? Use the button
+					below to proceed.
+				</p>
+				<button onclick="toggleModal()" type="button"
+					class="mt-6 px-5 py-2.5 rounded-lg text-white text-sm tracking-wider border-none outline-none bg-teal-600 hover:bg-teal-700 active:bg-teal-600">Upload
+					files</button>
+			</div>
+		</div>
 	</div>
 	<form>
 		<div id="modal"
-			class="hidden fixed inset-0 p-4 flex flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]">
+			class="hidden fixed inset-0 p-4 flex flex-col flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]">
+			<div id="notification"
+				class="bg-white shadow-[0_3px_10px_-3px_rgba(6,81,237,0.3)] text-gray-800 w-full max-w-lg flex items-center p-4 rounded-md z-50 mb-6 opacity-0 transition-opacity transition-transform duration-300"
+				role="alert">
+				<svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] shrink-0 fill-yellow-500 inline mr-3"
+					viewBox="0 0 128 128">
+					<path
+						d="M56.463 14.337 6.9 106.644C4.1 111.861 8.173 118 14.437 118h99.126c6.264 0 10.338-6.139 7.537-11.356L71.537 14.337c-3.106-5.783-11.968-5.783-15.074 0z" />
+					<g class="fill-white">
+						<path
+							d="M64 31.726a5.418 5.418 0 0 0-5.5 5.45l1.017 44.289A4.422 4.422 0 0 0 64 85.726a4.422 4.422 0 0 0 4.482-4.261L69.5 37.176a5.418 5.418 0 0 0-5.5-5.45z"
+							data-original="#fff" />
+						<circle cx="64" cy="100.222" r="6" data-original="#fff" />
+					</g>
+				</svg>
+				<span class="text-sm font-semibold tracking-wide"></span>
+			</div>
+
 			<div class="w-full max-w-lg bg-white shadow-lg rounded-lg p-6 relative">
 				<div class="flex items-center pb-3 border-b border-gray-200">
 					<div class="flex-1">
@@ -148,11 +176,19 @@
 						</div>
 					</label>
 				</div>
-				<input type="file" id="chooseFile" class="hidden" />
+				<input name="files" type="file" id="chooseFile" class="hidden" multiple />
+				<div id="progress-bar" class="hidden py-4 flex flex-col">
+					<div class="bg-gray-300 rounded-full w-full h-2 my-2">
+						<div id="loading" class="h-full rounded-full bg-blue-600 flex items-center relative">
+						</div>
+					</div>
+					<div>
+						<span class="text-xs left -0 bg-white w-2 h-2 rounded-full"></span>
+					</div>
+				</div>
 
-
-				<template id="dropped-file-details">
-					<div class="flex flex-col bg-gray-50 p-4 rounded-lg mt-4">
+				<template id="clone-template">
+					<div id="fileDetails" class=" flex flex-col bg-gray-50 p-4 rounded-lg mt-4">
 						<div class="flex">
 							<p class="text-xs text-gray-600 flex-1">
 								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
@@ -166,25 +202,19 @@
 								</svg>
 								<span id="fileName"></span><span id="fileSize" class="ml-2"></span>
 							</p>
-							<svg id="file-cross" xmlns="http://www.w3.org/2000/svg"
-								class="w-3 cursor-pointer shrink-0 fill-gray-400 hover:fill-red-500"
-								viewBox="0 0 320.591 320.591">
-								<path
-									d="M30.391 318.583a30.37 30.37 0 0 1-21.56-7.288c-11.774-11.844-11.774-30.973 0-42.817L266.643 10.665c12.246-11.459 31.462-10.822 42.921 1.424 10.362 11.074 10.966 28.095 1.414 39.875L51.647 311.295a30.366 30.366 0 0 1-21.256 7.288z"
-									data-original="#000000"></path>
-								<path
-									d="M287.9 318.583a30.37 30.37 0 0 1-21.257-8.806L8.83 51.963C-2.078 39.225-.595 20.055 12.143 9.146c11.369-9.736 28.136-9.736 39.504 0l259.331 257.813c12.243 11.462 12.876 30.679 1.414 42.922-.456.487-.927.958-1.414 1.414a30.368 30.368 0 0 1-23.078 7.288z"
-									data-original="#000000"></path>
-							</svg>
-						</div>
-
-						<div class="bg-gray-300 rounded-full w-full h-2 my-2">
-							<div class="w-0 h-full rounded-full bg-blue-600 flex items-center relative">
-								<span class="absolute text-xs right-0 bg-white w-2 h-2 rounded-full"></span>
+							<div id="fileCross" class="h-fit w-fit">
+								<svg xmlns="http://www.w3.org/2000/svg"
+									class="w-3 cursor-pointer shrink-0 fill-gray-400 hover:fill-red-500"
+									viewBox="0 0 320.591 320.591">
+									<path
+										d="M30.391 318.583a30.37 30.37 0 0 1-21.56-7.288c-11.774-11.844-11.774-30.973 0-42.817L266.643 10.665c12.246-11.459 31.462-10.822 42.921 1.424 10.362 11.074 10.966 28.095 1.414 39.875L51.647 311.295a30.366 30.366 0 0 1-21.256 7.288z"
+										data-original="#000000"></path>
+									<path
+										d="M287.9 318.583a30.37 30.37 0 0 1-21.257-8.806L8.83 51.963C-2.078 39.225-.595 20.055 12.143 9.146c11.369-9.736 28.136-9.736 39.504 0l259.331 257.813c12.243 11.462 12.876 30.679 1.414 42.922-.456.487-.927.958-1.414 1.414a30.368 30.368 0 0 1-23.078 7.288z"
+										data-original="#000000"></path>
+								</svg>
 							</div>
 						</div>
-
-						<p class="text-xs text-gray-600 flex-1">0% done</p>
 					</div>
 				</template>
 
