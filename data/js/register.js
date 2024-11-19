@@ -14,9 +14,8 @@ class Register {
       } else {
         const formData = new FormData(this.form);
         const params = Object.fromEntries(formData.entries());
-		console.log(JSON.stringify(params));
+        params.action = "create";
         this.request.send(JSON.stringify(params));
-        this.showModal();
       }
     });
   }
@@ -63,18 +62,17 @@ class Register {
       field.classList.add("input-error");
     }
   }
-
-  showModal() {
-    const modal = document.getElementById("register-modal");
-    const btn = modal.getElementsByTagName("button")[0];
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      window.location.replace("/");
-    });
-    modal.classList.remove("hidden");
-  }
 }
 
+const showModal = () => {
+  const modal = document.getElementById("register-modal");
+  const btn = modal.getElementsByTagName("button")[0];
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    window.location.replace("/");
+  });
+  modal.classList.remove("hidden");
+};
 const createRequest = () => {
   const request = new XMLHttpRequest();
   const API_ENDPOINT = "/data/ressources/database/";
@@ -82,7 +80,9 @@ const createRequest = () => {
   request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
   request.onreadystatechange = () => {
     if (request.readyState === 4 && request.status === 200) {
-      console.log(request.responseText);
+      showModal();
+    } else {
+      alert("Something went wrong with the request");
     }
   };
   return request;

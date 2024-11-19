@@ -13,6 +13,7 @@ class ChangePassword {
       } else {
         const formData = new FormData(this.form);
 		const params = Object.fromEntries(formData.entries());
+		params.action = "modify";
         createRequest(params);
       }
     });

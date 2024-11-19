@@ -116,12 +116,13 @@ ConfigParser::ConfigError ConfigParser::parse()
 	// Print all words for testing purpose
 	for (std::vector<std::string>::const_iterator i = words.begin(); i != words.end(); i++)
 	{
-		Token 	token;
+		Token token;
 
 		token.value = *i;
 		token.type = getTokenType(*i);
 		_tokens.push_back(token);
-		std::cout << token.value << " Type = " << token.type << std::endl;
+		//std::cout << token.value << std::endl;
+		// std::cout << token.value << " Type = " << token.type << std::endl;
 	}
 
 	return (SUCCESS);
@@ -148,7 +149,20 @@ std::vector<std::string> ConfigParser::split(std::ifstream &file)
 				file.get(ch);
 			ch++;
 		}
-		else if (!std::isspace(ch) && ch != ';')
+		else if (ch == '$')
+		{
+			std::cout << ch << std::endl; 
+			word += ch;
+			//ch++;
+			while (isalnum(ch) || ch == '_')
+			{
+				word += ch;
+				ch++;
+			}
+			words.push_back(word);
+			word.clear();
+		}
+		else if (!std::isspace(ch) && ch != ';' && ch != '$')
 			word += ch;
 		else
 		{

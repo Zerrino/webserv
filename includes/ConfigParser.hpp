@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 15:12:33 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/14 15:13:13 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/19 13:28:17 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,11 @@ enum TokenType
 	TOKEN_BLOCK_HTTP,
 	TOKEN_BLOCK_SERVER,
 	TOKEN_BLOCK_LOCATION,
-	TOKEN_KEYWORD_INCLUDE,
-	TOKEN_KEYWORD_RETURN,
 	TOKEN_SYMBOL_OPEN_BRACE,
 	TOKEN_SYMBOL_CLOSE_BRACE,
 	TOKEN_SYMBOL_SEMICOLON,
+	TOKEN_OPERATOR_EQUAL,
+	TOKEN_OPERATOR_NOT_EQUAL,
 	TOKEN_IDENTIFIER,
 	TOKEN_STRING,
 	TOKEN_STRING_QUOTED,
@@ -34,8 +34,6 @@ enum TokenType
 	TOKEN_NUMBER_WITH_UNIT,
 	TOKEN_REGEX,
 	TOKEN_VARIABLE,
-	TOKEN_OPERATOR_EQUAL,
-	TOKEN_OPERATOR_NOT_EQUAL,
 	INVALID_TOKEN
 };
 

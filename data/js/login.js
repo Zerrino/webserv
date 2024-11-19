@@ -18,6 +18,7 @@ class Login {
       if (error == 0) {
         const formData = new FormData(this.form);
         const params = Object.fromEntries(formData.entries());
+        params.action = "cookieUpdate";
         createRequest(params);
       }
     });
@@ -74,15 +75,16 @@ const showModal = (status) => {
 
 async function createRequest(data) {
   try {
-    const request = await fetch("/data/ressources/database/", {
+    const request = await fetch("/data/ressources/database/profiles.txt", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
-    if (request.ok) {
-		localStorage.setItem("auth", 1);
+    if (request.ok && request.status === 204) {
+      localStorage.setItem("auth", 1);
+      fetch("/data/src/dashboard.html");
     } else if (request.status === 404) showModal("error");
     else throw new Error(`Server error: ${request.status}`);
   } catch (error) {
