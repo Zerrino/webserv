@@ -18,7 +18,6 @@ class Login {
       if (error == 0) {
         localStorage.setItem("auth", 1);
         this.form.submit();
-        console.log("clicked");
       }
     });
   }
