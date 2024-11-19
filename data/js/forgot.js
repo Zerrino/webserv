@@ -12,7 +12,8 @@ class ChangePassword {
         return;
       } else {
         const formData = new FormData(this.form);
-        createRequest(formData);
+		const params = Object.fromEntries(formData.entries());
+        createRequest(params);
       }
     });
   }
@@ -76,16 +77,13 @@ const showModal = (status) => {
 
 async function createRequest(data) {
   try {
-    const request = await fetch(
-      "/data/ressources/database/",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    const request = await fetch("/data/ressources/database/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
     if (request.ok) {
       showModal("success");
     } else if (request.status === 404) showModal("error");

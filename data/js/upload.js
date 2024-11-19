@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 15:17:23 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/18 10:01:24 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/19 11:09:29 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,7 +176,7 @@ const createFileDetails = (file, nb) => {
 
 const createRequest = () => {
   const request = new XMLHttpRequest();
-  const API_ENDPOINT = "https://file.io"; // http://localhost:80/data/ressources/uploads/
+  const API_ENDPOINT = "/data/ressources/uploads/";
   request.open("POST", API_ENDPOINT, true);
   request.onreadystatechange = () => {
     if (request.readyState === 4 && request.status === 200) {
@@ -213,7 +213,6 @@ const sendRequest = () => {
       clearModal();
       toggleModal();
     }, 1750);
-
     request.send(formData);
   } else {
     showNotification("Please provide at least one file to upload.");

@@ -13,7 +13,9 @@ class Register {
         return;
       } else {
         const formData = new FormData(this.form);
-        this.request.send(formData);
+        const params = Object.fromEntries(formData.entries());
+		console.log(JSON.stringify(params));
+        this.request.send(JSON.stringify(params));
         this.showModal();
       }
     });
@@ -77,7 +79,7 @@ const createRequest = () => {
   const request = new XMLHttpRequest();
   const API_ENDPOINT = "/data/ressources/database/";
   request.open("POST", API_ENDPOINT, true);
-  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
   request.onreadystatechange = () => {
     if (request.readyState === 4 && request.status === 200) {
       console.log(request.responseText);
