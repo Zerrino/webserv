@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/19 14:22:46 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/19 20:54:26 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,36 @@ void	ClientRequest::pollExecute()
 						std::string content = getContentType(PATH_ABS);
 						cook = _clMap["Cookie_ID"];
 						this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
+					}
+				}
+				else if (_clMap.find("POST") != _clMap.end())
+				{
+					std::cout <<  "test" << std::endl;
+					if (_clMap.find("action") != _clMap.end())
+					{
+						std::cout <<  _clMap["action"] << std::endl;
+						if (_clMap["action"].find("cookieUpdate") != std::string::npos)
+						{
+							std::cout <<  "hey" << std::endl;
+							if (isRegister(_clMap))
+							{
+								std::cout << "send" << std::endl;
+								sendClient(this->_fds[i].fd, 204, "");
+							}
+							else
+							{
+								std::cout << "send error" << std::endl;
+								sendClient(this->_fds[i].fd, 404, "");
+							}
+						}
+						else if (_clMap["action"].find("modify") != std::string::npos)
+						{
+
+						}
+						else if (_clMap["action"].find("create") != std::string::npos)
+						{
+
+						}
 					}
 				}
 				close(this->_fds[i].fd);

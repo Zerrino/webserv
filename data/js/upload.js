@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 15:17:23 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/19 14:03:28 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/19 20:51:43 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ const clearModal = () => {
 
 /*
  ** Handles the upload file logic
-*/
+ */
 
 dropZone.addEventListener("dragenter", (event) => {
   event.preventDefault();
@@ -176,7 +176,7 @@ const createFileDetails = (file, nb) => {
 
 const createRequest = () => {
   const request = new XMLHttpRequest();
-  const API_ENDPOINT = "/data/ressources/uploads/";
+  const API_ENDPOINT = "/ressources/uploads/";
   request.open("POST", API_ENDPOINT, true);
   request.onreadystatechange = () => {
     if (request.readyState === 4 && request.status === 200) {

@@ -13,6 +13,7 @@ class ChangePassword {
       } else {
         const formData = new FormData(this.form);
 		const params = Object.fromEntries(formData.entries());
+		params.action = "modify";
         createRequest(params);
       }
     });
@@ -77,7 +78,7 @@ const showModal = (status) => {
 
 async function createRequest(data) {
   try {
-    const request = await fetch("/data/ressources/database/", {
+    const request = await fetch("/ressources/database/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
