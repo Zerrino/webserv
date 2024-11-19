@@ -22,7 +22,6 @@ void HTTPRequest::send(int fd) const {
     }
 	frequest.append("\r\n" + getBody());
 	write(fd, frequest.c_str(), frequest.length());
-    std::cout << frequest << std::endl;
 }
 
 void HTTPRequest::setENVs() const {

@@ -8,10 +8,8 @@ CGI::~CGI() {}
 int CGI::sendPostBody(int pipe_in[2]){
 	if (_request.getMethod() == "POST") {
 		ssize_t bytesWritten = write(pipe_in[1], _request.getBody().c_str(), _request.getBody().length());
-		if (bytesWritten == -1) {
-			std::cerr << "Failed to write to pipe_in\n";
+		if (bytesWritten == -1)
 			return 1;
-		} else std::cout << "Successfully written to pipe_in: " << _request.getBody().c_str() << "\n"; // Debugging
 	}
     return 0;
 }
@@ -78,6 +76,14 @@ void splitPath(const std::string& fullPath, std::string& path, std::string& file
     }
 }
 
+bool isPHPInstalled() {
+    return std::system("php-cgi -v >nul 2>nul") == 0;
+}
+
+bool isPythonInstalled() {
+    return std::system("python3 -v >nul 2>nul") == 0;
+}
+
 int CGI::execute() {
     if (_type != "PHP" && _type != "PYTHON")
         return 1;
@@ -86,8 +92,20 @@ int CGI::execute() {
     splitPath(_request.getUrl(), localPath, fileToExecute);
 
     std::string cmd;
-    if(_type == "PHP") cmd = "php-cgi";
-	else if(_type == "PYTHON") cmd = "python3";
+    if(_type == "PHP"){ 
+        cmd = "php-cgi";
+        if(!isPHPInstalled()){
+            std::cerr << "Error: php-cgi is not installed.";
+            return 1;
+        }
+    }
+	else if(_type == "PYTHON"){ 
+        cmd = "python3";
+        if(!isPythonInstalled()){
+            std::cerr << "Error: python3 is not installed.";
+            return 1;
+        }
+    };
 
     int pipe_in[2], pipe_out[2];
     if (!createPipes(pipe_in, pipe_out)) {
