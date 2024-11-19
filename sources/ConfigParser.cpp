@@ -121,8 +121,9 @@ ConfigParser::ConfigError ConfigParser::parse()
 		token.value = *i;
 		token.type = getTokenType(*i);
 		_tokens.push_back(token);
-		//std::cout << token.value << std::endl;
-		// std::cout << token.value << " Type = " << token.type << std::endl;
+		std::cout << token.value << std::endl;
+		// if (token.value[0] == '$')
+		//	std::cout << token.value << std::endl << " Type = " << token.type << std::endl;
 	}
 
 	return (SUCCESS);
@@ -139,48 +140,93 @@ std::vector<std::string> ConfigParser::split(std::ifstream &file)
 {
 	std::vector<std::string> words;
 	std::string word;
-	char ch;
+	size_t start = 0;
 
-	while (file.get(ch))
+	std::string data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+	size_t i = 0;
+	while (i < data.length())
 	{
-		if (ch == '#')
+		// std::cout << data[i] << std::endl;
+		// std::cout << i << std::endl;
+		if (data[i] == '#')
 		{
-			while (ch != '\n')
-				file.get(ch);
-			ch++;
+			while (i < data.length() && data[i] != '\n')
+				i++;
+			i++;
 		}
-		else if (ch == '$')
+		else if (data[i] == '$')
 		{
-			std::cout << ch << std::endl; 
-			word += ch;
-			//ch++;
-			while (isalnum(ch) || ch == '_')
-			{
-				word += ch;
-				ch++;
-			}
+			start = i;
+			while (i < data.length() && (isalnum(data[i]) || data[i] == '_' || data[i] == '$'))
+				i++;
+			word = data.substr(start, i - start);
 			words.push_back(word);
 			word.clear();
 		}
-		else if (!std::isspace(ch) && ch != ';' && ch != '$')
-			word += ch;
-		else
+		else if (data[i] == ';')
 		{
-			if (!word.empty())
-			{
-				words.push_back(word);
-				word.clear();
-			}
-			if (ch == ';')
-			{
-				words.push_back(";");
-				word.clear();
-			}
+			word = data[i];
+			words.push_back(word);
+			word.clear();
+			i++;
 		}
+
+		else if (!std::isspace(data[i]))
+		{
+			start = i;
+			while (i < data.length() && !std::isspace(data[i]) && data[i] != ';' && data[i] != '$' && data[i] != '#')
+				i++;
+			word = data.substr(start, i - start);
+			words.push_back(word);
+			word.clear();
+		}
+		else
+			i++;
 	}
-	if (!word.empty())
-		words.push_back(word);
+	std::cout << "i = " << i << std::endl;
+	std::cout << "data =" << data.length() << std::endl;
 	return (words);
+
+	// while (file.get(ch))
+	// {
+	// 	if (ch == '#')
+	// 	{
+	// 		while (ch != '\n')
+	// 			file.get(ch);
+	// 		ch++;
+	// 	}
+	// 	else if (ch == '$')
+	// 	{
+	// 		while (isalnum(ch) || ch == '_')
+	// 		{
+	// 			word += ch;
+	// 			file.get(ch);
+	// 		}
+	// 		words.push_back(word);
+	// 		word.clear();
+	// 		// std::cout << word << std::endl;
+	// 		if (ch == '$')
+	// 			continue ;
+	// 	}
+	// 	else if (!std::isspace(ch) && ch != ';' && ch != '$')
+	// 		word += ch;
+	// 	else
+	// 	{
+	// 		if (!word.empty())
+	// 		{
+	// 			words.push_back(word);
+	// 			word.clear();
+	// 		}
+	// 		if (ch == ';')
+	// 		{
+	// 			words.push_back(";");
+	// 			word.clear();
+	// 		}
+	// 	}
+	// }
+	// if (!word.empty())
+	// 	words.push_back(word);
+	// return (words);
 }
 
 void ConfigParser::initTokenMap()
