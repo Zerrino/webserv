@@ -82,13 +82,19 @@ async function createRequest(data) {
       },
       body: JSON.stringify(data),
     });
-    if (request.ok && request.status === 204) {
+    if (request.ok && request.status === 204)
+    {
       localStorage.setItem("auth", 1);
       const response = await fetch("/src/dashboard.html");
       if (!response.ok) {
         console.log("error");
       }
-    } else if (request.status === 404) showModal("error");
+      else if (response.ok)
+      {
+        window.location.href = "/src/dashboard.html";
+      }
+    }
+    else if (request.status === 404) showModal("error");
     else throw new Error(`Server error: ${request.status}`);
   } catch (error) {
     console.error("An error occurred:", error.message);
