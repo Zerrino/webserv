@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/15 14:10:19 by root             ###   ########.fr       */
+/*   Updated: 2024/11/19 15:49:05 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,14 +22,27 @@ std::string getTestRequestGETPYTHON() {
            "body=alice";
 }
 
-std::string getTestRequestPOSTPHP() {
-    return "POST /info.php HTTP/1.1\n"
-           "Host: example.com\n"
-           "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36\n"
-           "Content-Type: application/x-www-form-urlencoded\n"
-           "Content-Length: 28\n"
-           "Connection: keep-alive\n\n"
-           "user=alice&age=25&city=Matis";
+std::string getTestRequestPOSTPHP(std::string info) {
+    return "POST / HTTP/1.1\n"
+			"Host: localhost:5000\n"
+			"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0\n"
+			"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n"
+			"Accept-Language: fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3\n"
+			"Accept-Encoding: gzip, deflate, br, zstd\n"
+			"Content-Type: application/x-www-form-urlencoded\n"
+			"Content-Length: 8\n"
+			"Origin: http://localhost:5000\n"
+			"DNT: 1\n"
+			"Connection: keep-alive\n"
+			"Referer: http://localhost:5000/\n"
+			"Cookie: PHPSESSID=0op581bmb0jflctvek4uidgqhb\n"
+			"Upgrade-Insecure-Requests: 1\n"
+			"Sec-Fetch-Dest: document\n"
+			"Sec-Fetch-Mode: navigate\n"
+			"Sec-Fetch-Site: same-origin\n"
+			"Sec-Fetch-User: ?1\n"
+			"Priority: u=0, i\n\n"
+			"name=hey";
 }
 
 ClientRequest::ClientRequest(std::vector<int> fdSocket)
@@ -51,6 +64,9 @@ void	ClientRequest::pollRequest()
 	if (ret == -1)
 		throw std::runtime_error("poll failed");
 }
+				bool isPHPFile(const std::string& path) {
+					return path.size() >= 4 && path.substr(path.size() - 4) == ".php";
+				}
 
 void	ClientRequest::pollExecute()
 {
@@ -68,100 +84,74 @@ void	ClientRequest::pollExecute()
 				int	request_done;
 				request_done = 0;
 				this->get_clientInfo(this->_fds[i].fd);
-
-				HTTPRequest request(getTestRequestPOSTPHP());
-				CGI cgi("PHP", request, this->_fds[i].fd);
-    			if (cgi.execute() != 0)
-					std::cerr << "CGI execution failed.\n";
 					
 				std::string str = this->_clientInfo;
 				std::size_t pos = str.find('/');
 				std::string rest;
 				std::string cook;
 
-				// if (pos != std::string::npos && str.length() >= pos)
-				// 	str = str.substr(pos);
-				// pos = str.find(' ');
-				// if (pos != std::string::npos && str.length() >= pos)
-				// 	str = str.substr(0, pos);
-				// pos = str.find('?');
-				// if (pos != std::string::npos && str.length() >= pos)
-				// {
-				// 	request_done = 1;
-				// 	rest = str.substr(pos + 1);
-				// 	str = str.substr(0, pos);
-				// }
-				// if (this->_clientInfo.length() > 10)
-				// {
-				// 	cook = isCookied(this->_clientInfo);
-				// 	if (cook.length() != 0)
-				// 	{
-				// 		//std::cout << "Cookie is " << cook << std::endl;
-				// 		flag = 0;
-				// 	}
-				// 	else
-				// 	{
-				// 		std::cout << "No Cookies..." << std::endl;
-				// 		flag = 1;
-				// 	}
-				// }
-				// // STR = le PATH de la requete
+				if (pos != std::string::npos && str.length() >= pos)
+					str = str.substr(pos);
+				pos = str.find(' ');
+				if (pos != std::string::npos && str.length() >= pos)
+					str = str.substr(0, pos);
+				pos = str.find('?');
+				if (pos != std::string::npos && str.length() >= pos)
+				{
+					request_done = 1;
+					rest = str.substr(pos + 1);
+					str = str.substr(0, pos);
+				}
+				if (this->_clientInfo.length() > 10)
+				{
+					cook = isCookied(this->_clientInfo);
+					if (cook.length() != 0) flag = 0;
+					else flag = 1;
+				}
 
-				// std::string PATH_ABS = "./data";
-				// PATH_ABS.append(str);
-				// //std::cout << PATH_ABS << std::endl;
-				// std::cout << PATH_ABS << std::endl;
-				// if (str == "")
-				// {}
-				// else if (str == "/")
-				// {
-				// 	std::string file_index = "index.html";
-				// 	PATH_ABS.append(file_index);
-				// 	if (!flag)
-				// 		this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
-				// 	else
-				// 	{
-				// 		std::string req = "HTTP/1.1 200 OK\r\n";
-				// 		req.append(getDate());
-				// 		req.append("Set-Cookie: session_id=");
-				// 		req.append(createCookieId());
-				// 		req.append("; HttpOnly\r\n");
-				// 		std::string file = getFile(PATH_ABS);
-				// 		req.append(getContentType(PATH_ABS));
-				// 		req.append(this->_length);
-				// 		req.append("\r\n\r\n");
-				// 		req.append(file);
-				// 		write(this->_fds[i].fd, req.c_str(), req.length());
-				// 		flag = 0;
-				// 	}
-				// }
-				// else if (request_done)
-				// {
-				// 	cook = isCookied(this->_clientInfo);
-				// 	//std::cout << isRegister(getRequestData(rest)) << std::endl;
-				// 	//std::cout << "cookie : " << cook << std::endl;
-				// 	if ((isRegister(getRequestData(rest))) && (cook.length() > 0))
-				// 	{
-				// 		cookiedUpdate("login", "true", cook);
-				// 		this->sendClient(this->_fds[i].fd, 200, "./data/src/dashboard.html");
-				// 	}
-				// 	else
-				// 	{
-				// 		cookiedUpdate("login", "false", cook);
-				// 		this->sendClient(this->_fds[i].fd, 302, "/"); // Ici si il a pas mis un bon mdp ?
-				// 	}
-				// }
-				// else // SI aucune informations en plus
-				// {
-				// 	std::string content = getContentType(PATH_ABS);
-				// 	cook = isCookied(this->_clientInfo);
-				// 	//std::cout << "Cookie " << cook << " is " << isCookies("login", "true", cook) << std::endl;
-				// 	//std::cout << PATH_ABS << std::endl;
-				// 	if ((content != "Content-Type: text/html\r\n") || (isCookies("login", "true", cook) == 1))
-				// 		this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
-				// 	else
-				// 		this->sendClient(this->_fds[i].fd, 302, "/"); // redirige si il essaye d'aller autre pars que le debut .html et est pas login
-				// }
+				std::string PATH_ABS = "/var/www/html/data";
+				PATH_ABS.append(str);
+				std::cout << PATH_ABS << std::endl;
+				if (str == "")
+				{}
+				else if (str == "/")
+				{
+					std::string file_index = "welcome.php";
+					PATH_ABS.append("src/");
+					PATH_ABS.append(file_index);
+					std::cout << PATH_ABS << std::endl;
+					
+					HTTPRequest mainRequest2 = HTTPRequest((this->_clientInfo));
+					mainRequest2.setUrl(PATH_ABS);
+					CGI cgi2("PHP", mainRequest2, this->_fds[i].fd);
+					if (cgi2.execute() != 0)
+						std::cerr << "CGI execution failed.\n";
+				}
+				else if (request_done)
+				{
+					cook = isCookied(this->_clientInfo);
+					//std::cout << isRegister(getRequestData(rest)) << std::endl;
+					//std::cout << "cookie : " << cook << std::endl;
+					if ((isRegister(getRequestData(rest))) && (cook.length() > 0))
+					{
+						cookiedUpdate("login", "true", cook);
+						this->sendClient(this->_fds[i].fd, 200, "./data/src/dashboard.html");
+					} else {
+						cookiedUpdate("login", "false", cook);
+						this->sendClient(this->_fds[i].fd, 302, "/"); // Ici si il a pas mis un bon mdp ?
+					}
+				}
+				else // SI aucune informations en plus
+				{
+					std::string content = getContentType(PATH_ABS);
+					cook = isCookied(this->_clientInfo);
+					//std::cout << "Cookie " << cook << " is " << isCookies("login", "true", cook) << std::endl;
+					// std::cout << PATH_ABS << std::endl;
+					// if ((content != "Content-Type: text/html\r\n") || (isCookies("login", "true", cook) == 1))
+						this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
+					// else
+					// 	this->sendClient(this->_fds[i].fd, 302, "/"); // redirige si il essaye d'aller autre pars que le debut .html et est pas login
+				}
 				close(this->_fds[i].fd);
 				this->_fds.erase(this->_fds.begin() + i);
 				--i;

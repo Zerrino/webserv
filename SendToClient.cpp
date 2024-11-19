@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 22:20:30 by zerrino           #+#    #+#             */
-/*   Updated: 2024/11/15 13:48:48 by root             ###   ########.fr       */
+/*   Updated: 2024/11/19 13:22:39 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,6 +240,7 @@ const std::map<std::string, std::string>& SendToClient::getContentTypesMap()
 	if (contentTypes.empty())
 	{
 		contentTypes["html"] = "text/html";
+		contentTypes["php"] = "text/php";
 		contentTypes["htm"] = "text/html";
 		contentTypes["txt"] = "text/plain";
 		contentTypes["csv"] = "text/csv";

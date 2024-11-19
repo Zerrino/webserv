@@ -11,7 +11,7 @@ int CGI::sendPostBody(int pipe_in[2]){
 		if (bytesWritten == -1) {
 			std::cerr << "Failed to write to pipe_in\n";
 			return 1;
-		}
+		} else std::cout << "Successfully written to pipe_in: " << _request.getBody().c_str() << "\n"; // Debugging
 	}
     return 0;
 }
@@ -65,12 +65,26 @@ void CGI::sendResponse(const std::string& result) const {
 }
 
 
+
+void splitPath(const std::string& fullPath, std::string& path, std::string& file) {
+    std::size_t lastSlashPos = fullPath.find_last_of("/");
+
+    if (lastSlashPos != std::string::npos) {
+        path = fullPath.substr(0, lastSlashPos);
+        file = fullPath.substr(lastSlashPos + 1);
+    } else {
+        path = "";
+        file = fullPath;
+    }
+}
+
 int CGI::execute() {
     if (_type != "PHP" && _type != "PYTHON")
         return 1;
 
-    std::string localPath = "/var/www/html";
-    std::string fileToExecute = _request.getUrl().substr(1);
+    std::string localPath, fileToExecute;
+    splitPath(_request.getUrl(), localPath, fileToExecute);
+
     std::string cmd;
     if(_type == "PHP") cmd = "php-cgi";
 	else if(_type == "PYTHON") cmd = "python3";
@@ -80,7 +94,6 @@ int CGI::execute() {
         std::cerr << "Failed to create pipes.\n";
         return 1;
     }
-
     pid_t pid = fork();
     if (pid == 0) {
         close(pipe_in[1]);

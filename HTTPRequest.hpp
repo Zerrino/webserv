@@ -38,6 +38,7 @@ class HTTPRequest {
 		void setStatusMessage(std::string code);
 	private:
 		void parseRequest(const std::string& request);
+		std::string reformat_request(const std::string& input);
 
 		std::string _method;
 		int			_status_code;

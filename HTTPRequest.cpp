@@ -46,8 +46,20 @@ void HTTPRequest::setENVs() const {
     }
 }
 
+std::string HTTPRequest::reformat_request(const std::string& input) {
+    std::string result = "";
+    for (size_t i = 0; i < input.length(); ++i) {
+        if (input[i] == '\r' && i + 1 < input.length() && input[i + 1] == '\n') {
+            result += '\n';
+            ++i;
+        } else result += input[i];
+    }
+    return result;
+}
+
 void HTTPRequest::parseRequest(const std::string& request) {
-    std::istringstream stream(request);
+    std::string fRequest = reformat_request(request);
+    std::istringstream stream(fRequest);
     std::string line;
 
     if (std::getline(stream, line)) {

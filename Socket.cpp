@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:35:13 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/15 14:06:01 by root             ###   ########.fr       */
+/*   Updated: 2024/11/19 13:55:00 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,6 @@ Socket::Socket(int domain, int type, int protocol)
 
 	setsockopt(this->_fdSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)); // a delete
 }
-
-
 
 Socket::~Socket()
 {
