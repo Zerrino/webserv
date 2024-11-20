@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 04:06:02 by zerrino           #+#    #+#             */
-/*   Updated: 2024/11/15 06:25:17 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/20 07:45:15 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,37 +85,39 @@ std::map<std::string, std::string> Cookie::getRequestData(std::string data)
 	std::string myKey;
 	std::string myVal;
 	std::size_t pos;
+	std::size_t pos1;
 
-	pos = data.find('&');
-	while (pos != std::string::npos)
+	std::cout << data << std::endl;
+	while ((pos1 = data.find('&')) != std::string::npos)
 	{
-		tmp = data.substr(0, pos);
+		tmp = data.substr(0, pos1);
 		pos = tmp.find('=');
 		if (pos != std::string::npos)
 		{
 			myKey = tmp.substr(0, pos);
 			myVal = tmp.substr(pos + 1);
+			pos = myVal.find("\r");
+			if (pos != std::string::npos)
+			{
+				myVal = myVal.substr(0, pos);
+				myData[myKey] = myVal;
+			}
 			myData[myKey] = myVal;
+			std::cout << myKey << ":" << myData[myKey] << std::endl;
 		}
-		pos = data.find('&');
-		data = data.substr(pos + 1);
-	}
-	pos = myVal.find("\r");
-	if (pos != std::string::npos)
-	{
-		myVal = myVal.substr(0, pos);
-		myData[myKey] = myVal;
+		data = data.substr(pos1 + 1);
 	}
 	this->_requestData = myData;
 	return (myData);
 }
 
-int	Cookie::isCookies(std::string myKey, std::string myVal, std::string CookiedID)
+int	Cookie::isCookies(std::string myKey, std::string myVal, std::string CookiedID) // -1 pas de key, 0 val !=, 1 val ==
 {
 	std::string	file_data;
 	std::stringstream ss;
-	std::string path = "./data/ressources/cookies/";
+	std::string path = "./data/ressources/";
 	path.append(CookiedID);
+	std::cout << path << std::endl;
 	std::ifstream file(path.c_str());
 	if (!file.is_open())
 		throw std::runtime_error("cookie doesn't exist");
@@ -123,6 +125,8 @@ int	Cookie::isCookies(std::string myKey, std::string myVal, std::string CookiedI
 	file_data = ss.str();
 	file.close();
 	std::map<std::string, std::string> myData = getRequestData(file_data);
+	if (myData.find(myKey) == myData.end())
+		return (-1);
 	if (myData[myKey] == myVal)
 		return (1);
 	return (0);
@@ -131,8 +135,9 @@ void Cookie::cookiedUpdate(std::string myKey, std::string myVal, std::string Coo
 {
 	std::string	file_data;
 	std::stringstream ss;
-	std::string path = "./data/ressources/cookies/";
+	std::string path = "./data/ressources/";
 	path.append(CookiedID);
+	std::cout << path << std::endl;
 	std::ifstream file(path.c_str());
 	if (!file.is_open())
 		throw std::runtime_error("cookie doesn't exist");

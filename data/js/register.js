@@ -79,7 +79,7 @@ const createRequest = () => {
   request.open("POST", API_ENDPOINT, true);
   request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
   request.onreadystatechange = () => {
-    if (request.readyState === 4 && request.status === 200) {
+    if (request.readyState === 4 && request.status === 204) {
       showModal();
     } else {
       alert("Something went wrong with the request");
