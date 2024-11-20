@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/20 08:01:29 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/20 08:03:29 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,6 @@ void	ClientRequest::pollExecute()
 						if (_clMap["action"].find("cookieUpdate") != std::string::npos)
 						{
 							std::string path_cookies = "cookies/";
-							std::cout << _clMap["email"] << "  " << _clMap["password"] << std::endl;
 							if (isCookies(_clMap["email"], _clMap["password"], "database/profiles.txt") == 1)
 							{
 								cookiedUpdate("login", "true", path_cookies.append(_clMap["Cookie_ID"]));

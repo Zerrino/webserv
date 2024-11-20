@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 04:06:02 by zerrino           #+#    #+#             */
-/*   Updated: 2024/11/20 08:01:07 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/20 08:03:25 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,6 @@ std::map<std::string, std::string> Cookie::getRequestData(std::string data)
 	std::size_t pos;
 	std::size_t pos1;
 
-	std::cout << data << std::endl;
 	while ((pos1 = data.find('&')) != std::string::npos)
 	{
 		tmp = data.substr(0, pos1);
@@ -135,7 +134,6 @@ void Cookie::cookiedUpdate(std::string myKey, std::string myVal, std::string Coo
 	std::stringstream ss;
 	std::string path = "./data/ressources/";
 	path.append(CookiedID);
-	std::cout << path << std::endl;
 	std::ifstream file(path.c_str());
 	if (!file.is_open())
 		throw std::runtime_error("cookie doesn't exist");
