@@ -30,7 +30,7 @@
 				<div class="space-y-6">
 					<div>
 						<label class="text-gray-800 text-sm mb-2 block" for="email">Email</label>
-						<input id="email" name="email" type="email"  autocomplete="off"
+						<input id="email" name="email" type="email" autocomplete="off"
 							class="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-3 mb-6 rounded-md outline-blue-500"
 							placeholder="username@student.s19.be" pattern=".+@student.s19.be"
 							title="username@student.s19.be" />
@@ -61,26 +61,49 @@
 			</form>
 		</div>
 	</div>
-	<div id="register-modal"
-            class="hidden fixed inset-0 p-4 flex flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]">
-            <div class="w-full max-w-lg bg-white shadow-lg rounded-lg p-6 relative">
-                <div class="my-8 text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-14 shrink-0 fill-green-500 inline" viewBox="0 0 512 512">
-                        <path
-                            d="M383.841 171.838c-7.881-8.31-21.02-8.676-29.343-.775L221.987 296.732l-63.204-64.893c-8.005-8.213-21.13-8.393-29.35-.387-8.213 7.998-8.386 21.137-.388 29.35l77.492 79.561a20.687 20.687 0 0 0 14.869 6.275 20.744 20.744 0 0 0 14.288-5.694l147.373-139.762c8.316-7.888 8.668-21.027.774-29.344z"
-                            data-original="#000000" />
-                        <path
-                            d="M256 0C114.84 0 0 114.84 0 256s114.84 256 256 256 256-114.84 256-256S397.16 0 256 0zm0 470.487c-118.265 0-214.487-96.214-214.487-214.487 0-118.265 96.221-214.487 214.487-214.487 118.272 0 214.487 96.221 214.487 214.487 0 118.272-96.215 214.487-214.487 214.487z"
-                            data-original="#000000" />
-                    </svg>
-                    <h4 class="text-xl text-gray-800 font-semibold mt-4">Account successfully created!</h4>
-                    <p class="text-sm text-gray-500 leading-relaxed mt-4">Your account has been successfully created. You can now log in on Webserv.</p>
-                </div>
+	<div id="success-modal"
+		class="hidden fixed inset-0 p-4 flex flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]">
+		<div class="w-full max-w-lg bg-white shadow-lg rounded-lg p-6 relative">
+			<div class="my-8 text-center">
+				<svg xmlns="http://www.w3.org/2000/svg" class="w-14 shrink-0 fill-green-500 inline"
+					viewBox="0 0 512 512">
+					<path
+						d="M383.841 171.838c-7.881-8.31-21.02-8.676-29.343-.775L221.987 296.732l-63.204-64.893c-8.005-8.213-21.13-8.393-29.35-.387-8.213 7.998-8.386 21.137-.388 29.35l77.492 79.561a20.687 20.687 0 0 0 14.869 6.275 20.744 20.744 0 0 0 14.288-5.694l147.373-139.762c8.316-7.888 8.668-21.027.774-29.344z"
+						data-original="#000000" />
+					<path
+						d="M256 0C114.84 0 0 114.84 0 256s114.84 256 256 256 256-114.84 256-256S397.16 0 256 0zm0 470.487c-118.265 0-214.487-96.214-214.487-214.487 0-118.265 96.221-214.487 214.487-214.487 118.272 0 214.487 96.221 214.487 214.487 0 118.272-96.215 214.487-214.487 214.487z"
+						data-original="#000000" />
+				</svg>
+				<h4 class="text-xl text-gray-800 font-semibold mt-4">Account successfully created!</h4>
+				<p class="text-sm text-gray-500 leading-relaxed mt-4">Your account has been successfully created. You
+					can now log in on Webserv.</p>
+			</div>
 
-                <button type="button"
-                    class="px-5 py-2.5 w-full rounded-lg text-white text-sm border-none outline-none bg-gray-800 hover:bg-gray-700">Got it</button>
-            </div>
-        </div>
+			<button type="button"
+				class="px-5 py-2.5 w-full rounded-lg text-white text-sm border-none outline-none bg-gray-800 hover:bg-gray-700">Got
+				it</button>
+		</div>
+	</div>
+	<div id="failure-modal"
+	class="hidden fixed inset-0 p-4 flex flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]">
+	<div class="w-full max-w-lg bg-white shadow-lg rounded-lg p-6 relative">
+		<div class="my-8 text-center">
+			<svg xmlns="http://www.w3.org/2000/svg" class="w-14 fill-red-500 inline" viewBox="0 0 286.054 286.054">
+				<path fill="#e2574c"
+					d="M143.027 0C64.04 0 0 64.04 0 143.027c0 78.996 64.04 143.027 143.027 143.027 78.996 0 143.027-64.022 143.027-143.027C286.054 64.04 222.022 0 143.027 0zm0 259.236c-64.183 0-116.209-52.026-116.209-116.209S78.844 26.818 143.027 26.818s116.209 52.026 116.209 116.209-52.026 116.209-116.209 116.209zm.009-196.51c-10.244 0-17.995 5.346-17.995 13.981v79.201c0 8.644 7.75 13.972 17.995 13.972 9.994 0 17.995-5.551 17.995-13.972V76.707c-.001-8.43-8.001-13.981-17.995-13.981zm0 124.997c-9.842 0-17.852 8.01-17.852 17.86 0 9.833 8.01 17.843 17.852 17.843s17.843-8.01 17.843-17.843c-.001-9.851-8.001-17.86-17.843-17.86z"
+					data-original="#e2574c" />
+			</svg>
+			<h4 class="text-xl text-gray-800 font-semibold mt-4">Error: your account already exists!</h4>
+			<p class="text-sm text-gray-500 leading-relaxed mt-4">Please login to Webserv <a
+					href="./index.html">here</a> instead.</p>
+		</div>
+
+		<button type="button"
+			class="px-5 py-2.5 w-full rounded-lg text-white text-sm border-none outline-none bg-gray-800 hover:bg-gray-700">Got
+			it</button>
+	</div>
+</div>
+</div>
 
 </body>
 

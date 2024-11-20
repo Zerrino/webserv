@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:35:13 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/14 15:27:07 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/20 12:16:29 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,6 @@ void	Socket::runSocket(uint16_t port, int backlog)
 	}
 	catch (const std::exception &e)
 	{
-		std::cout << "error occured : " << e.what() << std::cout;
+		std::cout << "error occured : " << e.what() << std::endl;
 	}
 }

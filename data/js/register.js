@@ -34,6 +34,13 @@ class Register {
         "error"
       );
       return false;
+    }
+    if (password.value.indexOf("&") || password.value.indexOf("=")) {
+      this.setStatus(password,
+        "Password should not contain '&' or '='",
+        "error"
+      );
+      return false;
     } else this.setStatus(password, "", "success");
     return this.checkPasswordEquality(password, repeated);
   }
@@ -64,8 +71,11 @@ class Register {
   }
 }
 
-const showModal = () => {
-  const modal = document.getElementById("register-modal");
+const showModal = (status) => {
+  let modal;
+  if (status === "success") {
+    modal = document.getElementById("success-modal");
+  } else modal = document.getElementById("failure-modal");
   const btn = modal.getElementsByTagName("button")[0];
   btn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -84,9 +94,10 @@ async function createRequest(data) {
       body: JSON.stringify(data),
     });
     if (request.ok && request.status === 204) {
-      showModal();
-    } else if (request.status === 404) showModal("error");
-    else throw new Error(`Server error: ${request.status}`);
+      showModal("success");
+    } else if (request.status === 404) {
+      showModal("error");
+    }
   } catch (error) {
     console.error("An error occurred:", error.message);
   }

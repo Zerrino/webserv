@@ -37,7 +37,8 @@ class Login {
           "error"
         );
         return false;
-      } else {
+	  } 
+	  else {
         this.setStatus(field, null, "success");
         return true;
       }
@@ -64,7 +65,10 @@ const showModal = (status) => {
   let modal;
   if (status === "success") {
     modal = document.getElementById("success-modal");
-  } else modal = document.getElementById("failure-modal");
+  } else {
+    modal = document.getElementById("failure-modal");
+
+  }
   const btn = modal.getElementsByTagName("button")[0];
   btn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -84,8 +88,9 @@ async function createRequest(data) {
     });
     if (request.ok && request.status === 204) {
       localStorage.setItem("auth", 1);
-    } else if (request.status === 404) showModal("error");
-    else throw new Error(`Server error: ${request.status}`);
+    } else if (request.status === 404) {
+      showModal("error");
+    } else throw new Error(`Server error: ${request.status}`);
   } catch (error) {
     console.error("An error occurred:", error.message);
   }
