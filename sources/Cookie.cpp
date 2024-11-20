@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 04:06:02 by zerrino           #+#    #+#             */
-/*   Updated: 2024/11/20 07:45:15 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/20 08:01:07 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,6 @@ std::map<std::string, std::string> Cookie::getRequestData(std::string data)
 				myData[myKey] = myVal;
 			}
 			myData[myKey] = myVal;
-			std::cout << myKey << ":" << myData[myKey] << std::endl;
 		}
 		data = data.substr(pos1 + 1);
 	}
@@ -117,7 +116,6 @@ int	Cookie::isCookies(std::string myKey, std::string myVal, std::string CookiedI
 	std::stringstream ss;
 	std::string path = "./data/ressources/";
 	path.append(CookiedID);
-	std::cout << path << std::endl;
 	std::ifstream file(path.c_str());
 	if (!file.is_open())
 		throw std::runtime_error("cookie doesn't exist");
