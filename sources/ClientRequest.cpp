@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/20 08:03:29 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/20 11:04:42 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,7 @@ void	ClientRequest::pollExecute()
 							if (isCookies(_clMap["email"], _clMap["password"], "database/profiles.txt") == 1)
 							{
 								cookiedUpdate("login", "true", path_cookies.append(_clMap["Cookie_ID"]));
+								cookiedUpdate("session", _clMap["email"].substr(0, _clMap["email"].find('@')), path_cookies);
 								sendClient(this->_fds[i].fd, 204, "");
 							}
 							else
