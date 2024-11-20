@@ -15,7 +15,7 @@ class Register {
         const formData = new FormData(this.form);
         const params = Object.fromEntries(formData.entries());
         params.action = "create";
-        this.request.send(JSON.stringify(params));
+        createRequest(params);
       }
     });
   }
@@ -43,7 +43,7 @@ class Register {
       this.setStatus(repeated, "Passwords are not corresponding", "error");
       return false;
     } else {
-      this.setStatus(password, "", "success");
+      this.setStatus(repeated, "", "success");
       return true;
     }
   }
@@ -73,24 +73,27 @@ const showModal = () => {
   });
   modal.classList.remove("hidden");
 };
-const createRequest = () => {
-  const request = new XMLHttpRequest();
-  const API_ENDPOINT = "/data/ressources/database/";
-  request.open("POST", API_ENDPOINT, true);
-  request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-  request.onreadystatechange = () => {
-    if (request.readyState === 4 && request.status === 200) {
+
+async function createRequest(data) {
+  try {
+    const request = await fetch("/data/ressources/database/profiles.txt", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    if (request.ok && request.status === 204) {
       showModal();
-    } else {
-      alert("Something went wrong with the request");
-    }
-  };
-  return request;
-};
+    } else if (request.status === 404) showModal("error");
+    else throw new Error(`Server error: ${request.status}`);
+  } catch (error) {
+    console.error("An error occurred:", error.message);
+  }
+}
 
 const form = document.getElementById("register-form");
 if (form) {
   const fields = ["email", "password", "cpassword"];
-  const request = createRequest();
-  const validator = new Register(form, fields, request);
+  const validator = new Register(form, fields);
 }
