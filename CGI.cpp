@@ -81,7 +81,7 @@ bool isPHPInstalled() {
 }
 
 bool isPythonInstalled() {
-    return std::system("python3 -v >nul 2>nul") == 0;
+    return std::system("python3 -V >nul 2>nul") == 0;
 }
 
 int CGI::execute() {
