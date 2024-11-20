@@ -37,8 +37,7 @@ class Login {
           "error"
         );
         return false;
-	  } 
-	  else {
+      } else {
         this.setStatus(field, null, "success");
         return true;
       }
@@ -67,7 +66,6 @@ const showModal = (status) => {
     modal = document.getElementById("success-modal");
   } else {
     modal = document.getElementById("failure-modal");
-
   }
   const btn = modal.getElementsByTagName("button")[0];
   btn.addEventListener("click", (e) => {
@@ -78,23 +76,28 @@ const showModal = (status) => {
 };
 
 async function createRequest(data) {
-  try {
-    const request = await fetch("/data/ressources/database/profiles.txt", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-    if (request.ok && request.status === 204) {
-      localStorage.setItem("auth", 1);
-    } else if (request.status === 404) {
-      showModal("error");
-    } else throw new Error(`Server error: ${request.status}`);
-  } catch (error) {
-    console.error("An error occurred:", error.message);
+	try {
+		console.log("ICI");
+	  const request = await fetch("/ressources/database/profiles.txt", {
+		method: "POST",
+		headers: {
+		  "Content-Type": "application/json",
+		},
+		body: JSON.stringify(data),
+	  });
+	  console.log('Request status:', request.status);
+	  if (request.ok && request.status === 204) {
+		localStorage.setItem("auth", 1);
+		window.location.href = "/src/dashboard.html";
+	  } else if (request.status === 404) {
+		showModal("error");
+	  } else {
+		throw new Error(`Server error: ${request.status}`);
+	  }
+	} catch (error) {
+	  console.error("An error occurred:", error.message);
+	}
   }
-}
 
 const form = document.querySelector(".loginForm");
 if (form) {

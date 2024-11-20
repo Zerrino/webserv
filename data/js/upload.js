@@ -6,12 +6,12 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 15:17:23 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/19 11:09:29 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/20 15:07:05 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 var formData = new FormData();
-const modal = document.querySelector("#modal");
+const modal = document.querySelector("#files-modal");
 const dropZone = document.getElementById("drop-zone");
 const fileInput = document.getElementById("chooseFile");
 const sendBtn = document.getElementById("import-btn");
@@ -24,7 +24,7 @@ let nbOfFiles = 0;
  ** Handles the upload file modal logic
  */
 
-const toggleModal = () => {
+const toggleFilesModal = () => {
   modal.classList.remove("pointer-events-none");
   if (modal.classList.contains("hidden")) modal.classList.remove("hidden");
   else {
@@ -211,7 +211,7 @@ const sendRequest = () => {
     modal.classList.add("pointer-events-none");
     setTimeout(() => {
       clearModal();
-      toggleModal();
+      toggleFilesModal();
     }, 1750);
     request.send(formData);
   } else {
