@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   auth.js                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/20 21:27:00 by gdelvign          #+#    #+#             */
+/*   Updated: 2024/11/20 21:27:24 by gdelvign         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 class Auth {
   constructor() {
     document.querySelector("body").classList.add = "hidden";
@@ -16,3 +28,9 @@ class Auth {
     window.location.replace("/");
   }
 }
+
+const auth = new Auth();
+
+document.querySelector(".logout").addEventListener("click", (e) => {
+    auth.logOut();
+});

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   login.js                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/20 21:26:14 by gdelvign          #+#    #+#             */
+/*   Updated: 2024/11/20 21:26:16 by gdelvign         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 class Login {
   constructor(form, fields) {
     this.form = form;
@@ -76,28 +88,28 @@ const showModal = (status) => {
 };
 
 async function createRequest(data) {
-	try {
-		console.log("ICI");
-	  const request = await fetch("/ressources/database/profiles.txt", {
-		method: "POST",
-		headers: {
-		  "Content-Type": "application/json",
-		},
-		body: JSON.stringify(data),
-	  });
-	  console.log('Request status:', request.status);
-	  if (request.ok && request.status === 204) {
-		localStorage.setItem("auth", 1);
-		window.location.href = "/src/dashboard.html";
-	  } else if (request.status === 404) {
-		showModal("error");
-	  } else {
-		throw new Error(`Server error: ${request.status}`);
-	  }
-	} catch (error) {
-	  console.error("An error occurred:", error.message);
-	}
+  try {
+    console.log("ICI");
+    const request = await fetch("/ressources/database/profiles.txt", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    if (request.ok && request.status === 204) {
+      localStorage.setItem("auth", 1);
+	  localStorage.setItem("username", data.email.split('@')[0]);
+      window.location.href = "/src/dashboard.html";
+    } else if (request.status === 404) {
+      showModal("error");
+    } else {
+      throw new Error(`Server error: ${request.status}`);
+    }
+  } catch (error) {
+    console.error("An error occurred:", error.message);
   }
+}
 
 const form = document.querySelector(".loginForm");
 if (form) {
