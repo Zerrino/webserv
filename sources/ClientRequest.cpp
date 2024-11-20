@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/20 11:04:42 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/20 13:11:55 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,8 @@ void	ClientRequest::pollExecute()
 						if (_clMap["action"].find("cookieUpdate") != std::string::npos)
 						{
 							std::string path_cookies = "cookies/";
-							if (isCookies(_clMap["email"], _clMap["password"], "database/profiles.txt") == 1)
+							int resultCook = isCookies(_clMap["email"], _clMap["password"], "database/profiles.txt");
+							if (resultCook == 1)
 							{
 								cookiedUpdate("login", "true", path_cookies.append(_clMap["Cookie_ID"]));
 								cookiedUpdate("session", _clMap["email"].substr(0, _clMap["email"].find('@')), path_cookies);
@@ -95,7 +96,10 @@ void	ClientRequest::pollExecute()
 							else
 							{
 								cookiedUpdate("login", "false", path_cookies.append(_clMap["Cookie_ID"]));
-								sendClient(this->_fds[i].fd, 404, "./data/ressources/empty.txt");
+								if (resultCook == -1)
+									sendClient(this->_fds[i].fd, 404, "./data/ressources/responses/errors/errorkey.txt");
+								else
+									sendClient(this->_fds[i].fd, 404, "./data/ressources/responses/errors/errorval.txt");
 							}
 						}
 						else if (_clMap["action"].find("modify") != std::string::npos)
