@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 21:26:14 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/21 11:52:29 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/21 13:19:57 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,9 +98,9 @@ async function createRequest(data) {
     });
     if (request.ok && request.status === 204) {
       localStorage.setItem("auth", 1);
-	  localStorage.setItem("email", data.email);
-	  localStorage.setItem("username", data.email.split('@')[0]);
-	  localStorage.setItem("inital", data.email[0].toUpperCase());
+      localStorage.setItem("email", data.email);
+      localStorage.setItem("username", data.email.split("@")[0]);
+      localStorage.setItem("inital", data.email[0].toUpperCase());
       window.location.href = "/src/dashboard.html";
     } else if (request.status === 404) {
       showModal("error");
@@ -117,3 +117,10 @@ if (form) {
   const fields = ["email", "password"];
   const validator = new Login(form, fields);
 }
+
+document.getElementById("eye-icon").addEventListener("click", (e) => {
+  const input = document.getElementById("password");
+  if (input.type === "text") {
+    input.type = "password";
+  } else input.type = "text";
+});
