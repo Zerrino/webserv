@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 21:26:14 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/21 13:19:57 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/21 13:28:27 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ async function createRequest(data) {
       localStorage.setItem("auth", 1);
       localStorage.setItem("email", data.email);
       localStorage.setItem("username", data.email.split("@")[0]);
-      localStorage.setItem("inital", data.email[0].toUpperCase());
+      localStorage.setItem("initial", data.email[0].toUpperCase());
       window.location.href = "/src/dashboard.html";
     } else if (request.status === 404) {
       showModal("error");
