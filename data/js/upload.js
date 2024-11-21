@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 15:17:23 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/21 17:52:24 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/21 19:37:24 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,34 +189,34 @@ const createRequest = () => {
 const sendRequest = () => {
   let files = formData.getAll("file");
   if (files.length > 0) {
-    const request = createRequest();
+    files.forEach((file) => {
+      const request = createRequest();
 
-    request.upload.addEventListener("progress", (event) => {
-      if (event.lengthComputable) {
-        let pourcentage = ((event.loaded / event.total) * 100).toFixed(1);
-        let done = "";
-        progressBar.classList.remove("hidden");
-        const loading = document.getElementById("loading");
-        loading.style.width = `${pourcentage}%`;
-        if (pourcentage == "100.0") {
-          pourcentage = pourcentage.split(".")[0];
-          done = "done";
+      request.upload.addEventListener("progress", (event) => {
+        if (event.lengthComputable) {
+          let pourcentage = ((event.loaded / event.total) * 100).toFixed(1);
+          let done = "";
+          progressBar.classList.remove("hidden");
+          const loading = document.getElementById("loading");
+          loading.style.width = `${pourcentage}%`;
+          if (pourcentage == "100.0") {
+            pourcentage = pourcentage.split(".")[0];
+            done = "done";
+          }
+          progressBar.getElementsByTagName(
+            "span"
+          )[0].innerHTML = `${pourcentage} % ${done}`;
         }
-        progressBar.getElementsByTagName(
-          "span"
-        )[0].innerHTML = `${pourcentage} % ${done}`;
-      }
+      });
+	  request.send(file);
     });
-
     modal.classList.add("pointer-events-none");
     setTimeout(() => {
       clearModal();
       toggleFilesModal();
     }, 1750);
-    request.send(formData);
   } else {
     showNotification("Please provide at least one file to upload.");
   }
 };
-
 sendBtn.addEventListener("click", sendRequest);
