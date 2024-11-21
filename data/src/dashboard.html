@@ -30,7 +30,7 @@
 			</div>
 
 			<div id="collapseMenu"
-				class="lg:grow max-lg:hidden lg:!block max-lg:before:fixed max-lg:before:bg-black max-lg:before:opacity-50 max-lg:before:inset-0 max-lg:before:z-50">
+				class="lg:flex lg:flex-grow lg:grow max-lg:hidden lg:!block max-lg:before:fixed max-lg:before:bg-black max-lg:before:opacity-50 max-lg:before:inset-0 max-lg:before:z-50">
 				<button id="toggleClose" class="lg:hidden fixed top-2 right-4 z-[100] rounded-full bg-white p-3">
 					<svg xmlns="http://www.w3.org/2000/svg" class="w-4 fill-black" viewBox="0 0 320.591 320.591">
 						<path
@@ -41,9 +41,9 @@
 							data-original="#000000"></path>
 					</svg>
 				</button>
-				<div>
+				<div class="flex justify-center">
 					<ul
-						class="lg:flex gap-x-5 max-lg:space-y-3 max-lg:fixed max-lg:bg-white max-lg:w-1/2 max-lg:min-w-[300px] max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-full max-lg:shadow-md max-lg:overflow-auto z-50">
+						class="lg:flex justify-center items-center gap-x-5 lg:grow max-lg:space-y-3 max-lg:fixed max-lg:bg-white max-lg:w-1/2 max-lg:min-w-[300px] max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-full max-lg:shadow-md max-lg:overflow-auto z-50">
 						<li class="mb-6 hidden max-lg:block">
 							<div class="flex space-x-2">
 								<div>
@@ -76,24 +76,31 @@
 							<a href="./gdelvign.html"
 								class="hover:text-teal-600 text-gray-500 block font-semibold text-[15px]">gdelvign</a>
 						</li>
+						<li class="flex lg:hidden px-1">
+							<button
+								class="logout px-2 py-1 text-sm rounded-lg text-white bg-teal-600 border-2 border-white hover:border-teal-600 transition-all ease-in-out duration-300 hover:bg-transparent hover:text-teal-600"
+								href="#">
+								Log Out
+							</button>
+						</li>
 					</ul>
+					<div
+						class="hidden lg:flex ml-auto flex-wrap items-center cursor-pointer border border-gray-300 rounded-lg w-max px-1.5 py-1.5">
+						<div class="w-10 h-10 rounded-lg bg-teal-600 flex justify-center items-center"><span
+								id="session-avatar" class="text-white text-3xl"></span></div>
+						<div class="mx-4">
+							<p id="session-username" class="text-sm text-gray-800 font-semibold"></p>
+							<p id="session-email" class="text-xs text-gray-400 mt-0.5"></p>
+						</div>
+						<button
+							class="logout px-2 py-1 text-sm rounded-lg text-teal-600 border-2 border-white hover:border-teal-600 transition-all ease-in-out duration-300 hover:bg-transparent hover:text-teal-600"
+							href="#">
+							Log Out
+						</button>
+					</div>
 				</div>
 			</div>
 			<div class="flex max-lg:ml-auto space-x-3">
-				<div
-					class="flex flex-wrap items-center cursor-pointer border border-gray-300 rounded-lg w-max px-1.5 py-1.5 mt-4">
-					<img src='javascript:void(0);' class="w-10 h-10 rounded-lg bg-teal-600" />
-					<div class="mx-4">
-						<p id="session-username" class="text-sm text-gray-800 font-semibold">gdelvign</p>
-						<p id="session-email" class="text-xs text-gray-400 mt-0.5">gdelvign@student.s19.be</p>
-					</div>
-					<button
-						class="logout px-2 py-1 text-sm rounded-lg text-teal-600 border-2 border-white hover:border-teal-600 transition-all ease-in-out duration-300 hover:bg-transparent hover:text-teal-600"
-						href="#">
-						Log Out
-					</button>
-				</div>
-
 				<button id="toggleOpen" class="lg:hidden">
 					<svg class="w-7 h-7" fill="#000" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
 						<path fill-rule="evenodd"
@@ -104,38 +111,40 @@
 			</div>
 		</div>
 	</header>
-	<div id="content-container" class="flex items-center justify-center grow w-1/2 m-auto">
-		<div
-			class="bg-white shadow-[0_4px_12px_-5px_rgba(0,0,0,0.4)] w-full max-w-sm rounded-lg overflow-hidden mx-auto font-[sans-serif] mt-4">
-			<div class="min-h-[256px] bg-teal-600">
-				<img src="../img/file-hosting.png" class="w-full" />
+	<div id="content-container" class="flex m-auto">
+		<div class="flex lg:flex-row flex-col items-center justify-center grow w-1/2 mx-auto lg:space-x-6">
+			<div
+				class="bg-white shadow-[0_4px_12px_-5px_rgba(0,0,0,0.4)] w-full max-w-sm rounded-lg overflow-hidden mx-auto font-[sans-serif] mt-4 h-full">
+				<div class="min-h-[256px] bg-teal-600">
+					<img src="../img/file-hosting.png" class="w-full" />
+				</div>
+				<div class="p-6">
+					<h3 class="text-gray-800 text-xl font-bold">Upload Files to Our Server</h3>
+					<p class="mt-4 text-sm text-gray-500 leading-relaxed">Need to upload files on our server? Use the
+						button
+						below to proceed.
+					</p>
+					<button onclick="toggleFilesModal()" type="button"
+						class="mt-6 px-5 py-2.5 rounded-lg text-white text-sm tracking-wider border-none outline-none bg-teal-600 hover:bg-teal-700 active:bg-teal-600">Upload
+						files</button>
+				</div>
 			</div>
+			<div
+				class="bg-white shadow-[0_4px_12px_-5px_rgba(0,0,0,0.4)] w-full max-w-sm rounded-lg overflow-hidden mx-auto font-[sans-serif] mt-4 h-full">
+				<div class="min-h-[256px] bg-teal-600">
+					<img src="../img/view_files.png" class="w-full" />
+				</div>
 
-			<div class="p-6">
-				<h3 class="text-gray-800 text-xl font-bold">Upload Files to Our Server</h3>
-				<p class="mt-4 text-sm text-gray-500 leading-relaxed">Need to upload files on our server? Use the button
-					below to proceed.
-				</p>
-				<button onclick="toggleFilesModal()" type="button"
-					class="mt-6 px-5 py-2.5 rounded-lg text-white text-sm tracking-wider border-none outline-none bg-teal-600 hover:bg-teal-700 active:bg-teal-600">Upload
-					files</button>
-			</div>
-		</div>
-		<div
-			class="bg-white shadow-[0_4px_12px_-5px_rgba(0,0,0,0.4)] w-full max-w-sm rounded-lg overflow-hidden mx-auto font-[sans-serif] mt-4">
-			<div class="min-h-[256px] bg-teal-600">
-				<img src="../img/view_files.png" class="w-full" />
-			</div>
-
-			<div class="p-6">
-				<h3 class="text-gray-800 text-xl font-bold">View Your Uploaded files</h3>
-				<p class="mt-4 text-sm text-gray-500 leading-relaxed">Check the files you have already uploaded on
-					webserv.
-				</p>
-				<button onclick="toggleViewFilesModal()" type="button"
-					class="mt-6 px-5 py-2.5 rounded-lg text-white text-sm tracking-wider border-none outline-none bg-teal-600 hover:bg-teal-700 active:bg-teal-600">View
-					files
-				</button>
+				<div class="p-6">
+					<h3 class="text-gray-800 text-xl font-bold">View Your Uploaded Files</h3>
+					<p class="mt-4 text-sm text-gray-500 leading-relaxed">Check the files you have already uploaded on
+						webserv.
+					</p>
+					<button onclick="toggleViewFilesModal()" type="button"
+						class="mt-6 px-5 py-2.5 rounded-lg text-white text-sm tracking-wider border-none outline-none bg-teal-600 hover:bg-teal-700 active:bg-teal-600">View
+						files
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -143,7 +152,7 @@
 		<div id="files-modal"
 			class="hidden fixed inset-0 p-4 flex flex-col flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]">
 			<div id="notification"
-				class="bg-white shadow-[0_3px_10px_-3px_rgba(6,81,237,0.3)] text-gray-800 w-full max-w-lg flex items-center p-4 rounded-md z-50 mb-6 opacity-0 transition-opacity transition-transform duration-300"
+				class="bg-white shadow-[0_3px_10px_-3px_rgba(15,18,110,0.3)] text-gray-800 w-full max-w-lg flex items-center p-4 rounded-md z-50 mb-6 opacity-0 transition-opacity transition-transform duration-300"
 				role="alert">
 				<svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] shrink-0 fill-yellow-500 inline mr-3"
 					viewBox="0 0 128 128">
