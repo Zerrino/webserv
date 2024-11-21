@@ -125,7 +125,7 @@ ConfigParser::ConfigError ConfigParser::parse()
 	// Print all tokens for testing purpose
 	for (std::vector<Token>::const_iterator i = _tokens.begin(); i != _tokens.end(); i++)
 	{
-		//std::cout << i->type << std::endl;
+		std::cout << i->type << std::endl;
 		std::cout << i->value << std::endl;
 		//std::cout << std::endl;
 	}

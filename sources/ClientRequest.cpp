@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ClientRequest.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/20 11:04:42 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/21 19:48:09 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,7 +183,7 @@ std::string	ClientRequest::get_clientInfo(int fd)
 			parseContent(_clMap);
 			printMap(_clMap);
 		}
-		if ((_clMap.find("POST") != _clMap.end()) && _clMap["end"] == "false")
+		if ((_clMap.find("PUT") != _clMap.end()) && _clMap["end"] == "false")
 		{
 			if (!_clMap["filename"].empty() && _clMap["filename"][0] == '"' && _clMap["filename"][_clMap["filename"].size() - 1] == '"')
 			{
@@ -243,4 +243,5 @@ void	ClientRequest::sendClient(int fd, int request, std::string path)
 	else if ((request >= 500) && (request < 600))
 		str = this->requestFive(request, path);
 	write(fd, str.c_str(), str.length());
+	write(1, str.c_str(), str.length());
 }
