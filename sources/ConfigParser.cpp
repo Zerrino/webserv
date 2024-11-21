@@ -113,7 +113,6 @@ ConfigParser::ConfigError ConfigParser::parse()
 {
 	std::vector<std::string> words = split(_configFile);
 
-	// Print all words for testing purpose
 	for (std::vector<std::string>::const_iterator i = words.begin(); i != words.end(); i++)
 	{
 		Token token;
@@ -121,9 +120,14 @@ ConfigParser::ConfigError ConfigParser::parse()
 		token.value = *i;
 		token.type = getTokenType(*i);
 		_tokens.push_back(token);
-		std::cout << token.value << std::endl;
-		// if (token.value[0] == '$')
-		//	std::cout << token.value << std::endl << " Type = " << token.type << std::endl;
+	}
+
+	// Print all tokens for testing purpose
+	for (std::vector<Token>::const_iterator i = _tokens.begin(); i != _tokens.end(); i++)
+	{
+		//std::cout << i->type << std::endl;
+		std::cout << i->value << std::endl;
+		//std::cout << std::endl;
 	}
 
 	return (SUCCESS);
@@ -146,18 +150,28 @@ std::vector<std::string> ConfigParser::split(std::ifstream &file)
 	size_t i = 0;
 	while (i < data.length())
 	{
-		// std::cout << data[i] << std::endl;
-		// std::cout << i << std::endl;
 		if (data[i] == '#')
 		{
 			while (i < data.length() && data[i] != '\n')
 				i++;
 			i++;
 		}
+		else if (data[i] == '~' || data[i] == '^')
+		{
+			start = i;
+			i++;
+			data[i] == '*' ? i += 2 : i++;
+			while (data[i] != ' ')
+				i++;
+			word = data.substr(start, i - start);
+			words.push_back(word);
+			word.clear();
+		}
 		else if (data[i] == '$')
 		{
 			start = i;
-			while (i < data.length() && (isalnum(data[i]) || data[i] == '_' || data[i] == '$'))
+			i++;
+			while (i < data.length() && (isalnum(data[i]) || data[i] == '_'))
 				i++;
 			word = data.substr(start, i - start);
 			words.push_back(word);
@@ -170,7 +184,6 @@ std::vector<std::string> ConfigParser::split(std::ifstream &file)
 			word.clear();
 			i++;
 		}
-
 		else if (!std::isspace(data[i]))
 		{
 			start = i;
@@ -183,50 +196,7 @@ std::vector<std::string> ConfigParser::split(std::ifstream &file)
 		else
 			i++;
 	}
-	std::cout << "i = " << i << std::endl;
-	std::cout << "data =" << data.length() << std::endl;
 	return (words);
-
-	// while (file.get(ch))
-	// {
-	// 	if (ch == '#')
-	// 	{
-	// 		while (ch != '\n')
-	// 			file.get(ch);
-	// 		ch++;
-	// 	}
-	// 	else if (ch == '$')
-	// 	{
-	// 		while (isalnum(ch) || ch == '_')
-	// 		{
-	// 			word += ch;
-	// 			file.get(ch);
-	// 		}
-	// 		words.push_back(word);
-	// 		word.clear();
-	// 		// std::cout << word << std::endl;
-	// 		if (ch == '$')
-	// 			continue ;
-	// 	}
-	// 	else if (!std::isspace(ch) && ch != ';' && ch != '$')
-	// 		word += ch;
-	// 	else
-	// 	{
-	// 		if (!word.empty())
-	// 		{
-	// 			words.push_back(word);
-	// 			word.clear();
-	// 		}
-	// 		if (ch == ';')
-	// 		{
-	// 			words.push_back(";");
-	// 			word.clear();
-	// 		}
-	// 	}
-	// }
-	// if (!word.empty())
-	// 	words.push_back(word);
-	// return (words);
 }
 
 void ConfigParser::initTokenMap()
@@ -258,6 +228,7 @@ void ConfigParser::initTokenMap()
 	_tokenMap["fastcgi_params"] = TOKEN_IDENTIFIER;
 	_tokenMap["include"] = TOKEN_IDENTIFIER;
 	_tokenMap["return"] = TOKEN_IDENTIFIER;
+	_tokenMap["deny"] = TOKEN_IDENTIFIER;
 }
 
 int ConfigParser::isNumber(const std::string &word)
@@ -279,10 +250,20 @@ int ConfigParser::isNumber(const std::string &word)
 			return (TOKEN_NUMBER);
 		if (j == (word.length() - 1) || j == (word.length() - 2))
 		{
-			if ((j == (word.length() - 1) && isUnit(word[word.length()])) || (j == (word.length() - 2) && ((word[word.length()] == 's' && (word[word.length()] - 1) == 'm'))))
+			if ((j == (word.length() - 1) && isUnit(*word.rbegin())) || (j == (word.length() - 2) && (*word.rbegin() == 's') && (*word.rbegin() == 'm')))
 				return (TOKEN_NUMBER_WITH_UNIT);
 		}
+		return (INVALID_TOKEN);
 	}
+	return (0);
+}
+
+int ConfigParser::isOperator(const std::string &word)
+{
+	if (word == "=")
+		return (TOKEN_OPERATOR_EQUAL);
+	else if (word == "!=")
+		return (TOKEN_OPERATOR_NOT_EQUAL);
 	return (0);
 }
 
@@ -300,13 +281,25 @@ bool ConfigParser::isVariable(const std::string &word)
 	return (false);
 }
 
-int ConfigParser::isOperator(const std::string &word)
+bool ConfigParser::isRegex(const std::string &word)
 {
-	if (word == "=")
-		return (TOKEN_OPERATOR_EQUAL);
-	else if (word == "!=")
-		return (TOKEN_OPERATOR_NOT_EQUAL);
-	return (0);
+	if (word[0] == '~' || word[0] == '^')
+		return (true);
+	return (false);
+}
+
+int ConfigParser::isString(const std::string &word)
+{
+	if (word[0] == '"' || word == "'")
+	{
+		char quote_type = word[0];
+		if (word.find(quote_type, word.length()) != std::string::npos)
+			return (TOKEN_STRING_QUOTED);
+		else
+			return (INVALID_TOKEN);
+	}
+	else
+		return (TOKEN_STRING);
 }
 
 void ConfigParser::initializeUnits()
@@ -333,16 +326,20 @@ bool ConfigParser::isUnit(char c) const
 TokenType ConfigParser::getTokenType(const std::string &word)
 {
 	initTokenMap();
+	int ret;
 	std::map<std::string, TokenType>::iterator it = _tokenMap.find(word);
 	if (it != _tokenMap.end())
 		return (it->second);
-	else if (int ret = isNumber(word))
+	else if ((ret = isNumber(word)))
 		return ((TokenType)ret);
-	else if (int ret = isOperator(word))
+	else if ((ret = isOperator(word)))
 		return ((TokenType)ret);
 	else if (isVariable(word))
 		return (TOKEN_VARIABLE);
-
+	else if (isRegex(word))
+		return (TOKEN_REGEX);
+	else if ((ret = isString(word)))
+		return ((TokenType)ret);
 	return (INVALID_TOKEN);
 }
 

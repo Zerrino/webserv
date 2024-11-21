@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 15:17:23 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/20 15:07:05 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/21 17:52:24 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,7 +177,7 @@ const createFileDetails = (file, nb) => {
 const createRequest = () => {
   const request = new XMLHttpRequest();
   const API_ENDPOINT = "/data/ressources/uploads/";
-  request.open("POST", API_ENDPOINT, true);
+  request.open("PUT", API_ENDPOINT, true);
   request.onreadystatechange = () => {
     if (request.readyState === 4 && request.status === 200) {
       console.log(request.responseText);
