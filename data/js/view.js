@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 21:25:45 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/20 21:33:37 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/22 12:44:24 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,3 +20,15 @@ const toggleViewFilesModal = () => {
     viewModal.classList.add("hidden");
   }
 };
+
+async function getAllUploadedFiles() {
+  try {
+    const response = fetch("/ressources/uploads");
+    const files = await response.json();
+    console.log(files);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+getAllUploadedFiles();
