@@ -9,11 +9,7 @@
 #include <sstream>
 #include <cstdlib>
 #include "HTTPRequest.hpp"
-
-enum Types {
-    PHP,
-    PYTHON
-};
+#include "CGIUtils.hpp"
 
 class CGI {
 	public:

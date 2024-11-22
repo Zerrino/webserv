@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/22 12:04:06 by root             ###   ########.fr       */
+/*   Updated: 2024/11/22 12:17:57 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ void	ClientRequest::pollExecute()
 					else flag = 1;
 				}
 
-				std::string PATH_ABS = "/home/jtollena/Documents/git/webserv/data";
+				std::string PATH_ABS = "/var/www/html/data";
 				PATH_ABS.append(str);
 				std::cout << PATH_ABS << std::endl;
 				if (str == "")

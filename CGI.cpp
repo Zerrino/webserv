@@ -4,34 +4,6 @@ CGI::CGI(const std::string type, const HTTPRequest& request, int fd): _type(type
 
 CGI::~CGI() {}
 
-std::string getTypeName(Types type) {
-    switch (type) {
-        case PHP:    return "PHP";
-        case PYTHON: return "PYTHON";
-        default:     return "NULL";
-    }
-}
-
-std::string getTypeName(std::string suffix) {
-    if (suffix == "php") return "PHP";
-    if (suffix == "py") return "PYTHON";
-    return "NULL";
-}
-
-int CGIchecker(std::string clientInfo, std::string PATH_ABS, int fd){
-    HTTPRequest mainRequest = HTTPRequest(clientInfo);
-
-    mainRequest.setUrl(PATH_ABS);
-    size_t pos = mainRequest.getUrl().rfind('.');
-    if (pos != std::string::npos){
-        std::string suffix = mainRequest.getUrl().substr(pos + 1);
-        if(suffix != "php" && suffix != "py")
-            return 2;
-        CGI cgi(getTypeName(suffix), mainRequest, fd);
-        return cgi.execute();
-    } else return 2;
-}
-
 int CGI::sendPostBody(int pipe_in[2]){
 	if (_request.getMethod() == "POST") {
 		ssize_t bytesWritten = write(pipe_in[1], _request.getBody().c_str(), _request.getBody().length());
@@ -89,44 +61,22 @@ void CGI::sendResponse(const std::string& result) const {
     resultRequest.send(_fd);
 }
 
-
-
-void splitPath(const std::string& fullPath, std::string& path, std::string& file) {
-    std::size_t lastSlashPos = fullPath.find_last_of("/");
-
-    if (lastSlashPos != std::string::npos) {
-        path = fullPath.substr(0, lastSlashPos);
-        file = fullPath.substr(lastSlashPos + 1);
-    } else {
-        path = "";
-        file = fullPath;
-    }
-}
-
-bool isPHPInstalled() {
-    return std::system("php-cgi -v > /dev/null 2>&1") == 0;
-}
-
-bool isPythonInstalled() {
-    return std::system("python3 -V >nul 2>nul") == 0;
-}
-
 int CGI::execute() {
-    if (_type != "PHP" && _type != "PYTHON")
+    if (_type != PHP && _type != PYTHON)
         return 1;
 
     std::string localPath, fileToExecute;
     splitPath(_request.getUrl(), localPath, fileToExecute);
 
     std::string cmd;
-    if(_type == "PHP"){ 
+    if(_type == PHP){ 
         cmd = "php-cgi";
         if(!isPHPInstalled()){
             std::cerr << "Error: php-cgi is not installed.";
             return 1;
         }
     }
-	else if(_type == "PYTHON"){ 
+	else if(_type == PYTHON){ 
         cmd = "python3";
         if(!isPythonInstalled()){
             std::cerr << "Error: python3 is not installed.";
