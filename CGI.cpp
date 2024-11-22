@@ -62,21 +62,21 @@ void CGI::sendResponse(const std::string& result) const {
 }
 
 int CGI::execute() {
-    if (_type != PHP && _type != PYTHON)
+    if (_type != "PHP" && _type != "PYTHON")
         return 1;
 
     std::string localPath, fileToExecute;
     splitPath(_request.getUrl(), localPath, fileToExecute);
 
     std::string cmd;
-    if(_type == PHP){ 
+    if(_type == "PHP"){ 
         cmd = "php-cgi";
         if(!isPHPInstalled()){
             std::cerr << "Error: php-cgi is not installed.";
             return 1;
         }
     }
-	else if(_type == PYTHON){ 
+	else if(_type == "PYTHON"){ 
         cmd = "python3";
         if(!isPythonInstalled()){
             std::cerr << "Error: python3 is not installed.";
