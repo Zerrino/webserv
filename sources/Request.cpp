@@ -252,3 +252,30 @@ std::map<std::string, std::string> Request::reParseRequest(std::map<std::string,
 	myMap[tmp.substr(0, pos1)] = tmp.substr(pos1 + 2);
 	return myMap;
 }
+
+
+std::string Request::urlParsing(std::vector<std::string> listLocation, std::string url)
+{
+	std::size_t pos;
+
+	pos = url.find("/");
+	if (pos == std::string::npos)
+		return "none";
+	if (url.length() == 1)
+		return ("/");
+	while (true)
+	{
+		for (std::size_t i = 0; i < listLocation.size(); i++)
+		{
+			if (listLocation[i] == url)
+				return listLocation[i];
+		}
+		pos = url.rfind("/");
+		if (pos == std::string::npos)
+			return "none";
+		if (url.substr(0, pos + 1) == "/")
+			return ("/");
+		url = url.substr(0, pos);
+	}
+	return url;
+}
