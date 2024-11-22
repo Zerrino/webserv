@@ -109,7 +109,7 @@ void	ClientRequest::pollExecute()
 					else flag = 1;
 				}
 
-				std::string PATH_ABS = "/var/www/html/data";
+				std::string PATH_ABS = "/home/jtollena/Documents/git/webserv/data";
 				PATH_ABS.append(str);
 				std::cout << PATH_ABS << std::endl;
 				if (str == "")
