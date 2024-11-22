@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 15:12:33 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/21 16:08:23 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/22 21:06:33 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,13 @@ enum TokenType
 	INVALID_TOKEN
 };
 
+enum Context
+{
+	HTTP_BLOCK,
+	SERVER_BLOCK,
+	LOCATION_BLOCK
+};
+
 struct Token
 {
 	std::string value;
@@ -62,6 +69,7 @@ struct ServerBlock
 
 struct HttpBlock
 {
+	std::vector<Directive> directives;
 	std::vector<ServerBlock> servers;
 };
 
@@ -76,7 +84,8 @@ public:
 		NOT_FILE,
 		NOT_ACCESSIBLE,
 		NOT_OPEN,
-		EMPTY_FILE
+		EMPTY_FILE,
+		PARSING_ERROR
 	};
 
 	/* Constructors */
@@ -107,10 +116,14 @@ public:
 	int isString(const std::string &word);
 	void initializeUnits();
 	void initTokenMap();
-	bool expectedToken(const std::string &expected);
+	bool expectedTokenType(TokenType expectedType);
 	void getNextToken();
-	bool expectedAndMove(const std::string &expected);
-	bool parsehttp();
+	bool expectedAndMove(TokenType expectedType);
+	bool parseHttp();
+	bool parseServer();
+	bool parseLocation();
+	bool parseDirective(Context context, int server_id, int loc_id);
+	bool reportSyntaxError(const std::string &error);
 
 private:
 	std::string _configPath;
@@ -119,6 +132,9 @@ private:
 	size_t _currentPosition;
 	std::map<std::string, TokenType> _tokenMap;
 	std::vector<char> _units;
+	HttpBlock _http;
+	int	_server_id;
+	int _loc_id;
 };
 
 std::ostream &operator<<(std::ostream &o, ConfigParser const &i);

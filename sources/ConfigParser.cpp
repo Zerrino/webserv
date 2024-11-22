@@ -119,18 +119,134 @@ ConfigParser::ConfigError ConfigParser::parse()
 
 		token.value = *i;
 		token.type = getTokenType(*i);
+		if (token.type == INVALID_TOKEN)
+		{
+			std::cerr << "Syntax error : invalid token at '" << token.value << "'" << std::endl;
+			return (PARSING_ERROR);
+		}
 		_tokens.push_back(token);
 	}
+	if (parseHttp())
+		return (PARSING_ERROR);
+	return (SUCCESS);
+}
 
-	// Print all tokens for testing purpose
-	for (std::vector<Token>::const_iterator i = _tokens.begin(); i != _tokens.end(); i++)
+bool ConfigParser::parseHttp()
+{
+	_server_id = 0;
+	_loc_id = 0;
+
+	if (!expectedAndMove(TOKEN_BLOCK_HTTP))
+		return reportSyntaxError("Config file should begin by a 'http' block");
+	if (!expectedAndMove(TOKEN_SYMBOL_OPEN_BRACE))
+		return reportSyntaxError("Expected '{' after 'http'");
+	while (!expectedTokenType(TOKEN_SYMBOL_CLOSE_BRACE))
 	{
-		std::cout << i->type << std::endl;
-		std::cout << i->value << std::endl;
-		//std::cout << std::endl;
+		if (expectedTokenType(TOKEN_IDENTIFIER))
+		{
+			if (!parseDirective(HTTP_BLOCK, 0, 0))
+				return (false);
+		}
+		else if (expectedTokenType(TOKEN_BLOCK_SERVER))
+		{
+			if (!parseServer())
+				return (false);
+		}
+		else
+			return reportSyntaxError("Unexpected token in 'http' : '" + _tokens[_currentPosition].value + "'");
+	}
+	if (!expectedAndMove(TOKEN_SYMBOL_CLOSE_BRACE))
+		return reportSyntaxError("Missing closing bracket in 'http' block");
+	std::cout << "ok" << std::endl;
+	return (true);
+}
+
+bool ConfigParser::parseServer()
+{
+	if (!expectedAndMove(TOKEN_BLOCK_SERVER))
+		return reportSyntaxError("Server block expected instead of '" + _tokens[_currentPosition].value + "'");
+	if (!expectedAndMove(TOKEN_SYMBOL_OPEN_BRACE))
+		return reportSyntaxError("Expected '{' after 'server'");
+	while (!expectedTokenType(TOKEN_SYMBOL_CLOSE_BRACE))
+	{
+		if (expectedTokenType(TOKEN_IDENTIFIER))
+		{
+			if (!parseDirective(SERVER_BLOCK, _server_id, _loc_id))
+				return (false);
+		}
+		else if (expectedTokenType(TOKEN_BLOCK_LOCATION))
+		{
+			if (!parseLocation())
+				return (false);
+		}
+		else
+			return reportSyntaxError("Unexpected token in 'server' : '" + _tokens[_currentPosition].value + "'");
+	}
+	_server_id++;
+	return (true);
+} 
+
+bool ConfigParser::parseLocation()
+{
+	_loc_id++;
+	return (true);
+}
+
+bool ConfigParser::parseDirective(Context context, int server_id, int loc_id)
+{
+	Directive temp;
+
+	if (!expectedTokenType(TOKEN_IDENTIFIER))
+		return reportSyntaxError("Directive name expected instead of '" + _tokens[_currentPosition].value + "'");
+	temp.name = _tokens[_currentPosition].value;
+
+	while (!expectedTokenType(TOKEN_SYMBOL_SEMICOLON))
+	{
+		if (_currentPosition >= _tokens.size())
+			return reportSyntaxError("Unexpected end of input in directive arguments");
+		temp.arguments.push_back(_tokens[_currentPosition].value);
+		_currentPosition++;
 	}
 
-	return (SUCCESS);
+	if (context == HTTP_BLOCK)
+		_http.directives.push_back(temp);
+	else if (context == SERVER_BLOCK)
+	{
+		_http.servers[server_id].directives.push_back(temp);
+	}
+	else
+		_http.servers[server_id].locations[loc_id].directives.push_back(temp);
+	_currentPosition++;
+	return (true);
+}
+
+bool ConfigParser::reportSyntaxError(const std::string &error)
+{
+	std::cout << "Syntax error : " << error << std::endl;
+	return (false);
+}
+
+bool ConfigParser::expectedTokenType(TokenType expectedType)
+{
+	if (_currentPosition >= _tokens.size())
+		return false;
+	return (_tokens[_currentPosition].type == expectedType);
+}
+
+void ConfigParser::getNextToken()
+{
+	if (_currentPosition < _tokens.size())
+		_currentPosition++;
+}
+
+bool ConfigParser::expectedAndMove(TokenType expectedType)
+{
+	if (expectedTokenType(expectedType))
+	{
+		getNextToken();
+		return (true);
+	}
+	return (false);
 }
 
 /*
@@ -341,35 +457,6 @@ TokenType ConfigParser::getTokenType(const std::string &word)
 	else if ((ret = isString(word)))
 		return ((TokenType)ret);
 	return (INVALID_TOKEN);
-}
-
-bool ConfigParser::expectedToken(const std::string &expected)
-{
-	if (_currentPosition >= _tokens.size())
-		return false;
-	return (_tokens[_currentPosition].value == expected);
-}
-
-void ConfigParser::getNextToken()
-{
-	if (_currentPosition < _tokens.size())
-		_currentPosition++;
-}
-
-bool ConfigParser::expectedAndMove(const std::string &expected)
-{
-	if (expectedToken(expected))
-	{
-		getNextToken();
-		return (true);
-	}
-	return (false);
-}
-
-bool ConfigParser::parsehttp()
-{
-	// WIP
-	return (true);
 }
 
 /* ************************************************************************** */
