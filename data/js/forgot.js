@@ -1,3 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   forgot.js                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/20 21:26:52 by gdelvign          #+#    #+#             */
+/*   Updated: 2024/11/20 21:26:53 by gdelvign         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+
 class ChangePassword {
   constructor(form, fields) {
     this.form = form;
@@ -78,7 +91,7 @@ const showModal = (status) => {
 
 async function createRequest(data) {
   try {
-    const request = await fetch("/ressources/database/", {
+    const request = await fetch("/data/ressources/database/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   login.js                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/20 21:26:14 by gdelvign          #+#    #+#             */
+/*   Updated: 2024/11/22 09:45:51 by marvin           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 class Login {
   constructor(form, fields) {
     this.form = form;
@@ -64,7 +76,9 @@ const showModal = (status) => {
   let modal;
   if (status === "success") {
     modal = document.getElementById("success-modal");
-  } else modal = document.getElementById("failure-modal");
+  } else {
+    modal = document.getElementById("failure-modal");
+  }
   const btn = modal.getElementsByTagName("button")[0];
   btn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -82,20 +96,21 @@ async function createRequest(data) {
       },
       body: JSON.stringify(data),
     });
-    if (request.ok && request.status === 204)
-    {
+    if (request.ok && request.status === 204) {
       localStorage.setItem("auth", 1);
+      localStorage.setItem("email", data.email);
+      localStorage.setItem("username", data.email.split("@")[0]);
+      localStorage.setItem("initial", data.email[0].toUpperCase());
       const response = await fetch("/src/dashboard.html");
-      if (!response.ok) {
+      if (!response.ok)
         console.log("error");
-      }
       else if (response.ok)
-      {
         window.location.href = "/src/dashboard.html";
-      }
+    } else if (request.status === 404) {
+      showModal("error");
+    } else {
+      throw new Error(`Server error: ${request.status}`);
     }
-    else if (request.status === 404) showModal("error");
-    else throw new Error(`Server error: ${request.status}`);
   } catch (error) {
     console.error("An error occurred:", error.message);
   }
@@ -106,3 +121,10 @@ if (form) {
   const fields = ["email", "password"];
   const validator = new Login(form, fields);
 }
+
+document.getElementById("eye-icon").addEventListener("click", (e) => {
+  const input = document.getElementById("password");
+  if (input.type === "text") {
+    input.type = "password";
+  } else input.type = "text";
+});

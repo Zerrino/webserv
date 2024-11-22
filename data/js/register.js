@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   register.js                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/20 21:26:01 by gdelvign          #+#    #+#             */
+/*   Updated: 2024/11/20 21:26:04 by gdelvign         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 class Register {
   constructor(form, fields, request) {
     this.form = form;
@@ -15,7 +27,7 @@ class Register {
         const formData = new FormData(this.form);
         const params = Object.fromEntries(formData.entries());
         params.action = "create";
-        this.request.send(JSON.stringify(params));
+        createRequest(params);
       }
     });
   }
@@ -34,6 +46,13 @@ class Register {
         "error"
       );
       return false;
+    }
+    if (password.value.indexOf("&") || password.value.indexOf("=")) {
+      this.setStatus(password,
+        "Password should not contain '&' or '='",
+        "error"
+      );
+      return false;
     } else this.setStatus(password, "", "success");
     return this.checkPasswordEquality(password, repeated);
   }
@@ -43,7 +62,7 @@ class Register {
       this.setStatus(repeated, "Passwords are not corresponding", "error");
       return false;
     } else {
-      this.setStatus(password, "", "success");
+      this.setStatus(repeated, "", "success");
       return true;
     }
   }
@@ -64,8 +83,11 @@ class Register {
   }
 }
 
-const showModal = () => {
-  const modal = document.getElementById("register-modal");
+const showModal = (status) => {
+  let modal;
+  if (status === "success") {
+    modal = document.getElementById("success-modal");
+  } else modal = document.getElementById("failure-modal");
   const btn = modal.getElementsByTagName("button")[0];
   btn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -73,24 +95,28 @@ const showModal = () => {
   });
   modal.classList.remove("hidden");
 };
-const createRequest = () => {
-  const request = new XMLHttpRequest();
-  const API_ENDPOINT = "/ressources/database/";
-  request.open("POST", API_ENDPOINT, true);
-  request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-  request.onreadystatechange = () => {
-    if (request.readyState === 4 && request.status === 204) {
-      showModal();
-    } else {
-      alert("Something went wrong with the request");
+
+async function createRequest(data) {
+  try {
+    const request = await fetch("/data/ressources/database/profiles.txt", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    if (request.ok && request.status === 204) {
+      showModal("success");
+    } else if (request.status === 404) {
+      showModal("error");
     }
-  };
-  return request;
-};
+  } catch (error) {
+    console.error("An error occurred:", error.message);
+  }
+}
 
 const form = document.getElementById("register-form");
 if (form) {
   const fields = ["email", "password", "cpassword"];
-  const request = createRequest();
-  const validator = new Register(form, fields, request);
+  const validator = new Register(form, fields);
 }

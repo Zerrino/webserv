@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   upload.js                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 15:17:23 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/19 20:51:43 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/21 19:37:24 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 var formData = new FormData();
-const modal = document.querySelector("#modal");
+const modal = document.querySelector("#files-modal");
 const dropZone = document.getElementById("drop-zone");
 const fileInput = document.getElementById("chooseFile");
 const sendBtn = document.getElementById("import-btn");
@@ -24,7 +24,7 @@ let nbOfFiles = 0;
  ** Handles the upload file modal logic
  */
 
-const toggleModal = () => {
+const toggleFilesModal = () => {
   modal.classList.remove("pointer-events-none");
   if (modal.classList.contains("hidden")) modal.classList.remove("hidden");
   else {
@@ -176,8 +176,8 @@ const createFileDetails = (file, nb) => {
 
 const createRequest = () => {
   const request = new XMLHttpRequest();
-  const API_ENDPOINT = "/ressources/uploads/";
-  request.open("POST", API_ENDPOINT, true);
+  const API_ENDPOINT = "/data/ressources/uploads/";
+  request.open("PUT", API_ENDPOINT, true);
   request.onreadystatechange = () => {
     if (request.readyState === 4 && request.status === 200) {
       console.log(request.responseText);
@@ -189,34 +189,34 @@ const createRequest = () => {
 const sendRequest = () => {
   let files = formData.getAll("file");
   if (files.length > 0) {
-    const request = createRequest();
+    files.forEach((file) => {
+      const request = createRequest();
 
-    request.upload.addEventListener("progress", (event) => {
-      if (event.lengthComputable) {
-        let pourcentage = ((event.loaded / event.total) * 100).toFixed(1);
-        let done = "";
-        progressBar.classList.remove("hidden");
-        const loading = document.getElementById("loading");
-        loading.style.width = `${pourcentage}%`;
-        if (pourcentage == "100.0") {
-          pourcentage = pourcentage.split(".")[0];
-          done = "done";
+      request.upload.addEventListener("progress", (event) => {
+        if (event.lengthComputable) {
+          let pourcentage = ((event.loaded / event.total) * 100).toFixed(1);
+          let done = "";
+          progressBar.classList.remove("hidden");
+          const loading = document.getElementById("loading");
+          loading.style.width = `${pourcentage}%`;
+          if (pourcentage == "100.0") {
+            pourcentage = pourcentage.split(".")[0];
+            done = "done";
+          }
+          progressBar.getElementsByTagName(
+            "span"
+          )[0].innerHTML = `${pourcentage} % ${done}`;
         }
-        progressBar.getElementsByTagName(
-          "span"
-        )[0].innerHTML = `${pourcentage} % ${done}`;
-      }
+      });
+	  request.send(file);
     });
-
     modal.classList.add("pointer-events-none");
     setTimeout(() => {
       clearModal();
-      toggleModal();
+      toggleFilesModal();
     }, 1750);
-    request.send(formData);
   } else {
     showNotification("Please provide at least one file to upload.");
   }
 };
-
 sendBtn.addEventListener("click", sendRequest);

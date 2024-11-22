@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 20:27:04 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/18 23:41:40 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/21 11:59:22 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,3 +39,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
+
+const username = localStorage.getItem("username");
+const email = localStorage.getItem("email");
+const initial = localStorage.getItem("initial");
+document.getElementById("session-avatar").innerHTML = initial;
+document.getElementById("session-username").innerHTML = username;
+document.getElementById("session-email").innerHTML = email;

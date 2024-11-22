@@ -39,7 +39,8 @@ void	Request::printMap(std::map<std::string, std::string> myMap)
 	std::cout << "-------------------New Request--------------------" << std::endl;
 	for (std::map<std::string, std::string>::iterator it = myMap.begin(); it != myMap.end(); ++it)
 	{
-		std::cout << "[\"" << it->first << "\"] = \"" << it->second << "\"" << std::endl;
+		if (it->first != "Content")
+			std::cout << "[\"" << it->first << "\"] = \"" << it->second << "\"" << std::endl;
 	}
 	std::cout << "--------------------------------------------------" << std::endl << std::endl;
 }
