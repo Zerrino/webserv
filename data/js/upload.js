@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 15:17:23 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/21 19:37:24 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/22 12:07:20 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,24 +174,19 @@ const createFileDetails = (file, nb) => {
   dropZone.parentNode.insertBefore(fileDetails, dropZone.nextSibling);
 };
 
-const createRequest = () => {
-  const request = new XMLHttpRequest();
-  const API_ENDPOINT = "/data/ressources/uploads/";
-  request.open("PUT", API_ENDPOINT, true);
-  request.onreadystatechange = () => {
-    if (request.readyState === 4 && request.status === 200) {
-      console.log(request.responseText);
-    }
-  };
-  return request;
-};
-
 const sendRequest = () => {
   let files = formData.getAll("file");
+  console.log(files);
   if (files.length > 0) {
     files.forEach((file) => {
-      const request = createRequest();
-
+      const request = new XMLHttpRequest();
+      const API_ENDPOINT = "/data/ressources/uploads/" + file.name;
+      request.open("PUT", API_ENDPOINT, true);
+      request.onreadystatechange = () => {
+        if (request.readyState === 4 && request.status === 200) {
+          console.log(request.responseText);
+        }
+      };
       request.upload.addEventListener("progress", (event) => {
         if (event.lengthComputable) {
           let pourcentage = ((event.loaded / event.total) * 100).toFixed(1);
@@ -208,7 +203,7 @@ const sendRequest = () => {
           )[0].innerHTML = `${pourcentage} % ${done}`;
         }
       });
-	  request.send(file);
+      request.send(file);
     });
     modal.classList.add("pointer-events-none");
     setTimeout(() => {
