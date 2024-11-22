@@ -6,29 +6,29 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 21:25:45 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/22 12:44:24 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/22 13:03:50 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 const viewModal = document.querySelector("#viewFiles-modal");
 
-const toggleViewFilesModal = () => {
-  viewModal.classList.remove("pointer-events-none");
-  if (viewModal.classList.contains("hidden"))
-    viewModal.classList.remove("hidden");
-  else {
-    viewModal.classList.add("hidden");
-  }
-};
-
 async function getAllUploadedFiles() {
   try {
-    const response = fetch("/ressources/uploads");
-    const files = await response.json();
+    const response = await fetch("/ressources/uploads");
+	console.log(response);
+    const files = await response.text();
     console.log(files);
   } catch (err) {
     console.error(err);
   }
 }
 
-getAllUploadedFiles();
+const toggleViewFilesModal = () => {
+  viewModal.classList.remove("pointer-events-none");
+  if (viewModal.classList.contains("hidden")) {
+    viewModal.classList.remove("hidden");
+    getAllUploadedFiles();
+  } else {
+    viewModal.classList.add("hidden");
+  }
+};
