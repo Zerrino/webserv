@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   login.js                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 21:26:14 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/22 09:45:51 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/21 13:28:27 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,11 +101,7 @@ async function createRequest(data) {
       localStorage.setItem("email", data.email);
       localStorage.setItem("username", data.email.split("@")[0]);
       localStorage.setItem("initial", data.email[0].toUpperCase());
-      const response = await fetch("/src/dashboard.html");
-      if (!response.ok)
-        console.log("error");
-      else if (response.ok)
-        window.location.href = "/src/dashboard.html";
+      window.location.href = "/src/dashboard.html";
     } else if (request.status === 404) {
       showModal("error");
     } else {

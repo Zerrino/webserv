@@ -20,6 +20,7 @@ class	Request
 	private:
 	std::map<std::string, std::string>	_requestMap;
 	std::string _this_file;
+	std::string	_pathUrl;
 	public:
 		Request();
 		~Request();

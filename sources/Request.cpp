@@ -258,23 +258,33 @@ std::string Request::urlParsing(std::vector<std::string> listLocation, std::stri
 {
 	std::size_t pos;
 
+	_pathUrl = url;
 	pos = url.find("/");
 	if (pos == std::string::npos)
 		return "none";
 	if (url.length() == 1)
+	{
+		_pathUrl = "";
 		return ("/");
+	}
 	while (true)
 	{
 		for (std::size_t i = 0; i < listLocation.size(); i++)
 		{
 			if (listLocation[i] == url)
+			{
+				_pathUrl = _pathUrl.substr(listLocation[i].length());
 				return listLocation[i];
+			}
 		}
 		pos = url.rfind("/");
 		if (pos == std::string::npos)
 			return "none";
 		if (url.substr(0, pos + 1) == "/")
+		{
+			_pathUrl = "";
 			return ("/");
+		}
 		url = url.substr(0, pos);
 	}
 	return url;
