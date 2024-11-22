@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/19 15:49:05 by root             ###   ########.fr       */
+/*   Updated: 2024/11/22 12:04:06 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,11 +121,11 @@ void	ClientRequest::pollExecute()
 					PATH_ABS.append(file_index);
 					std::cout << PATH_ABS << std::endl;
 					
-					HTTPRequest mainRequest2 = HTTPRequest((this->_clientInfo));
-					mainRequest2.setUrl(PATH_ABS);
-					CGI cgi2("PHP", mainRequest2, this->_fds[i].fd);
-					if (cgi2.execute() != 0)
-						std::cerr << "CGI execution failed.\n";
+					int cgi = CGIchecker(this->_clientInfo, PATH_ABS, this->_fds[i].fd);
+					if(cgi == 2)
+						std::cerr << "File is not php or py and can't be handled by the CGI." << std::endl;
+					else if (cgi == 1)
+						std::cerr << "Error while executing CGI request." << std::endl;
 				}
 				else if (request_done)
 				{

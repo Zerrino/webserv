@@ -4,6 +4,33 @@ CGI::CGI(const std::string type, const HTTPRequest& request, int fd): _type(type
 
 CGI::~CGI() {}
 
+std::string getTypeName(Types type) {
+    switch (type) {
+        case PHP:    return "PHP";
+        case PYTHON: return "PYTHON";
+        default:     return "NULL";
+    }
+}
+
+std::string getTypeName(std::string suffix) {
+    if (suffix == "php") return "PHP";
+    if (suffix == "py") return "PYTHON";
+    return "NULL";
+}
+
+int CGIchecker(std::string clientInfo, std::string PATH_ABS, int fd){
+    HTTPRequest mainRequest = HTTPRequest(clientInfo);
+
+    mainRequest.setUrl(PATH_ABS);
+    size_t pos = mainRequest.getUrl().rfind('.');
+    if (pos != std::string::npos){
+        std::string suffix = mainRequest.getUrl().substr(pos + 1);
+        if(suffix != "php" && suffix != "py")
+            return 2;
+        CGI cgi(getTypeName(suffix), mainRequest, fd);
+        return cgi.execute();
+    } else return 2;
+}
 
 int CGI::sendPostBody(int pipe_in[2]){
 	if (_request.getMethod() == "POST") {
@@ -77,11 +104,11 @@ void splitPath(const std::string& fullPath, std::string& path, std::string& file
 }
 
 bool isPHPInstalled() {
-    return std::system("php-cgi -v >nul 2>nul") == 0;
+    return std::system("php-cgi -v > /dev/null 2>&1") == 0;
 }
 
 bool isPythonInstalled() {
-    return std::system("python3 -v >nul 2>nul") == 0;
+    return std::system("python3 -v > /dev/null 2>&1") == 0;
 }
 
 int CGI::execute() {

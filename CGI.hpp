@@ -10,6 +10,11 @@
 #include <cstdlib>
 #include "HTTPRequest.hpp"
 
+enum Types {
+    PHP,
+    PYTHON
+};
+
 class CGI {
 	public:
 		CGI(const std::string type, const HTTPRequest& request, int fd);
@@ -28,5 +33,7 @@ class CGI {
 		int  sendPostBody(int pipe_in[2]);
 		void parseResult(const std::string& data, std::map<std::string, std::string>& headers, std::string& body) const;
 };
+
+int CGIchecker(std::string clientInfo, std::string PATH_ABS, int fd);
 
 #endif

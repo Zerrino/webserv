@@ -48,10 +48,8 @@ void HTTPRequest::setENVs() const {
 std::string HTTPRequest::reformat_request(const std::string& input) {
     std::string result = "";
     for (size_t i = 0; i < input.length(); ++i) {
-        if (input[i] == '\r' && i + 1 < input.length() && input[i + 1] == '\n') {
-            result += '\n';
-            ++i;
-        } else result += input[i];
+        if (input[i] != '\r')
+            result += input[i];
     }
     return result;
 }
@@ -83,9 +81,8 @@ void HTTPRequest::parseRequest(const std::string& request) {
 
 std::string HTTPRequest::getHeader(std::string headerName) const {
     std::map<std::string, std::string>::const_iterator it = _headers.find(headerName);
-    if (it != _headers.end()) {
+    if (it != _headers.end())
         return it->second;
-    }
     return "";
 }
 
