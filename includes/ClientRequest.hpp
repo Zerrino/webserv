@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/22 08:38:57 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/24 22:08:07 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ class	ClientRequest : public SendToClient, public Cookie, public Request
 		struct sockaddr_in get_addr();
 
 		void	handlingGET(int i);
-		void	handlingPUT();
-		void	handlingDELETE();
+		void	handlingPUT(int i);
+		void	handlingDELETE(int i);
 		void	handlingPOST(int i);
 
 };

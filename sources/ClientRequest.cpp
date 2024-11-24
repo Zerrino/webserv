@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/22 11:35:11 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/24 22:09:31 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,11 +56,11 @@ void	ClientRequest::pollExecute()
 				}
 				else if (_clMap.find("PUT") != _clMap.end())
 				{
-					handlingPUT();
+					handlingPUT(i);
 				}
 				else if (_clMap.find("DELETE") != _clMap.end())
 				{
-					handlingDELETE();
+					handlingDELETE(i);
 				}
 				close(this->_fds[i].fd);
 				this->_fds.erase(this->_fds.begin() + i);
@@ -153,7 +153,7 @@ std::string ClientRequest::get_clientInfo(int fd)
 				break;
 		}
 	}
-	//printMap(_clMap);
+	printMap(_clMap);
 	this->_clientInfo = requestData;
 	return requestData;
 }
@@ -228,13 +228,32 @@ void	ClientRequest::handlingGET(int i)
 		this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
 	}
 }
-void	ClientRequest::handlingPUT()
+void	ClientRequest::handlingPUT(int i)
 {
-
+	std::string path = "./data";
+	int	number;
+	path.append(_clMap["PUT"]);
+	std::ofstream file(path.c_str());
+	if (!file.is_open())
+		sendClient(this->_fds[i].fd, 404, "./data/ressources/responses/errors/errorkey.txt");
+	std::istringstream iss(_clMap["Content-Length"]);
+	iss >> number;
+	file.write(_clMap["Content"].c_str(), number);
+	file.close();
+	sendClient(this->_fds[i].fd, 204, "");
 }
-void	ClientRequest::handlingDELETE()
+void	ClientRequest::handlingDELETE(int i)
 {
-
+	std::string path = "./data";
+	path.append(_clMap["PUT"]);
+	if (std::remove(path.c_str()) == 0)
+	{
+		sendClient(this->_fds[i].fd, 204, "");
+	}
+	else
+	{
+		sendClient(this->_fds[i].fd, 404, "./data/ressources/responses/errors/errorkey.txt");
+	}
 }
 void	ClientRequest::handlingPOST(int i)
 {
