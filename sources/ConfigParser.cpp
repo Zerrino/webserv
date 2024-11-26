@@ -126,8 +126,12 @@ ConfigParser::ConfigError ConfigParser::parse()
 		}
 		_tokens.push_back(token);
 	}
-	if (parseHttp())
+	if (!parseHttp())
 		return (PARSING_ERROR);
+
+	// TESTING
+	printConfig();
+
 	return (SUCCESS);
 }
 
@@ -142,9 +146,11 @@ bool ConfigParser::parseHttp()
 		return reportSyntaxError("Expected '{' after 'http'");
 	while (!expectedTokenType(TOKEN_SYMBOL_CLOSE_BRACE))
 	{
+		if (_currentPosition >= _tokens.size())
+			return reportSyntaxError("Unexpected end of file. Missing closing bracket '}' in 'http' block.");
 		if (expectedTokenType(TOKEN_IDENTIFIER))
 		{
-			if (!parseDirective(HTTP_BLOCK, 0, 0))
+			if (!parseDirective(HTTP_BLOCK))
 				return (false);
 		}
 		else if (expectedTokenType(TOKEN_BLOCK_SERVER))
@@ -157,21 +163,26 @@ bool ConfigParser::parseHttp()
 	}
 	if (!expectedAndMove(TOKEN_SYMBOL_CLOSE_BRACE))
 		return reportSyntaxError("Missing closing bracket in 'http' block");
-	std::cout << "ok" << std::endl;
 	return (true);
 }
 
 bool ConfigParser::parseServer()
 {
+	_loc_id = 0;
+	ServerBlock server;
+	_http.servers.push_back(server);
+
 	if (!expectedAndMove(TOKEN_BLOCK_SERVER))
 		return reportSyntaxError("Server block expected instead of '" + _tokens[_currentPosition].value + "'");
 	if (!expectedAndMove(TOKEN_SYMBOL_OPEN_BRACE))
 		return reportSyntaxError("Expected '{' after 'server'");
 	while (!expectedTokenType(TOKEN_SYMBOL_CLOSE_BRACE))
 	{
+		if (_currentPosition >= _tokens.size())
+			return reportSyntaxError("Unexpected end of file. Missing closing bracket '}' in 'server' block.");
 		if (expectedTokenType(TOKEN_IDENTIFIER))
 		{
-			if (!parseDirective(SERVER_BLOCK, _server_id, _loc_id))
+			if (!parseDirective(SERVER_BLOCK))
 				return (false);
 		}
 		else if (expectedTokenType(TOKEN_BLOCK_LOCATION))
@@ -182,41 +193,66 @@ bool ConfigParser::parseServer()
 		else
 			return reportSyntaxError("Unexpected token in 'server' : '" + _tokens[_currentPosition].value + "'");
 	}
+	if (!expectedAndMove(TOKEN_SYMBOL_CLOSE_BRACE))
+		return reportSyntaxError("Missing closing bracket in 'server' block");
 	_server_id++;
 	return (true);
-} 
+}
 
 bool ConfigParser::parseLocation()
 {
+	LocationBlock temp;
+
+	if (!expectedTokenType(TOKEN_BLOCK_LOCATION))
+		return reportSyntaxError("Location expected instead of '" + _tokens[_currentPosition].value + "'");
+	getNextToken();
+	if (expectedTokenType(TOKEN_OPERATOR_EQUAL) || expectedTokenType(TOKEN_MODIFIER))
+	{
+		temp.modifier = _tokens[_currentPosition].value;
+		getNextToken();
+	}
+	if (expectedTokenType(TOKEN_STRING) || expectedTokenType(TOKEN_REGEX))
+		temp.uri = _tokens[_currentPosition].value;
+	else
+		return reportSyntaxError("Location URI is missing or invalid at '" + _tokens[_currentPosition].value + "'");
+	getNextToken();
+	if (!expectedAndMove(TOKEN_SYMBOL_OPEN_BRACE))
+		return reportSyntaxError("Expected '{' after 'location'");
+	_http.servers[_server_id].locations.push_back(temp);
+	while (!expectedTokenType(TOKEN_SYMBOL_CLOSE_BRACE))
+	{
+		if (!parseDirective(LOCATION_BLOCK))
+			return (false);
+	}
+	if (!expectedAndMove(TOKEN_SYMBOL_CLOSE_BRACE))
+		return reportSyntaxError("Missing closing bracket in 'location' block");
 	_loc_id++;
 	return (true);
 }
 
-bool ConfigParser::parseDirective(Context context, int server_id, int loc_id)
+bool ConfigParser::parseDirective(Context context)
 {
 	Directive temp;
 
 	if (!expectedTokenType(TOKEN_IDENTIFIER))
 		return reportSyntaxError("Directive name expected instead of '" + _tokens[_currentPosition].value + "'");
 	temp.name = _tokens[_currentPosition].value;
-
+	getNextToken();
 	while (!expectedTokenType(TOKEN_SYMBOL_SEMICOLON))
 	{
 		if (_currentPosition >= _tokens.size())
 			return reportSyntaxError("Unexpected end of input in directive arguments");
 		temp.arguments.push_back(_tokens[_currentPosition].value);
-		_currentPosition++;
+		getNextToken();
 	}
-
 	if (context == HTTP_BLOCK)
 		_http.directives.push_back(temp);
 	else if (context == SERVER_BLOCK)
-	{
-		_http.servers[server_id].directives.push_back(temp);
-	}
+		_http.servers[_server_id].directives.push_back(temp);
 	else
-		_http.servers[server_id].locations[loc_id].directives.push_back(temp);
-	_currentPosition++;
+		_http.servers[_server_id].locations[_loc_id].directives.push_back(temp);
+	if (!expectedAndMove(TOKEN_SYMBOL_SEMICOLON))
+		return reportSyntaxError("Missing semicolon at the end of the directive '" + temp.name + "'");
 	return (true);
 }
 
@@ -275,8 +311,13 @@ std::vector<std::string> ConfigParser::split(std::ifstream &file)
 		else if (data[i] == '~' || data[i] == '^')
 		{
 			start = i;
+			while (data[i] != ' ')
+				i++;
+			word = data.substr(start, i - start);
+			words.push_back(word);
+			word.clear();
 			i++;
-			data[i] == '*' ? i += 2 : i++;
+			start = i;
 			while (data[i] != ' ')
 				i++;
 			word = data.substr(start, i - start);
@@ -329,6 +370,11 @@ void ConfigParser::initTokenMap()
 	_tokenMap["="] = TOKEN_OPERATOR_EQUAL;
 	_tokenMap["!="] = TOKEN_OPERATOR_NOT_EQUAL;
 
+	/* Modifiers */
+	_tokenMap["~"] = TOKEN_MODIFIER;
+	_tokenMap["~*"] = TOKEN_MODIFIER;
+	_tokenMap["^~"] = TOKEN_MODIFIER;
+
 	/* Identifiers */
 	_tokenMap["client_max_body_size"] = TOKEN_IDENTIFIER;
 	_tokenMap["error_page"] = TOKEN_IDENTIFIER;
@@ -341,10 +387,11 @@ void ConfigParser::initTokenMap()
 	_tokenMap["client_body_in_file_only"] = TOKEN_IDENTIFIER;
 	_tokenMap["client_max_body_size"] = TOKEN_IDENTIFIER;
 	_tokenMap["fastcgi_pass"] = TOKEN_IDENTIFIER;
-	_tokenMap["fastcgi_params"] = TOKEN_IDENTIFIER;
+	_tokenMap["fastcgi_param"] = TOKEN_IDENTIFIER;
 	_tokenMap["include"] = TOKEN_IDENTIFIER;
 	_tokenMap["return"] = TOKEN_IDENTIFIER;
 	_tokenMap["deny"] = TOKEN_IDENTIFIER;
+	_tokenMap["index"] = TOKEN_IDENTIFIER;
 }
 
 int ConfigParser::isNumber(const std::string &word)
@@ -460,3 +507,61 @@ TokenType ConfigParser::getTokenType(const std::string &word)
 }
 
 /* ************************************************************************** */
+
+void ConfigParser::printConfig()
+{
+
+	// Print HTTP directives
+	std::cout << "--- HTTP DIRECTIVES ---" << std::endl;
+	std::cout << std::endl;
+	for (std::vector<Directive>::const_iterator i = _http.directives.begin(); i != _http.directives.end(); i++)
+	{
+		std::cout << "Directive's name : " << i->name << std::endl;
+		std::cout << i->name << "'s aguments : " << std::endl;
+		for (std::vector<std::string>::const_iterator j = i->arguments.begin(); j != i->arguments.end(); j++)
+			std::cout << *j << std::endl;
+		std::cout << std::endl;
+	}
+	std::cout << "--- END OF HTTP DIRECTIVES ---" << std::endl;
+	std::cout << std::endl;
+	// Print server blocks
+	std::cout << "--- HTTP SERVERS ---" << std::endl;
+	std::cout << std::endl;
+	for (std::vector<ServerBlock>::const_iterator i = _http.servers.begin(); i != _http.servers.end(); i++)
+	{
+		// Print server directives
+		std::cout << "--- SERVER DIRECTIVES ---" << std::endl;
+		for (std::vector<Directive>::const_iterator j = i->directives.begin(); j != i->directives.end(); j++)
+		{
+			std::cout << "Directive's name : " << j->name << std::endl;
+			std::cout << j->name << "'s aguments : " << std::endl;
+			for (std::vector<std::string>::const_iterator k = j->arguments.begin(); k != j->arguments.end(); k++)
+				std::cout << *k << std::endl;
+			std::cout << std::endl;
+		}
+		std::cout << "--- END OF SERVER DIRECTIVES ---" << std::endl;
+		std::cout << std::endl;
+
+		// Print location
+		std::cout << "--- SERVER LOCATIONS ---" << std::endl;
+		for (std::vector<LocationBlock>::const_iterator j = i->locations.begin(); j != i->locations.end(); j++)
+		{
+			std::cout << "--- LOCATION INFOS ---" << std::endl;
+			std::cout << "Location modifier : " << j->modifier << std::endl;
+			std::cout << "Location URI : " << j->uri << std::endl;
+			std::cout << "--- LOCATION DIRECTIVES ---" << std::endl;
+			for (std::vector<Directive>::const_iterator k = j->directives.begin(); k != j->directives.end(); k++)
+			{
+				std::cout << "Directive's name : " << k->name << std::endl;
+				std::cout << k->name << "'s aguments : " << std::endl;
+				for (std::vector<std::string>::const_iterator l = k->arguments.begin(); l != k->arguments.end(); l++)
+					std::cout << *l << std::endl;
+				std::cout << std::endl;
+			}
+		}
+		std::cout << "--- END OF OF SERVER LOCATIONS ---" << std::endl;
+		std::cout << std::endl;
+		std::cout << "--- END OF HTTP SERVER ---" << std::endl;
+		std::cout << std::endl;
+	}
+}

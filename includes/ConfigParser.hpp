@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 15:12:33 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/22 21:06:33 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/25 15:37:03 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ enum TokenType
 	TOKEN_SYMBOL_SEMICOLON,
 	TOKEN_OPERATOR_EQUAL,
 	TOKEN_OPERATOR_NOT_EQUAL,
+	TOKEN_MODIFIER,
 	TOKEN_IDENTIFIER,
 	TOKEN_NUMBER,
 	TOKEN_NUMBER_WITH_UNIT,
@@ -57,7 +58,8 @@ struct Directive
 
 struct LocationBlock
 {
-	std::string match;
+	std::string modifier;
+	std::string uri;
 	std::vector<Directive> directives;
 };
 
@@ -122,8 +124,11 @@ public:
 	bool parseHttp();
 	bool parseServer();
 	bool parseLocation();
-	bool parseDirective(Context context, int server_id, int loc_id);
+	bool parseDirective(Context context);
 	bool reportSyntaxError(const std::string &error);
+
+	/* TESTING PURPOSE */
+	void printConfig();
 
 private:
 	std::string _configPath;

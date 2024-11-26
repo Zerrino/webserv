@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 20:12:32 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/21 19:38:54 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/26 10:49:20 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,8 @@ int main(int ac, char **av)
 				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
 			if ((status = config.open()))
 				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
-			config.parse();
+			status = config.parse();
+			std::cout << "Status = " << status << " => Parsing ok if status = 0" <<  std::endl;
 		}
 	}
 	return EXIT_SUCCESS;
