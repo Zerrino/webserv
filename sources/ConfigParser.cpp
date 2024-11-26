@@ -132,6 +132,9 @@ ConfigParser::ConfigError ConfigParser::parse()
 	// TESTING
 	printConfig();
 
+	// TODO: WIP
+	validateDirectives();
+
 	return (SUCCESS);
 }
 
@@ -148,7 +151,7 @@ bool ConfigParser::parseHttp()
 	{
 		if (_currentPosition >= _tokens.size())
 			return reportSyntaxError("Unexpected end of file. Missing closing bracket '}' in 'http' block.");
-		if (expectedTokenType(TOKEN_IDENTIFIER))
+		if (expectedTokenType(TOKEN_DIRECTIVE))
 		{
 			if (!parseDirective(HTTP_BLOCK))
 				return (false);
@@ -180,7 +183,7 @@ bool ConfigParser::parseServer()
 	{
 		if (_currentPosition >= _tokens.size())
 			return reportSyntaxError("Unexpected end of file. Missing closing bracket '}' in 'server' block.");
-		if (expectedTokenType(TOKEN_IDENTIFIER))
+		if (expectedTokenType(TOKEN_DIRECTIVE))
 		{
 			if (!parseDirective(SERVER_BLOCK))
 				return (false);
@@ -233,16 +236,22 @@ bool ConfigParser::parseLocation()
 bool ConfigParser::parseDirective(Context context)
 {
 	Directive temp;
+	DirArgument tempArg;
 
-	if (!expectedTokenType(TOKEN_IDENTIFIER))
+	if (!expectedTokenType(TOKEN_DIRECTIVE))
 		return reportSyntaxError("Directive name expected instead of '" + _tokens[_currentPosition].value + "'");
 	temp.name = _tokens[_currentPosition].value;
-	getNextToken();
+	if (!isValidArgType(getNextToken()))
+		return reportSyntaxError("Invalid type of directive argument at '" + _tokens[_currentPosition].value + "'");
 	while (!expectedTokenType(TOKEN_SYMBOL_SEMICOLON))
 	{
 		if (_currentPosition >= _tokens.size())
 			return reportSyntaxError("Unexpected end of input in directive arguments");
-		temp.arguments.push_back(_tokens[_currentPosition].value);
+		if (!isValidArgType(_tokens[_currentPosition]))
+			return reportSyntaxError("Invalid type of directive argument at '" + _tokens[_currentPosition].value + "'");
+		tempArg.value = _tokens[_currentPosition].value;
+		tempArg.type = _tokens[_currentPosition].type;
+		temp.arguments.push_back(tempArg);
 		getNextToken();
 	}
 	if (context == HTTP_BLOCK)
@@ -269,10 +278,11 @@ bool ConfigParser::expectedTokenType(TokenType expectedType)
 	return (_tokens[_currentPosition].type == expectedType);
 }
 
-void ConfigParser::getNextToken()
+Token ConfigParser::getNextToken()
 {
 	if (_currentPosition < _tokens.size())
 		_currentPosition++;
+	return (_tokens[_currentPosition]);
 }
 
 bool ConfigParser::expectedAndMove(TokenType expectedType)
@@ -282,6 +292,13 @@ bool ConfigParser::expectedAndMove(TokenType expectedType)
 		getNextToken();
 		return (true);
 	}
+	return (false);
+}
+
+bool ConfigParser::isValidArgType(const Token &token)
+{
+	if (token.type == TOKEN_STRING || token.type == TOKEN_STRING_QUOTED || token.type == TOKEN_NUMBER || token.type == TOKEN_NUMBER_WITH_UNIT || token.type == TOKEN_VARIABLE)
+		return (true);
 	return (false);
 }
 
@@ -374,24 +391,16 @@ void ConfigParser::initTokenMap()
 	_tokenMap["~"] = TOKEN_MODIFIER;
 	_tokenMap["~*"] = TOKEN_MODIFIER;
 	_tokenMap["^~"] = TOKEN_MODIFIER;
+}
 
-	/* Identifiers */
-	_tokenMap["client_max_body_size"] = TOKEN_IDENTIFIER;
-	_tokenMap["error_page"] = TOKEN_IDENTIFIER;
-	_tokenMap["listen"] = TOKEN_IDENTIFIER;
-	_tokenMap["server_name"] = TOKEN_IDENTIFIER;
-	_tokenMap["root"] = TOKEN_IDENTIFIER;
-	_tokenMap["limit_except"] = TOKEN_IDENTIFIER;
-	_tokenMap["autoindex"] = TOKEN_IDENTIFIER;
-	_tokenMap["client_body_temp_path"] = TOKEN_IDENTIFIER;
-	_tokenMap["client_body_in_file_only"] = TOKEN_IDENTIFIER;
-	_tokenMap["client_max_body_size"] = TOKEN_IDENTIFIER;
-	_tokenMap["fastcgi_pass"] = TOKEN_IDENTIFIER;
-	_tokenMap["fastcgi_param"] = TOKEN_IDENTIFIER;
-	_tokenMap["include"] = TOKEN_IDENTIFIER;
-	_tokenMap["return"] = TOKEN_IDENTIFIER;
-	_tokenMap["deny"] = TOKEN_IDENTIFIER;
-	_tokenMap["index"] = TOKEN_IDENTIFIER;
+bool ConfigParser::isDirective(const std::string &word)
+{
+	for (const DirectiveSpec *it = directives; !it->name.empty(); ++it)
+	{
+		if (it->name == word)
+			return true;
+	}
+	return false;
 }
 
 int ConfigParser::isNumber(const std::string &word)
@@ -491,8 +500,11 @@ TokenType ConfigParser::getTokenType(const std::string &word)
 	initTokenMap();
 	int ret;
 	std::map<std::string, TokenType>::iterator it = _tokenMap.find(word);
+
 	if (it != _tokenMap.end())
 		return (it->second);
+	else if (isDirective(word))
+		return (TOKEN_DIRECTIVE);
 	else if ((ret = isNumber(word)))
 		return ((TokenType)ret);
 	else if ((ret = isOperator(word)))
@@ -504,6 +516,17 @@ TokenType ConfigParser::getTokenType(const std::string &word)
 	else if ((ret = isString(word)))
 		return ((TokenType)ret);
 	return (INVALID_TOKEN);
+}
+
+void ConfigParser::validateDirectives()
+{
+	for (std::vector<Directive>::const_iterator itDir = _http.directives.begin(); itDir != _http.directives.end(); itDir++)
+	{
+		for (std::vector<DirArgument>::const_iterator itArg = itDir->arguments.begin(); itArg != itDir->arguments.end(); itArg++)
+		{
+			std::cout << itArg->type << std::endl;
+		}
+	}
 }
 
 /* ************************************************************************** */
@@ -518,8 +541,8 @@ void ConfigParser::printConfig()
 	{
 		std::cout << "Directive's name : " << i->name << std::endl;
 		std::cout << i->name << "'s aguments : " << std::endl;
-		for (std::vector<std::string>::const_iterator j = i->arguments.begin(); j != i->arguments.end(); j++)
-			std::cout << *j << std::endl;
+		for (std::vector<DirArgument>::const_iterator j = i->arguments.begin(); j != i->arguments.end(); j++)
+			std::cout << j->value << std::endl;
 		std::cout << std::endl;
 	}
 	std::cout << "--- END OF HTTP DIRECTIVES ---" << std::endl;
@@ -535,8 +558,8 @@ void ConfigParser::printConfig()
 		{
 			std::cout << "Directive's name : " << j->name << std::endl;
 			std::cout << j->name << "'s aguments : " << std::endl;
-			for (std::vector<std::string>::const_iterator k = j->arguments.begin(); k != j->arguments.end(); k++)
-				std::cout << *k << std::endl;
+			for (std::vector<DirArgument>::const_iterator k = j->arguments.begin(); k != j->arguments.end(); k++)
+				std::cout << k->value << std::endl;
 			std::cout << std::endl;
 		}
 		std::cout << "--- END OF SERVER DIRECTIVES ---" << std::endl;
@@ -554,8 +577,8 @@ void ConfigParser::printConfig()
 			{
 				std::cout << "Directive's name : " << k->name << std::endl;
 				std::cout << k->name << "'s aguments : " << std::endl;
-				for (std::vector<std::string>::const_iterator l = k->arguments.begin(); l != k->arguments.end(); l++)
-					std::cout << *l << std::endl;
+				for (std::vector<DirArgument>::const_iterator l = k->arguments.begin(); l != k->arguments.end(); l++)
+					std::cout << l->value << std::endl;
 				std::cout << std::endl;
 			}
 		}

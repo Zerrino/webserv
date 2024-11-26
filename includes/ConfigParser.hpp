@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 15:12:33 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/25 15:37:03 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/26 17:01:53 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,10 @@
 #include "webserv.hpp"
 
 #define DEFAULT_CONFIG_PATH "Config/default.conf"
+
+/*
+** List of all token types that could be found in config file
+*/
 
 enum TokenType
 {
@@ -27,15 +31,21 @@ enum TokenType
 	TOKEN_OPERATOR_EQUAL,
 	TOKEN_OPERATOR_NOT_EQUAL,
 	TOKEN_MODIFIER,
-	TOKEN_IDENTIFIER,
+	TOKEN_DIRECTIVE,
 	TOKEN_NUMBER,
 	TOKEN_NUMBER_WITH_UNIT,
 	TOKEN_VARIABLE,
 	TOKEN_REGEX,
 	TOKEN_STRING,
 	TOKEN_STRING_QUOTED,
-	INVALID_TOKEN
+	INVALID_TOKEN,
+	SENTINELLE = -1,
 };
+
+/*
+** Enum useful for parsing to determine at which level
+** to store the directive's values
+*/
 
 enum Context
 {
@@ -44,7 +54,101 @@ enum Context
 	LOCATION_BLOCK
 };
 
+/*
+** Token structure to type each collected word from config file
+*/
+
 struct Token
+{
+	std::string value;
+	TokenType type;
+};
+
+/*
+** Structure to store directives specifications
+*/
+
+struct DirectiveSpec
+{
+	std::string name;
+	int maxArgs;
+	TokenType argTypes[5];
+	bool (*validator)(TokenType *args, int maxArgs);
+};
+
+/*
+** Static list of directives to store all of them
+** with their specifications
+*/
+
+static const DirectiveSpec directives[] = {
+	{"client_max_body_size",
+	 1,
+	 {TOKEN_NUMBER_WITH_UNIT, SENTINELLE},
+	 nullptr},
+	{"error_page",
+	 1,
+	 {TOKEN_NUMBER, TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"listen",
+	 2,
+	 {TOKEN_NUMBER, SENTINELLE},
+	 nullptr},
+	{"server_name",
+	 5,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"root",
+	 1,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"limit_except",
+	 5,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"autoindex",
+	 1,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"client_body_temp_path",
+	 1,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"client_body_in_file_only",
+	 1,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"fastcgi_pass",
+	 1,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"fastcgi_param",
+	 1,
+	 {TOKEN_STRING, TOKEN_VARIABLE, SENTINELLE},
+	 nullptr},
+	{"index",
+	 5,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"return",
+	 2,
+	 {TOKEN_NUMBER, TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"include",
+	 1,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"",
+	 -1,
+	 {SENTINELLE},
+	 nullptr},
+};
+
+/* AST structures to store each relevant value from location
+** and directives at different context levels : http, server, location
+*/
+
+struct DirArgument 
 {
 	std::string value;
 	TokenType type;
@@ -53,7 +157,7 @@ struct Token
 struct Directive
 {
 	std::string name;
-	std::vector<std::string> arguments;
+	std::vector<DirArgument> arguments;
 };
 
 struct LocationBlock
@@ -74,6 +178,8 @@ struct HttpBlock
 	std::vector<Directive> directives;
 	std::vector<ServerBlock> servers;
 };
+
+/* Parsing class */
 
 class ConfigParser
 {
@@ -110,6 +216,7 @@ public:
 	/* Utils */
 	std::vector<std::string> split(std::ifstream &file);
 	TokenType getTokenType(const std::string &word);
+	bool isDirective(const std::string &word);
 	int isNumber(const std::string &word);
 	bool isUnit(char c) const;
 	int isOperator(const std::string &word);
@@ -119,13 +226,15 @@ public:
 	void initializeUnits();
 	void initTokenMap();
 	bool expectedTokenType(TokenType expectedType);
-	void getNextToken();
+	Token getNextToken();
 	bool expectedAndMove(TokenType expectedType);
 	bool parseHttp();
 	bool parseServer();
 	bool parseLocation();
 	bool parseDirective(Context context);
+	bool isValidArgType(const Token &token);
 	bool reportSyntaxError(const std::string &error);
+	void validateDirectives();
 
 	/* TESTING PURPOSE */
 	void printConfig();
@@ -138,7 +247,7 @@ private:
 	std::map<std::string, TokenType> _tokenMap;
 	std::vector<char> _units;
 	HttpBlock _http;
-	int	_server_id;
+	int _server_id;
 	int _loc_id;
 };
 
