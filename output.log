@@ -193,12 +193,7 @@ on
 
 --- END OF HTTP SERVER ---
 
-11
-10
-14
-10
-10
-10
-10
-14
+client_max_body_size
+error_page
+error_page
 Status = 0 => Parsing ok if status = 0

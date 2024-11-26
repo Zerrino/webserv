@@ -518,16 +518,47 @@ TokenType ConfigParser::getTokenType(const std::string &word)
 	return (INVALID_TOKEN);
 }
 
+
+bool ConfigParser::CheckClientMaxBodySize(const std::vector<DirArgument> &args, DirectiveSpec specs)
+{
+	if (args.size() > specs.maxArgs)
+		return (reportSyntaxError("Too many arguments for " + specs.name + " directive"));
+	if (args[0].type != specs.argTypes[0])
+		return (reportSyntaxError("Wrong type of argument " + args[0].value));
+	return (true);
+}
+
+bool CheckErrorPage(const std::vector<DirArgument> &args)
+{
+	if (args.size())
+		std::cout << "ok";
+	return (true);
+}
+
+
+
 void ConfigParser::validateDirectives()
 {
+
+	int arr_size = sizeof(directives) / sizeof(DirectiveSpec);
+	DirectiveSpec current;
+	current.name = "";
+
 	for (std::vector<Directive>::const_iterator itDir = _http.directives.begin(); itDir != _http.directives.end(); itDir++)
 	{
-		for (std::vector<DirArgument>::const_iterator itArg = itDir->arguments.begin(); itArg != itDir->arguments.end(); itArg++)
+		for (int i = 0; i < arr_size; i++)
 		{
-			std::cout << itArg->type << std::endl;
+			if (itDir->name == directives[i].name)
+				current = directives[i];
 		}
+		if (current.name != "")
+			std::cout << current.name << std::endl;
+		 if (current.validator)
+			(this->*current.validator)(itDir->arguments, current);
+		
 	}
 }
+
 
 /* ************************************************************************** */
 

@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 15:12:33 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/26 17:01:53 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/26 22:18:06 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 #include "webserv.hpp"
 
 #define DEFAULT_CONFIG_PATH "Config/default.conf"
+
+class ConfigParser;
 
 /*
 ** List of all token types that could be found in config file
@@ -64,91 +66,11 @@ struct Token
 	TokenType type;
 };
 
-/*
-** Structure to store directives specifications
-*/
-
-struct DirectiveSpec
-{
-	std::string name;
-	int maxArgs;
-	TokenType argTypes[5];
-	bool (*validator)(TokenType *args, int maxArgs);
-};
-
-/*
-** Static list of directives to store all of them
-** with their specifications
-*/
-
-static const DirectiveSpec directives[] = {
-	{"client_max_body_size",
-	 1,
-	 {TOKEN_NUMBER_WITH_UNIT, SENTINELLE},
-	 nullptr},
-	{"error_page",
-	 1,
-	 {TOKEN_NUMBER, TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"listen",
-	 2,
-	 {TOKEN_NUMBER, SENTINELLE},
-	 nullptr},
-	{"server_name",
-	 5,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"root",
-	 1,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"limit_except",
-	 5,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"autoindex",
-	 1,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"client_body_temp_path",
-	 1,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"client_body_in_file_only",
-	 1,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"fastcgi_pass",
-	 1,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"fastcgi_param",
-	 1,
-	 {TOKEN_STRING, TOKEN_VARIABLE, SENTINELLE},
-	 nullptr},
-	{"index",
-	 5,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"return",
-	 2,
-	 {TOKEN_NUMBER, TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"include",
-	 1,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"",
-	 -1,
-	 {SENTINELLE},
-	 nullptr},
-};
-
 /* AST structures to store each relevant value from location
 ** and directives at different context levels : http, server, location
 */
 
-struct DirArgument 
+struct DirArgument
 {
 	std::string value;
 	TokenType type;
@@ -178,6 +100,19 @@ struct HttpBlock
 	std::vector<Directive> directives;
 	std::vector<ServerBlock> servers;
 };
+
+/*
+** Structure to store directives specifications
+*/
+
+struct DirectiveSpec
+{
+	std::string name;
+	size_t maxArgs;
+	TokenType argTypes[5];
+	bool (ConfigParser::*validator)(const std::vector<DirArgument> &args, DirectiveSpec spec);
+};
+
 
 /* Parsing class */
 
@@ -235,6 +170,7 @@ public:
 	bool isValidArgType(const Token &token);
 	bool reportSyntaxError(const std::string &error);
 	void validateDirectives();
+	bool CheckClientMaxBodySize(const std::vector<DirArgument> &args, DirectiveSpec spec);
 
 	/* TESTING PURPOSE */
 	void printConfig();
@@ -252,3 +188,68 @@ private:
 };
 
 std::ostream &operator<<(std::ostream &o, ConfigParser const &i);
+
+/*
+** Static list of directives to store all of them
+** with their specifications
+*/
+
+static const DirectiveSpec directives[] = {
+	{"client_max_body_size",
+	 1,
+	 {TOKEN_NUMBER_WITH_UNIT, SENTINELLE},
+	 &ConfigParser::CheckClientMaxBodySize,
+	},
+	{"error_page",
+	 1,
+	 {TOKEN_NUMBER, TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"listen",
+	 2,
+	 {TOKEN_NUMBER, SENTINELLE},
+	 nullptr},
+	{"server_name",
+	 5,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"root",
+	 1,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"limit_except",
+	 5,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"autoindex",
+	 1,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"client_body_temp_path",
+	 1,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"client_body_in_file_only",
+	 1,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"fastcgi_pass",
+	 1,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"fastcgi_param",
+	 1,
+	 {TOKEN_STRING, TOKEN_VARIABLE, SENTINELLE},
+	 nullptr},
+	{"index",
+	 5,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"return",
+	 2,
+	 {TOKEN_NUMBER, TOKEN_STRING, SENTINELLE},
+	 nullptr},
+	{"include",
+	 1,
+	 {TOKEN_STRING, SENTINELLE},
+	 nullptr},
+};
