@@ -82,7 +82,7 @@ const createFileDetails = (file) => {
 
 const createRequest = () => {
   const request = new XMLHttpRequest();
-  const API_ENDPOINT = "https://file.io";
+  const API_ENDPOINT = "/ressources/uploads/";
   request.open("POST", API_ENDPOINT, true);
   request.onreadystatechange = () => {
     if (request.readyState === 4 && request.status === 200) {

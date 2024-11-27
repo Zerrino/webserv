@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ClientRequest.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/14 15:27:42 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/24 22:08:07 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,19 @@
 # include "webserv.hpp"
 # include "SendToClient.hpp"
 # include "Cookie.hpp"
+# include "Request.hpp"
 
-class	ClientRequest : public SendToClient, public Cookie
+class	ClientRequest : public SendToClient, public Cookie, public Request
 {
-	private:
+	protected:
 		std::vector<pollfd>	_fds;
 		std::vector<int>	_fdSocket;
 		int					_fdClient;
+		int					_i;
 		// char				_buffer[256];
 		std::string			_clientInfo;
 		struct sockaddr_in 	_addr;
+		std::map<std::string, std::string>	_clMap;
 
 	public:
 		ClientRequest(std::vector<int> fdSocket);
@@ -39,6 +42,11 @@ class	ClientRequest : public SendToClient, public Cookie
 		std::vector<int>	get_fdSocket();
 		int	get_fdClient();
 		struct sockaddr_in get_addr();
+
+		void	handlingGET(int i);
+		void	handlingPUT(int i);
+		void	handlingDELETE(int i);
+		void	handlingPOST(int i);
 
 };
 

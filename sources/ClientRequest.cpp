@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ClientRequest.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/14 15:10:06 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/24 22:09:31 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ ClientRequest::ClientRequest(std::vector<int> fdSocket)
 
 void	ClientRequest::pollRequest()
 {
-	int	ret = poll(this->_fds.data(), this->_fds.size(), 3000);
+	int	ret = poll(this->_fds.data(), this->_fds.size(), 30000);
 	if (ret == -1)
 		throw std::runtime_error("poll failed");
 }
@@ -44,98 +44,23 @@ void	ClientRequest::pollExecute()
 			}
 			else
 			{
-				int	flag;
-				int	request_done;
-				request_done = 0;
-				this->get_clientInfo(this->_fds[i].fd);
-
-				std::string str = this->_clientInfo;
-				std::size_t pos = str.find('/');
+				std::string str = this->get_clientInfo(this->_fds[i].fd);
 				std::string rest;
-				std::string cook;
-
-				if (pos != std::string::npos && str.length() >= pos)
-					str = str.substr(pos);
-				pos = str.find(' ');
-				if (pos != std::string::npos && str.length() >= pos)
-					str = str.substr(0, pos);
-				pos = str.find('?');
-				if (pos != std::string::npos && str.length() >= pos)
+				if (_clMap.find("GET") != _clMap.end())
 				{
-					request_done = 1;
-					rest = str.substr(pos + 1);
-					str = str.substr(0, pos);
+					handlingGET(i);
 				}
-				if (this->_clientInfo.length() > 10)
+				else if (_clMap.find("POST") != _clMap.end())
 				{
-					cook = isCookied(this->_clientInfo);
-					if (cook.length() != 0)
-					{
-						//std::cout << "Cookie is " << cook << std::endl;
-						flag = 0;
-					}
-					else
-					{
-						std::cout << "No Cookies..." << std::endl;
-						flag = 1;
-					}
+					handlingPOST(i);
 				}
-				// STR = le PATH de la requete
-
-				std::string PATH_ABS = "./data";
-				PATH_ABS.append(str);
-				//std::cout << PATH_ABS << std::endl;
-				std::cout << PATH_ABS << std::endl;
-				if (str == "")
-				{}
-				else if (str == "/")
+				else if (_clMap.find("PUT") != _clMap.end())
 				{
-					std::string file_index = "index.html";
-					PATH_ABS.append(file_index);
-					if (!flag)
-						this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
-					else
-					{
-						std::string req = "HTTP/1.1 200 OK\r\n";
-						req.append(getDate());
-						req.append("Set-Cookie: session_id=");
-						req.append(createCookieId());
-						req.append("; HttpOnly\r\n");
-						std::string file = getFile(PATH_ABS);
-						req.append(getContentType(PATH_ABS));
-						req.append(this->_length);
-						req.append("\r\n\r\n");
-						req.append(file);
-						write(this->_fds[i].fd, req.c_str(), req.length());
-						flag = 0;
-					}
+					handlingPUT(i);
 				}
-				else if (request_done)
+				else if (_clMap.find("DELETE") != _clMap.end())
 				{
-					cook = isCookied(this->_clientInfo);
-					//std::cout << isRegister(getRequestData(rest)) << std::endl;
-					//std::cout << "cookie : " << cook << std::endl;
-					if ((isRegister(getRequestData(rest))) && (cook.length() > 0))
-					{
-						cookiedUpdate("login", "true", cook);
-						this->sendClient(this->_fds[i].fd, 200, "./data/src/dashboard.html");
-					}
-					else
-					{
-						cookiedUpdate("login", "false", cook);
-						this->sendClient(this->_fds[i].fd, 302, "/"); // Ici si il a pas mis un bon mdp ?
-					}
-				}
-				else // SI aucune informations en plus
-				{
-					std::string content = getContentType(PATH_ABS);
-					cook = isCookied(this->_clientInfo);
-					//std::cout << "Cookie " << cook << " is " << isCookies("login", "true", cook) << std::endl;
-					//std::cout << PATH_ABS << std::endl;
-					if ((content != "Content-Type: text/html\r\n") || (isCookies("login", "true", cook) == 1))
-						this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
-					else
-						this->sendClient(this->_fds[i].fd, 302, "/"); // redirige si il essaye d'aller autre pars que le debut .html et est pas login
+					handlingDELETE(i);
 				}
 				close(this->_fds[i].fd);
 				this->_fds.erase(this->_fds.begin() + i);
@@ -179,14 +104,61 @@ struct sockaddr_in ClientRequest::get_addr()
 	return (this->_addr);
 }
 
-std::string	ClientRequest::get_clientInfo(int fd)
+
+
+
+std::string ClientRequest::get_clientInfo(int fd)
 {
-	char buffer[1024] = {0};
-	read(fd, buffer, 1024);
-	std::string str(buffer);
-	this->_clientInfo = str;
-	return (this->_clientInfo);
+	char buffer[4096];
+	std::string requestData;
+	std::size_t contentLength = 0;
+	std::size_t contentRead = 0;
+	bool headersParsed = false;
+
+	while (true)
+	{
+		std::size_t len = read(fd, buffer, sizeof(buffer));
+		if (len <= 0)
+			break;
+		if (!headersParsed)
+		{
+			requestData.append(buffer, len);
+			std::size_t pos = requestData.find("\r\n\r\n");
+			if (pos != std::string::npos)
+			{
+				headersParsed = true;
+				std::string headers = requestData.substr(0, pos + 4);
+				_clMap = reformat(parseRequest(headers));
+				parseContent(_clMap);
+				std::stringstream ss(_clMap["Content-Length"]);
+				ss >> contentLength;
+				std::string contentData = requestData.substr(pos + 4);
+				contentRead = contentData.size();
+				_clMap["Content"].resize(contentLength);
+				_clMap["Content"] = contentData;
+				if (contentRead >= contentLength)
+					break;
+			}
+		}
+		else
+		{
+			std::size_t i = 0;
+			while (i < len)
+			{
+				_clMap["Content"][i + contentRead] = buffer[i];
+				i++;
+			}
+			contentRead += len;
+			if (contentRead >= contentLength)
+				break;
+		}
+	}
+	printMap(_clMap);
+	this->_clientInfo = requestData;
+	return requestData;
 }
+
+
 
 std::string	ClientRequest::getRequest()
 {
@@ -218,14 +190,115 @@ void	ClientRequest::sendClient(int fd, int request, std::string path)
 
 
 
+//		void	handlingGET();
+//		void	handlingPUT();
+//		void	handlingDELETE();
+//		void	handlingPOST();
 
-
-
-
-
-
-
-
-
-
+void	ClientRequest::handlingGET(int i)
+{
+	std::string cook;
+	std::string PATH_ABS = "./data";
+	PATH_ABS.append(_clMap["GET"]);
+	if (_clMap["GET"] == "/")
+	{
+		std::string file_index = "index.html";
+		PATH_ABS.append(file_index);
+		if (_clMap.find("Cookie") != _clMap.end())
+			this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
+		else
+		{
+			std::string req = "HTTP/1.1 200 OK\r\n";
+			req.append(getDate());
+			req.append("Set-Cookie: session_id=");
+			req.append(createCookieId());
+			req.append("; HttpOnly\r\n");
+			std::string file = getFile(PATH_ABS);
+			req.append(getContentType(PATH_ABS));
+			req.append(this->_length);
+			req.append("\r\n\r\n");
+			req.append(file);
+			write(this->_fds[i].fd, req.c_str(), req.length());
+		}
+	}
+	else // SI aucune informations en plus
+	{
+		std::string content = getContentType(PATH_ABS);
+		cook = _clMap["Cookie_ID"];
+		this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
+	}
+}
+void	ClientRequest::handlingPUT(int i)
+{
+	std::string path = "./data";
+	int	number;
+	path.append(_clMap["PUT"]);
+	std::ofstream file(path.c_str());
+	if (!file.is_open())
+		sendClient(this->_fds[i].fd, 404, "./data/ressources/responses/errors/errorkey.txt");
+	std::istringstream iss(_clMap["Content-Length"]);
+	iss >> number;
+	file.write(_clMap["Content"].c_str(), number);
+	file.close();
+	sendClient(this->_fds[i].fd, 204, "");
+}
+void	ClientRequest::handlingDELETE(int i)
+{
+	std::string path = "./data";
+	path.append(_clMap["PUT"]);
+	if (std::remove(path.c_str()) == 0)
+	{
+		sendClient(this->_fds[i].fd, 204, "");
+	}
+	else
+	{
+		sendClient(this->_fds[i].fd, 404, "./data/ressources/responses/errors/errorkey.txt");
+	}
+}
+void	ClientRequest::handlingPOST(int i)
+{
+	parseContent(_clMap);
+	if (_clMap.find("action") != _clMap.end())
+	{
+		if (_clMap["action"].find("cookieUpdate") != std::string::npos)
+		{
+			std::string path_cookies = "cookies/";
+			int resultCook = isCookies(_clMap["email"], _clMap["password"], "database/profiles.txt");
+			if (resultCook == 1)
+			{
+				cookiedUpdate("login", "true", path_cookies.append(_clMap["Cookie_ID"]));
+				cookiedUpdate("session", _clMap["email"].substr(0, _clMap["email"].find('@')), path_cookies);
+				sendClient(this->_fds[i].fd, 204, "");
+			}
+			else
+			{
+				cookiedUpdate("login", "false", path_cookies.append(_clMap["Cookie_ID"]));
+				if (resultCook == -1)
+					sendClient(this->_fds[i].fd, 404, "./data/ressources/responses/errors/errorkey.txt");
+				else
+					sendClient(this->_fds[i].fd, 404, "./data/ressources/responses/errors/errorval.txt");
+			}
+		}
+		else if (_clMap["action"].find("modify") != std::string::npos)
+		{
+			if (isCookies(_clMap["email"], "a", "database/profiles.txt") == 0)
+			{
+				cookiedUpdate(_clMap["email"], _clMap["password"], "database/profiles.txt");
+				sendClient(this->_fds[i].fd, 204, "");
+			}
+			else
+				sendClient(this->_fds[i].fd, 404, "./data/ressources/empty.txt");
+		}
+		else if (_clMap["action"].find("create") != std::string::npos)
+		{
+			if (isCookies(_clMap["email"], "", "database/profiles.txt") == -1)
+			{
+				cookiedUpdate(_clMap["email"], _clMap["password"], "database/profiles.txt");
+				sendClient(this->_fds[i].fd, 204, "");
+			}
+			else
+				sendClient(this->_fds[i].fd, 404, "./data/ressources/empty.txt");
+		}
+	}
+}
 

@@ -1,16 +1,20 @@
-#include <netinet/in.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/syscall.h>
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <cstring>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/18 20:12:32 by gdelvign          #+#    #+#             */
+/*   Updated: 2024/11/27 21:10:47 by marvin           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../includes/Socket.hpp"
 #include "../includes/ClientRequest.hpp"
 #include "../includes/SendToClient.hpp"
 #include "../includes/Cookie.hpp"
-# include "../includes/ConfigParser.hpp"
+#include "../includes/ConfigParser.hpp"
 
 int main(int ac, char **av)
 {
@@ -27,10 +31,10 @@ int main(int ac, char **av)
 			// std::cout << test.getFile("./data/index.html") << std::endl;
 
 			Socket sock(AF_INET, SOCK_STREAM, 0);
-			sock.runSocket(7000, 10);
+			sock.runSocket(57000, 10);
 
 			Socket sock2(AF_INET, SOCK_STREAM, 0);
-			sock2.runSocket(5000, 10);
+			sock2.runSocket(50000, 10);
 
 			std::vector<int> ports;
 			ports.push_back(sock.get_fdSocket());
@@ -59,7 +63,8 @@ int main(int ac, char **av)
 				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
 			if ((status = config.open()))
 				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
-			config.parse();
+			if ((status = config.parse()))
+				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
 		}
 	}
 	return EXIT_SUCCESS;
