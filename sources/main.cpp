@@ -1,17 +1,20 @@
-#include <netinet/in.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/syscall.h>
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <cstring>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/18 20:12:32 by gdelvign          #+#    #+#             */
+/*   Updated: 2024/11/27 21:10:47 by marvin           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../includes/Socket.hpp"
 #include "../includes/ClientRequest.hpp"
 #include "../includes/SendToClient.hpp"
 #include "../includes/Cookie.hpp"
 #include "../includes/ConfigParser.hpp"
-#include "../includes/Request.hpp"
 
 int main(int ac, char **av)
 {
@@ -27,7 +30,6 @@ int main(int ac, char **av)
 			// SendToClient test;
 			// std::cout << test.getFile("./data/index.html") << std::endl;
 
-
 			Socket sock(AF_INET, SOCK_STREAM, 0);
 			sock.runSocket(57000, 10);
 
@@ -39,20 +41,6 @@ int main(int ac, char **av)
 			ports.push_back(sock2.get_fdSocket());
 
 			ClientRequest request(ports);
-			/*
-			std::vector<std::string> test;
-			test.push_back("/");
-			test.push_back("/bonjour/test");
-			test.push_back("/trois");
-			test.push_back("/un/deux/trois");
-			test.push_back("/un/deux");
-			std::cout << "url :" << request.urlParsing(test, "/trois") << std::endl;
-			std::cout << "url :" << request.urlParsing(test, "/bonjour/test/quatre/cinq/six/") << std::endl;
-			std::cout << "url :" << request.urlParsing(test, "/bonjour/test/quatre/cinq/six") << std::endl;
-			std::cout << "url :" << request.urlParsing(test, "/un/deux/trois/quatre/cinq") << std::endl;
-			std::cout << "url :" << request.urlParsing(test, "/un/deux/quatre/trois") << std::endl;
-			std::cout << "url :" << request.urlParsing(test, "/six/deux/quatre/trois") << std::endl;
-			*/
 			while (true)
 			{
 				try
@@ -75,7 +63,8 @@ int main(int ac, char **av)
 				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
 			if ((status = config.open()))
 				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
-			config.parse();
+			if ((status = config.parse()))
+				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
 		}
 	}
 	return EXIT_SUCCESS;

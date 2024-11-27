@@ -113,18 +113,217 @@ ConfigParser::ConfigError ConfigParser::parse()
 {
 	std::vector<std::string> words = split(_configFile);
 
-	// Print all words for testing purpose
 	for (std::vector<std::string>::const_iterator i = words.begin(); i != words.end(); i++)
 	{
-		Token 	token;
+		Token token;
 
 		token.value = *i;
 		token.type = getTokenType(*i);
+		if (token.type == INVALID_TOKEN)
+		{
+			std::cerr << "Syntax error : invalid token at '" << token.value << "'" << std::endl;
+			return (PARSING_ERROR);
+		}
 		_tokens.push_back(token);
-		std::cout << token.value << " Type = " << token.type << std::endl;
 	}
+	if (!parseHttp())
+		return (PARSING_ERROR);
+
+	// TESTING
+	printConfig();
 
 	return (SUCCESS);
+}
+
+bool ConfigParser::parseHttp()
+{
+	_server_id = 0;
+	_loc_id = 0;
+
+	if (!expectedAndMove(TOKEN_BLOCK_HTTP))
+		return reportSyntaxError("Config file should begin by a 'http' block");
+	if (!expectedAndMove(TOKEN_SYMBOL_OPEN_BRACE))
+		return reportSyntaxError("Expected '{' after 'http'");
+	while (!expectedTokenType(TOKEN_SYMBOL_CLOSE_BRACE))
+	{
+		if (_currentPosition >= _tokens.size())
+			return reportSyntaxError("Unexpected end of file. Missing closing bracket '}' in 'http' block.");
+		if (expectedTokenType(TOKEN_DIRECTIVE))
+		{
+			if (!parseDirective(HTTP_BLOCK))
+				return (false);
+		}
+		else if (expectedTokenType(TOKEN_BLOCK_SERVER))
+		{
+			if (!parseServer())
+				return (false);
+		}
+		else
+			return reportSyntaxError("Unexpected token in 'http' : '" + _tokens[_currentPosition].value + "'");
+	}
+	if (!expectedAndMove(TOKEN_SYMBOL_CLOSE_BRACE))
+		return reportSyntaxError("Missing closing bracket in 'http' block");
+	return (true);
+}
+
+bool ConfigParser::parseServer()
+{
+	_loc_id = 0;
+	ServerBlock server;
+	_http.servers.push_back(server);
+
+	if (!expectedAndMove(TOKEN_BLOCK_SERVER))
+		return reportSyntaxError("Server block expected instead of '" + _tokens[_currentPosition].value + "'");
+	if (!expectedAndMove(TOKEN_SYMBOL_OPEN_BRACE))
+		return reportSyntaxError("Expected '{' after 'server'");
+	while (!expectedTokenType(TOKEN_SYMBOL_CLOSE_BRACE))
+	{
+		if (_currentPosition >= _tokens.size())
+			return reportSyntaxError("Unexpected end of file. Missing closing bracket '}' in 'server' block.");
+		if (expectedTokenType(TOKEN_DIRECTIVE))
+		{
+			if (!parseDirective(SERVER_BLOCK))
+				return (false);
+		}
+		else if (expectedTokenType(TOKEN_BLOCK_LOCATION))
+		{
+			if (!parseLocation())
+				return (false);
+		}
+		else
+			return reportSyntaxError("Unexpected token in 'server' : '" + _tokens[_currentPosition].value + "'");
+	}
+	if (!expectedAndMove(TOKEN_SYMBOL_CLOSE_BRACE))
+		return reportSyntaxError("Missing closing bracket in 'server' block");
+	_server_id++;
+	return (true);
+}
+
+bool ConfigParser::parseLocation()
+{
+	LocationBlock temp;
+
+	if (!expectedTokenType(TOKEN_BLOCK_LOCATION))
+		return reportSyntaxError("Location expected instead of '" + _tokens[_currentPosition].value + "'");
+	getNextToken();
+	if (expectedTokenType(TOKEN_OPERATOR_EQUAL) || expectedTokenType(TOKEN_MODIFIER))
+	{
+		temp.modifier = _tokens[_currentPosition].value;
+		getNextToken();
+	}
+	if (expectedTokenType(TOKEN_STRING) || expectedTokenType(TOKEN_REGEX))
+		temp.uri = _tokens[_currentPosition].value;
+	else
+		return reportSyntaxError("Location URI is missing or invalid at '" + _tokens[_currentPosition].value + "'");
+	getNextToken();
+	if (!expectedAndMove(TOKEN_SYMBOL_OPEN_BRACE))
+		return reportSyntaxError("Expected '{' after 'location'");
+	_http.servers[_server_id].locations.push_back(temp);
+	while (!expectedTokenType(TOKEN_SYMBOL_CLOSE_BRACE))
+	{
+		if (!parseDirective(LOCATION_BLOCK))
+			return (false);
+	}
+	if (!expectedAndMove(TOKEN_SYMBOL_CLOSE_BRACE))
+		return reportSyntaxError("Missing closing bracket in 'location' block");
+	_loc_id++;
+	return (true);
+}
+
+bool ConfigParser::parseDirective(Context context)
+{
+	Directive temp;
+	DirArgument tempArg;
+
+	if (!expectedTokenType(TOKEN_DIRECTIVE))
+		return reportSyntaxError("Directive name expected instead of '" + _tokens[_currentPosition].value + "'");
+	temp.name = _tokens[_currentPosition].value;
+	if (!isValidArgType(getNextToken()))
+		return reportSyntaxError("Invalid type of directive argument for " + temp.name + " at '" + _tokens[_currentPosition].value + "'");
+	while (!expectedTokenType(TOKEN_SYMBOL_SEMICOLON))
+	{
+		if (_currentPosition >= _tokens.size())
+			return reportSyntaxError("Unexpected end of input in directive arguments");
+		if (!isValidArgType(_tokens[_currentPosition]))
+			return reportSyntaxError("Invalid type of directive argument for " + temp.name + " at '" + _tokens[_currentPosition].value + "'");
+		tempArg.value = _tokens[_currentPosition].value;
+		tempArg.type = _tokens[_currentPosition].type;
+		temp.arguments.push_back(tempArg);
+		getNextToken();
+	}
+	if (!validateDirective(temp))
+		return (false);
+	if (context == HTTP_BLOCK)
+		_http.directives.push_back(temp);
+	else if (context == SERVER_BLOCK)
+		_http.servers[_server_id].directives.push_back(temp);
+	else
+		_http.servers[_server_id].locations[_loc_id].directives.push_back(temp);
+	if (!expectedAndMove(TOKEN_SYMBOL_SEMICOLON))
+		return reportSyntaxError("Missing semicolon at the end of the directive '" + temp.name + "'");
+	return (true);
+}
+
+bool ConfigParser::validateDirective(Directive directive)
+{
+	int arr_size = sizeof(directives) / sizeof(DirectiveSpec);
+	DirectiveSpec current;
+	current.name = "";
+
+	if (directive.arguments.empty())
+		std::cout << "COUCOU LE CHIEN !" << std::endl;
+
+	for (int i = 0; i < arr_size; i++)
+	{
+		if (directive.name == directives[i].name)
+		{
+			current = directives[i];
+			break;
+		}
+	}
+	if (current.validator)
+	{
+		if (!(this->*current.validator)(directive.arguments, current))
+			return (false);
+	}
+	return (true);
+}
+
+bool ConfigParser::reportSyntaxError(const std::string &error)
+{
+	std::cout << "Syntax error : " << error << std::endl;
+	return (false);
+}
+
+bool ConfigParser::expectedTokenType(TokenType expectedType)
+{
+	if (_currentPosition >= _tokens.size())
+		return false;
+	return (_tokens[_currentPosition].type == expectedType);
+}
+
+Token ConfigParser::getNextToken()
+{
+	if (_currentPosition < _tokens.size())
+		_currentPosition++;
+	return (_tokens[_currentPosition]);
+}
+
+bool ConfigParser::expectedAndMove(TokenType expectedType)
+{
+	if (expectedTokenType(expectedType))
+	{
+		getNextToken();
+		return (true);
+	}
+	return (false);
+}
+
+bool ConfigParser::isValidArgType(const Token &token)
+{
+	if (token.type == TOKEN_STRING || token.type == TOKEN_STRING_QUOTED || token.type == TOKEN_NUMBER || token.type == TOKEN_NUMBER_WITH_UNIT || token.type == TOKEN_VARIABLE)
+		return (true);
+	return (false);
 }
 
 /*
@@ -138,34 +337,63 @@ std::vector<std::string> ConfigParser::split(std::ifstream &file)
 {
 	std::vector<std::string> words;
 	std::string word;
-	char ch;
+	size_t start = 0;
 
-	while (file.get(ch))
+	std::string data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+	size_t i = 0;
+	while (i < data.length())
 	{
-		if (ch == '#')
+		if (data[i] == '#')
 		{
-			while (ch != '\n')
-				file.get(ch);
-			ch++;
+			while (i < data.length() && data[i] != '\n')
+				i++;
+			i++;
 		}
-		else if (!std::isspace(ch) && ch != ';')
-			word += ch;
+		else if (data[i] == '~' || data[i] == '^')
+		{
+			start = i;
+			while (data[i] != ' ')
+				i++;
+			word = data.substr(start, i - start);
+			words.push_back(word);
+			word.clear();
+			i++;
+			start = i;
+			while (data[i] != ' ')
+				i++;
+			word = data.substr(start, i - start);
+			words.push_back(word);
+			word.clear();
+		}
+		else if (data[i] == '$')
+		{
+			start = i;
+			i++;
+			while (i < data.length() && (isalnum(data[i]) || data[i] == '_'))
+				i++;
+			word = data.substr(start, i - start);
+			words.push_back(word);
+			word.clear();
+		}
+		else if (data[i] == ';')
+		{
+			word = data[i];
+			words.push_back(word);
+			word.clear();
+			i++;
+		}
+		else if (!std::isspace(data[i]))
+		{
+			start = i;
+			while (i < data.length() && !std::isspace(data[i]) && data[i] != ';' && data[i] != '$' && data[i] != '#')
+				i++;
+			word = data.substr(start, i - start);
+			words.push_back(word);
+			word.clear();
+		}
 		else
-		{
-			if (!word.empty())
-			{
-				words.push_back(word);
-				word.clear();
-			}
-			if (ch == ';')
-			{
-				words.push_back(";");
-				word.clear();
-			}
-		}
+			i++;
 	}
-	if (!word.empty())
-		words.push_back(word);
 	return (words);
 }
 
@@ -183,21 +411,20 @@ void ConfigParser::initTokenMap()
 	_tokenMap["="] = TOKEN_OPERATOR_EQUAL;
 	_tokenMap["!="] = TOKEN_OPERATOR_NOT_EQUAL;
 
-	/* Identifiers */
-	_tokenMap["client_max_body_size"] = TOKEN_IDENTIFIER;
-	_tokenMap["error_page"] = TOKEN_IDENTIFIER;
-	_tokenMap["listen"] = TOKEN_IDENTIFIER;
-	_tokenMap["server_name"] = TOKEN_IDENTIFIER;
-	_tokenMap["root"] = TOKEN_IDENTIFIER;
-	_tokenMap["limit_except"] = TOKEN_IDENTIFIER;
-	_tokenMap["autoindex"] = TOKEN_IDENTIFIER;
-	_tokenMap["client_body_temp_path"] = TOKEN_IDENTIFIER;
-	_tokenMap["client_body_in_file_only"] = TOKEN_IDENTIFIER;
-	_tokenMap["client_max_body_size"] = TOKEN_IDENTIFIER;
-	_tokenMap["fastcgi_pass"] = TOKEN_IDENTIFIER;
-	_tokenMap["fastcgi_params"] = TOKEN_IDENTIFIER;
-	_tokenMap["include"] = TOKEN_IDENTIFIER;
-	_tokenMap["return"] = TOKEN_IDENTIFIER;
+	/* Modifiers */
+	_tokenMap["~"] = TOKEN_MODIFIER;
+	_tokenMap["~*"] = TOKEN_MODIFIER;
+	_tokenMap["^~"] = TOKEN_MODIFIER;
+}
+
+bool ConfigParser::isDirective(const std::string &word)
+{
+	for (const DirectiveSpec *it = directives; !it->name.empty(); ++it)
+	{
+		if (it->name == word)
+			return true;
+	}
+	return false;
 }
 
 int ConfigParser::isNumber(const std::string &word)
@@ -219,10 +446,20 @@ int ConfigParser::isNumber(const std::string &word)
 			return (TOKEN_NUMBER);
 		if (j == (word.length() - 1) || j == (word.length() - 2))
 		{
-			if ((j == (word.length() - 1) && isUnit(word[word.length()])) || (j == (word.length() - 2) && ((word[word.length()] == 's' && (word[word.length()] - 1) == 'm'))))
+			if (j == (word.length() - 1) && isUnit(*word.rbegin()))
 				return (TOKEN_NUMBER_WITH_UNIT);
 		}
+		return (INVALID_TOKEN);
 	}
+	return (0);
+}
+
+int ConfigParser::isOperator(const std::string &word)
+{
+	if (word == "=")
+		return (TOKEN_OPERATOR_EQUAL);
+	else if (word == "!=")
+		return (TOKEN_OPERATOR_NOT_EQUAL);
 	return (0);
 }
 
@@ -240,29 +477,36 @@ bool ConfigParser::isVariable(const std::string &word)
 	return (false);
 }
 
-int ConfigParser::isOperator(const std::string &word)
+bool ConfigParser::isRegex(const std::string &word)
 {
-	if (word == "=")
-		return (TOKEN_OPERATOR_EQUAL);
-	else if (word == "!=")
-		return (TOKEN_OPERATOR_NOT_EQUAL);
-	return (0);
+	if (word[0] == '~' || word[0] == '^')
+		return (true);
+	return (false);
+}
+
+int ConfigParser::isString(const std::string &word)
+{
+	if (word[0] == '"' || word == "'")
+	{
+		char quote_type = word[0];
+		if (word.find(quote_type, word.length()) != std::string::npos)
+			return (TOKEN_STRING_QUOTED);
+		else
+			return (INVALID_TOKEN);
+	}
+	else
+		return (TOKEN_STRING);
 }
 
 void ConfigParser::initializeUnits()
 {
+	/* SIZES */
 	_units.push_back('k');
 	_units.push_back('K');
 	_units.push_back('m');
 	_units.push_back('M');
 	_units.push_back('g');
 	_units.push_back('G');
-	_units.push_back('s');
-	_units.push_back('h');
-	_units.push_back('d');
-	_units.push_back('w');
-	_units.push_back('M');
-	_units.push_back('y');
 }
 
 bool ConfigParser::isUnit(char c) const
@@ -273,46 +517,180 @@ bool ConfigParser::isUnit(char c) const
 TokenType ConfigParser::getTokenType(const std::string &word)
 {
 	initTokenMap();
+	int ret;
 	std::map<std::string, TokenType>::iterator it = _tokenMap.find(word);
+
 	if (it != _tokenMap.end())
 		return (it->second);
-	else if (int ret = isNumber(word))
+	else if (isDirective(word))
+		return (TOKEN_DIRECTIVE);
+	else if ((ret = isNumber(word)))
 		return ((TokenType)ret);
-	else if (int ret = isOperator(word))
+	else if ((ret = isOperator(word)))
 		return ((TokenType)ret);
 	else if (isVariable(word))
 		return (TOKEN_VARIABLE);
-
+	else if (isRegex(word))
+		return (TOKEN_REGEX);
+	else if ((ret = isString(word)))
+		return ((TokenType)ret);
 	return (INVALID_TOKEN);
 }
 
-bool ConfigParser::expectedToken(const std::string &expected)
+bool ConfigParser::checkStandardDirective(const std::vector<DirArgument> &args, DirectiveSpec specs)
 {
-	if (_currentPosition >= _tokens.size())
-		return false;
-	return (_tokens[_currentPosition].value == expected);
-}
-
-void ConfigParser::getNextToken()
-{
-	if (_currentPosition < _tokens.size())
-		_currentPosition++;
-}
-
-bool ConfigParser::expectedAndMove(const std::string &expected)
-{
-	if (expectedToken(expected))
+	if (args.size() < 1 || args.size() > specs.maxArgs)
+		return (reportSyntaxError("Invalid number of arguments for " + specs.name + " directive"));
+	for (std::vector<DirArgument>::const_iterator it = args.begin(); it != args.end(); it++)
 	{
-		getNextToken();
-		return (true);
+		int i = 0;
+		int count = 0;
+		while (specs.argTypes[i] != SENTINELLE)
+		{
+			if (specs.argTypes[i] == it->type)
+				count++;
+			i++;
+		}
+		if (!count)
+			return (reportSyntaxError("Wrong type of argument: " + it->value + " for " + specs.name + " directive"));
 	}
-	return (false);
+	return (true);
 }
 
-bool ConfigParser::parsehttp()
+bool ConfigParser::checkClientMaxBodySize(const std::vector<DirArgument> &args, DirectiveSpec specs)
 {
-	// WIP
+	if (args.size() < 1 || args.size() > specs.maxArgs)
+		return (reportSyntaxError("Invalid number of arguments for " + specs.name + " directive"));
+	if (args[0].type != specs.argTypes[0])
+		return (reportSyntaxError("Wrong type of argument: " + args[0].value + " for " + specs.name + " directive"));
+	return (true);
+}
+
+bool ConfigParser::checkListen(const std::vector<DirArgument> &args, DirectiveSpec specs)
+{
+	int nb;
+	std::istringstream(args[0].value) >> nb;
+
+	if (args.size() < 1 || args.size() > specs.maxArgs)
+		return (reportSyntaxError("Invalid number of arguments for " + specs.name + " directive"));
+	if (args[0].type != TOKEN_NUMBER && (nb < 0 || nb > 65535))
+		return (reportSyntaxError("Wrong type of argument: " + args[0].value + ". Please provide a port number between 0 and 65535 for " + specs.name + " directive"));
+	if (args.size() > 1 && args[1].type != TOKEN_STRING)
+		return (reportSyntaxError("Wrong type of argument: " + args[1].value + " for " + specs.name + " directive"));
+	return (true);
+}
+
+bool ConfigParser::checkLimitExcept(const std::vector<DirArgument> &args, DirectiveSpec specs)
+{
+	static const std::string arr[] = {"GET", "POST", "PUT", "DELETE"};
+	std::vector<std::string> requests(arr, arr + sizeof(arr) / sizeof(arr[0]));
+
+	if (!checkStandardDirective(args, specs))
+		return (false);
+	int count = 0;
+	for (std::vector<DirArgument>::const_iterator it = args.begin(); it != args.end(); it++)
+	{
+		count = std::count(requests.begin(), requests.end(), it->value);
+		if (!count)
+			return (reportSyntaxError("Wrong argument: " + it->value + " for " + specs.name + " directive. It only accepts http requests."));
+	}
+	return (true);
+}
+
+bool ConfigParser::checkBoolDirective(const std::vector<DirArgument> &args, DirectiveSpec specs)
+{
+	if (args.size() < 1 || args.size() > specs.maxArgs)
+		return (reportSyntaxError("Invalid number of arguments for " + specs.name + " directive"));
+	if (args[0].type != TOKEN_STRING || (args[0].value != "on" && args[0].value != "off"))
+		return (reportSyntaxError("Wrong type of argument: " + args[0].value + " for " + specs.name + " directive. 'on' and 'off' only accepted."));
+	return (true);
+}
+
+bool ConfigParser::checkFastCgiParam(const std::vector<DirArgument> &args, DirectiveSpec specs)
+{
+	if (args[0].type != TOKEN_STRING)
+		return (reportSyntaxError("First parameter of " + specs.name + " directive should be a string"));
+	if (args.size() > specs.maxArgs)
+	{
+		int nbOfVar = 0;
+		for (std::vector<DirArgument>::const_iterator it = args.begin() + 1; it != args.end(); it++)
+		{
+			if (it->type == TOKEN_VARIABLE)
+				nbOfVar++;
+		}
+		if (!nbOfVar || (nbOfVar && (args.size() - nbOfVar) != 1))
+			return (reportSyntaxError("Invalid number of arguments for " + specs.name + " directive"));
+	}
+	return (true);
+}
+
+bool ConfigParser::checkReturn(const std::vector<DirArgument> &args, DirectiveSpec specs)
+{
+	if (args.size() < 1 || args.size() > specs.maxArgs)
+		return (reportSyntaxError("Invalid number of arguments for " + specs.name + " directive"));
+	if (args[0].type != TOKEN_NUMBER)
+		return (reportSyntaxError("Wrong type of argument: " + args[0].value + " for " + specs.name + " directive. Code (number) expected"));
+	if (args[1].type != TOKEN_STRING)
+		return (reportSyntaxError("Wrong type of argument: " + args[1].value + " for " + specs.name + " directive. URL (string) expected"));
 	return (true);
 }
 
 /* ************************************************************************** */
+
+void ConfigParser::printConfig()
+{
+
+	// Print HTTP directives
+	std::cout << "--- HTTP DIRECTIVES ---" << std::endl;
+	std::cout << std::endl;
+	for (std::vector<Directive>::const_iterator i = _http.directives.begin(); i != _http.directives.end(); i++)
+	{
+		std::cout << "Directive's name : " << i->name << std::endl;
+		std::cout << i->name << "'s aguments : " << std::endl;
+		for (std::vector<DirArgument>::const_iterator j = i->arguments.begin(); j != i->arguments.end(); j++)
+			std::cout << j->value << std::endl;
+		std::cout << std::endl;
+	}
+	std::cout << "--- END OF HTTP DIRECTIVES ---" << std::endl;
+	std::cout << std::endl;
+	// Print server blocks
+	std::cout << "--- HTTP SERVERS ---" << std::endl;
+	std::cout << std::endl;
+	for (std::vector<ServerBlock>::const_iterator i = _http.servers.begin(); i != _http.servers.end(); i++)
+	{
+		// Print server directives
+		std::cout << "--- SERVER DIRECTIVES ---" << std::endl;
+		for (std::vector<Directive>::const_iterator j = i->directives.begin(); j != i->directives.end(); j++)
+		{
+			std::cout << "Directive's name : " << j->name << std::endl;
+			std::cout << j->name << "'s aguments : " << std::endl;
+			for (std::vector<DirArgument>::const_iterator k = j->arguments.begin(); k != j->arguments.end(); k++)
+				std::cout << k->value << std::endl;
+			std::cout << std::endl;
+		}
+		std::cout << "--- END OF SERVER DIRECTIVES ---" << std::endl;
+		std::cout << std::endl;
+
+		// Print location
+		std::cout << "--- SERVER LOCATIONS ---" << std::endl;
+		for (std::vector<LocationBlock>::const_iterator j = i->locations.begin(); j != i->locations.end(); j++)
+		{
+			std::cout << "--- LOCATION INFOS ---" << std::endl;
+			std::cout << "Location modifier : " << j->modifier << std::endl;
+			std::cout << "Location URI : " << j->uri << std::endl;
+			std::cout << "--- LOCATION DIRECTIVES ---" << std::endl;
+			for (std::vector<Directive>::const_iterator k = j->directives.begin(); k != j->directives.end(); k++)
+			{
+				std::cout << "Directive's name : " << k->name << std::endl;
+				std::cout << k->name << "'s aguments : " << std::endl;
+				for (std::vector<DirArgument>::const_iterator l = k->arguments.begin(); l != k->arguments.end(); l++)
+					std::cout << l->value << std::endl;
+				std::cout << std::endl;
+			}
+		}
+		std::cout << "--- END OF OF SERVER LOCATIONS ---" << std::endl;
+		std::cout << std::endl;
+		std::cout << "--- END OF HTTP SERVER ---" << std::endl;
+		std::cout << std::endl;
+	}
+}
