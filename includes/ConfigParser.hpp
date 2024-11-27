@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 15:12:33 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/26 22:18:06 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/27 15:04:46 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,6 @@ struct DirectiveSpec
 	bool (ConfigParser::*validator)(const std::vector<DirArgument> &args, DirectiveSpec spec);
 };
 
-
 /* Parsing class */
 
 class ConfigParser
@@ -169,8 +168,11 @@ public:
 	bool parseDirective(Context context);
 	bool isValidArgType(const Token &token);
 	bool reportSyntaxError(const std::string &error);
-	void validateDirectives();
-	bool CheckClientMaxBodySize(const std::vector<DirArgument> &args, DirectiveSpec spec);
+	bool validateDirective(Directive directive);
+	bool checkStandardDirective(const std::vector<DirArgument> &args, DirectiveSpec specs);
+	bool checkClientMaxBodySize(const std::vector<DirArgument> &args, DirectiveSpec spec);
+	bool checkListen(const std::vector<DirArgument> &args, DirectiveSpec specs);
+	bool checkLimitExcept(const std::vector<DirArgument> &args, DirectiveSpec specs);
 
 	/* TESTING PURPOSE */
 	void printConfig();
@@ -195,31 +197,42 @@ std::ostream &operator<<(std::ostream &o, ConfigParser const &i);
 */
 
 static const DirectiveSpec directives[] = {
-	{"client_max_body_size",
-	 1,
-	 {TOKEN_NUMBER_WITH_UNIT, SENTINELLE},
-	 &ConfigParser::CheckClientMaxBodySize,
+	{
+		"client_max_body_size",
+		1,
+		{TOKEN_NUMBER_WITH_UNIT, SENTINELLE},
+		&ConfigParser::checkClientMaxBodySize,
 	},
-	{"error_page",
-	 1,
-	 {TOKEN_NUMBER, TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"listen",
-	 2,
-	 {TOKEN_NUMBER, SENTINELLE},
-	 nullptr},
-	{"server_name",
-	 5,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"root",
-	 1,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"limit_except",
-	 5,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
+	{
+		"error_page",
+		5,
+		{TOKEN_NUMBER, TOKEN_STRING, SENTINELLE},
+		&ConfigParser::checkStandardDirective,
+	},
+	{
+		"listen",
+		2,
+		{TOKEN_NUMBER, TOKEN_STRING, SENTINELLE},
+		&ConfigParser::checkListen,
+	},
+	{
+		"server_name",
+		5,
+		{TOKEN_STRING, SENTINELLE},
+		&ConfigParser::checkStandardDirective,
+	},
+	{
+		"root",
+		1,
+		{TOKEN_STRING, SENTINELLE},
+		&ConfigParser::checkStandardDirective,
+	},
+	{
+		"limit_except",
+		5,
+		{TOKEN_STRING, SENTINELLE},
+		&ConfigParser::checkLimitExcept,
+	},
 	{"autoindex",
 	 1,
 	 {TOKEN_STRING, SENTINELLE},

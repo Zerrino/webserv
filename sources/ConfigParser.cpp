@@ -132,9 +132,6 @@ ConfigParser::ConfigError ConfigParser::parse()
 	// TESTING
 	printConfig();
 
-	// TODO: WIP
-	validateDirectives();
-
 	return (SUCCESS);
 }
 
@@ -254,6 +251,8 @@ bool ConfigParser::parseDirective(Context context)
 		temp.arguments.push_back(tempArg);
 		getNextToken();
 	}
+	if (!validateDirective(temp))
+		return (false);
 	if (context == HTTP_BLOCK)
 		_http.directives.push_back(temp);
 	else if (context == SERVER_BLOCK)
@@ -262,6 +261,29 @@ bool ConfigParser::parseDirective(Context context)
 		_http.servers[_server_id].locations[_loc_id].directives.push_back(temp);
 	if (!expectedAndMove(TOKEN_SYMBOL_SEMICOLON))
 		return reportSyntaxError("Missing semicolon at the end of the directive '" + temp.name + "'");
+	return (true);
+}
+
+bool ConfigParser::validateDirective(Directive directive)
+{
+	int arr_size = sizeof(directives) / sizeof(DirectiveSpec);
+	DirectiveSpec current;
+	current.name = "";
+
+	for (int i = 0; i < arr_size; i++)
+	{
+		if (directive.name == directives[i].name)
+		{
+			current = directives[i];
+			break;
+		}
+	}
+	std::cout << directive.name << std::endl;
+	if (current.validator)
+	{
+		if (!(this->*current.validator)(directive.arguments, current))
+			return (false);
+	}
 	return (true);
 }
 
@@ -422,7 +444,7 @@ int ConfigParser::isNumber(const std::string &word)
 			return (TOKEN_NUMBER);
 		if (j == (word.length() - 1) || j == (word.length() - 2))
 		{
-			if ((j == (word.length() - 1) && isUnit(*word.rbegin())) || (j == (word.length() - 2) && (*word.rbegin() == 's') && (*word.rbegin() == 'm')))
+			if (j == (word.length() - 1) && isUnit(*word.rbegin()))
 				return (TOKEN_NUMBER_WITH_UNIT);
 		}
 		return (INVALID_TOKEN);
@@ -476,18 +498,13 @@ int ConfigParser::isString(const std::string &word)
 
 void ConfigParser::initializeUnits()
 {
+	/* SIZES */
 	_units.push_back('k');
 	_units.push_back('K');
 	_units.push_back('m');
 	_units.push_back('M');
 	_units.push_back('g');
 	_units.push_back('G');
-	_units.push_back('s');
-	_units.push_back('h');
-	_units.push_back('d');
-	_units.push_back('w');
-	_units.push_back('M');
-	_units.push_back('y');
 }
 
 bool ConfigParser::isUnit(char c) const
@@ -518,47 +535,66 @@ TokenType ConfigParser::getTokenType(const std::string &word)
 	return (INVALID_TOKEN);
 }
 
+bool ConfigParser::checkStandardDirective(const std::vector<DirArgument> &args, DirectiveSpec specs)
+{
+	if (args.size() > specs.maxArgs)
+		return (reportSyntaxError("Too many arguments for " + specs.name + " directive"));
+	for (std::vector<DirArgument>::const_iterator it = args.begin(); it != args.end(); it++)
+	{
+		int i = 0;
+		int count = 0;
+		while (specs.argTypes[i] != SENTINELLE)
+		{
+			if (specs.argTypes[i] == it->type)
+				count++;
+			i++;
+		}
+		if (!count)
+			return (reportSyntaxError("Wrong type of argument: " + it->value + " for " + specs.name + " directive"));
+	}
+	return (true);
+}
 
-bool ConfigParser::CheckClientMaxBodySize(const std::vector<DirArgument> &args, DirectiveSpec specs)
+bool ConfigParser::checkClientMaxBodySize(const std::vector<DirArgument> &args, DirectiveSpec specs)
 {
 	if (args.size() > specs.maxArgs)
 		return (reportSyntaxError("Too many arguments for " + specs.name + " directive"));
 	if (args[0].type != specs.argTypes[0])
-		return (reportSyntaxError("Wrong type of argument " + args[0].value));
+		return (reportSyntaxError("Wrong type of argument: " + args[0].value + " for " + specs.name + " directive"));
 	return (true);
 }
 
-bool CheckErrorPage(const std::vector<DirArgument> &args)
+bool ConfigParser::checkListen(const std::vector<DirArgument> &args, DirectiveSpec specs)
 {
-	if (args.size())
-		std::cout << "ok";
+	int nb;
+	std::istringstream(args[0].value) >> nb;
+
+	if (args.size() > specs.maxArgs)
+		return (reportSyntaxError("Too many arguments for " + specs.name + " directive"));
+	if (args[0].type != TOKEN_NUMBER && (nb < 0 || nb > 65535))
+		return (reportSyntaxError("Wrong type of argument: " + args[0].value + ". Please provide a port number between 0 and 65535 for " + specs.name + " directive"));
+	if (args.size() > 1 && args[1].type != TOKEN_STRING)
+		return (reportSyntaxError("Wrong type of argument: " + args[1].value + " for " + specs.name + " directive"));
 	return (true);
 }
 
-
-
-void ConfigParser::validateDirectives()
+bool ConfigParser::checkLimitExcept(const std::vector<DirArgument> &args, DirectiveSpec specs)
 {
+	static const std::string arr[] = {"GET", "POST", "PUT"
+													 "DELETE"};
+	std::vector<std::string> requests(arr, arr + sizeof(arr) / sizeof(arr[0]));
 
-	int arr_size = sizeof(directives) / sizeof(DirectiveSpec);
-	DirectiveSpec current;
-	current.name = "";
-
-	for (std::vector<Directive>::const_iterator itDir = _http.directives.begin(); itDir != _http.directives.end(); itDir++)
+	if (!checkStandardDirective(args, specs))
+		return (false);
+	int count = 0;
+	for (std::vector<DirArgument>::const_iterator it = args.begin(); it != args.end(); it++)
 	{
-		for (int i = 0; i < arr_size; i++)
-		{
-			if (itDir->name == directives[i].name)
-				current = directives[i];
-		}
-		if (current.name != "")
-			std::cout << current.name << std::endl;
-		 if (current.validator)
-			(this->*current.validator)(itDir->arguments, current);
-		
+		count = std::count(requests.begin(), requests.end(), it->value);
+		if (!count)
+			return (reportSyntaxError("Wrong argument: " + it->value + " for " + specs.name + " directive. It only accepts http requests."));
 	}
+	return (true);
 }
-
 
 /* ************************************************************************** */
 
