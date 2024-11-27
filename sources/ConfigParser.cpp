@@ -603,7 +603,6 @@ bool ConfigParser::checkBoolDirective(const std::vector<DirArgument> &args, Dire
 		return (reportSyntaxError("Invalid number of arguments for " + specs.name + " directive"));
 	if (args[0].type != TOKEN_STRING || (args[0].value != "on" && args[0].value != "off"))
 		return (reportSyntaxError("Wrong type of argument: " + args[0].value + " for " + specs.name + " directive. 'on' and 'off' only accepted."));
-	std::cout << "AUTOINDEX : " << args[0].value << std::endl;
 	return (true);
 }
 
@@ -619,10 +618,20 @@ bool ConfigParser::checkFastCgiParam(const std::vector<DirArgument> &args, Direc
 			if (it->type == TOKEN_VARIABLE)
 				nbOfVar++;
 		}
-		std::cout << "NbOfVar : " << nbOfVar << std::endl;
 		if (!nbOfVar || (nbOfVar && (args.size() - nbOfVar) != 1))
 			return (reportSyntaxError("Invalid number of arguments for " + specs.name + " directive"));
 	}
+	return (true);
+}
+
+bool ConfigParser::checkReturn(const std::vector<DirArgument> &args, DirectiveSpec specs)
+{
+	if (args.size() < 1 || args.size() > specs.maxArgs)
+		return (reportSyntaxError("Invalid number of arguments for " + specs.name + " directive"));
+	if (args[0].type != TOKEN_NUMBER)
+		return (reportSyntaxError("Wrong type of argument: " + args[0].value + " for " + specs.name + " directive. Code (number) expected"));
+	if (args[1].type != TOKEN_STRING)
+		return (reportSyntaxError("Wrong type of argument: " + args[1].value + " for " + specs.name + " directive. URL (string) expected"));
 	return (true);
 }
 

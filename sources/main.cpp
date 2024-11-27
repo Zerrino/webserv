@@ -6,15 +6,15 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 20:12:32 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/26 10:49:20 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/27 17:23:03 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../includes/Socket.hpp"
-# include "../includes/ClientRequest.hpp"
-# include "../includes/SendToClient.hpp"
-# include "../includes/Cookie.hpp"
-# include "../includes/ConfigParser.hpp"
+#include "../includes/Socket.hpp"
+#include "../includes/ClientRequest.hpp"
+#include "../includes/SendToClient.hpp"
+#include "../includes/Cookie.hpp"
+#include "../includes/ConfigParser.hpp"
 
 int main(int ac, char **av)
 {
@@ -63,8 +63,8 @@ int main(int ac, char **av)
 				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
 			if ((status = config.open()))
 				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
-			status = config.parse();
-			std::cout << "Status = " << status << " => Parsing ok if status = 0" <<  std::endl;
+			if ((status = config.parse()))
+				return (std::cerr << config.fetchErrorMsg(status) << std::endl, EXIT_FAILURE);
 		}
 	}
 	return EXIT_SUCCESS;

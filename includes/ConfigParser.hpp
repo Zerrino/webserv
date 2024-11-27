@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 15:12:33 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/27 16:01:31 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/27 17:21:01 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,8 +175,9 @@ public:
 	bool checkLimitExcept(const std::vector<DirArgument> &args, DirectiveSpec specs);
 	bool checkBoolDirective(const std::vector<DirArgument> &args, DirectiveSpec specs);
 	bool checkFastCgiParam(const std::vector<DirArgument> &args, DirectiveSpec specs);
+	bool checkReturn(const std::vector<DirArgument> &args, DirectiveSpec specs);
 
-	/* TESTING PURPOSE */
+	/* Debugging and testing purspose only */
 	void printConfig();
 
 private:
@@ -271,10 +272,12 @@ static const DirectiveSpec directives[] = {
 		{TOKEN_STRING, SENTINELLE},
 		&ConfigParser::checkStandardDirective,
 	},
-	{"return",
-	 2,
-	 {TOKEN_NUMBER, TOKEN_STRING, SENTINELLE},
-	 nullptr},
+	{
+		"return",
+		2,
+		{TOKEN_NUMBER, TOKEN_STRING, SENTINELLE},
+		&ConfigParser::checkReturn,
+	},
 	{
 		"include",
 		1,
