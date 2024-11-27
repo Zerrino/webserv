@@ -239,13 +239,13 @@ bool ConfigParser::parseDirective(Context context)
 		return reportSyntaxError("Directive name expected instead of '" + _tokens[_currentPosition].value + "'");
 	temp.name = _tokens[_currentPosition].value;
 	if (!isValidArgType(getNextToken()))
-		return reportSyntaxError("Invalid type of directive argument at '" + _tokens[_currentPosition].value + "'");
+		return reportSyntaxError("Invalid type of directive argument for " + temp.name + " at '" + _tokens[_currentPosition].value + "'");
 	while (!expectedTokenType(TOKEN_SYMBOL_SEMICOLON))
 	{
 		if (_currentPosition >= _tokens.size())
 			return reportSyntaxError("Unexpected end of input in directive arguments");
 		if (!isValidArgType(_tokens[_currentPosition]))
-			return reportSyntaxError("Invalid type of directive argument at '" + _tokens[_currentPosition].value + "'");
+			return reportSyntaxError("Invalid type of directive argument for " + temp.name + " at '" + _tokens[_currentPosition].value + "'");
 		tempArg.value = _tokens[_currentPosition].value;
 		tempArg.type = _tokens[_currentPosition].type;
 		temp.arguments.push_back(tempArg);
@@ -270,6 +270,9 @@ bool ConfigParser::validateDirective(Directive directive)
 	DirectiveSpec current;
 	current.name = "";
 
+	if (directive.arguments.empty())
+		std::cout << "COUCOU LE CHIEN !" << std::endl;
+
 	for (int i = 0; i < arr_size; i++)
 	{
 		if (directive.name == directives[i].name)
@@ -278,7 +281,6 @@ bool ConfigParser::validateDirective(Directive directive)
 			break;
 		}
 	}
-	std::cout << directive.name << std::endl;
 	if (current.validator)
 	{
 		if (!(this->*current.validator)(directive.arguments, current))
@@ -537,8 +539,8 @@ TokenType ConfigParser::getTokenType(const std::string &word)
 
 bool ConfigParser::checkStandardDirective(const std::vector<DirArgument> &args, DirectiveSpec specs)
 {
-	if (args.size() > specs.maxArgs)
-		return (reportSyntaxError("Too many arguments for " + specs.name + " directive"));
+	if (args.size() < 1 || args.size() > specs.maxArgs)
+		return (reportSyntaxError("Invalid number of arguments for " + specs.name + " directive"));
 	for (std::vector<DirArgument>::const_iterator it = args.begin(); it != args.end(); it++)
 	{
 		int i = 0;
@@ -557,8 +559,8 @@ bool ConfigParser::checkStandardDirective(const std::vector<DirArgument> &args, 
 
 bool ConfigParser::checkClientMaxBodySize(const std::vector<DirArgument> &args, DirectiveSpec specs)
 {
-	if (args.size() > specs.maxArgs)
-		return (reportSyntaxError("Too many arguments for " + specs.name + " directive"));
+	if (args.size() < 1 || args.size() > specs.maxArgs)
+		return (reportSyntaxError("Invalid number of arguments for " + specs.name + " directive"));
 	if (args[0].type != specs.argTypes[0])
 		return (reportSyntaxError("Wrong type of argument: " + args[0].value + " for " + specs.name + " directive"));
 	return (true);
@@ -569,8 +571,8 @@ bool ConfigParser::checkListen(const std::vector<DirArgument> &args, DirectiveSp
 	int nb;
 	std::istringstream(args[0].value) >> nb;
 
-	if (args.size() > specs.maxArgs)
-		return (reportSyntaxError("Too many arguments for " + specs.name + " directive"));
+	if (args.size() < 1 || args.size() > specs.maxArgs)
+		return (reportSyntaxError("Invalid number of arguments for " + specs.name + " directive"));
 	if (args[0].type != TOKEN_NUMBER && (nb < 0 || nb > 65535))
 		return (reportSyntaxError("Wrong type of argument: " + args[0].value + ". Please provide a port number between 0 and 65535 for " + specs.name + " directive"));
 	if (args.size() > 1 && args[1].type != TOKEN_STRING)
@@ -580,8 +582,7 @@ bool ConfigParser::checkListen(const std::vector<DirArgument> &args, DirectiveSp
 
 bool ConfigParser::checkLimitExcept(const std::vector<DirArgument> &args, DirectiveSpec specs)
 {
-	static const std::string arr[] = {"GET", "POST", "PUT"
-													 "DELETE"};
+	static const std::string arr[] = {"GET", "POST", "PUT", "DELETE"};
 	std::vector<std::string> requests(arr, arr + sizeof(arr) / sizeof(arr[0]));
 
 	if (!checkStandardDirective(args, specs))
@@ -592,6 +593,35 @@ bool ConfigParser::checkLimitExcept(const std::vector<DirArgument> &args, Direct
 		count = std::count(requests.begin(), requests.end(), it->value);
 		if (!count)
 			return (reportSyntaxError("Wrong argument: " + it->value + " for " + specs.name + " directive. It only accepts http requests."));
+	}
+	return (true);
+}
+
+bool ConfigParser::checkBoolDirective(const std::vector<DirArgument> &args, DirectiveSpec specs)
+{
+	if (args.size() < 1 || args.size() > specs.maxArgs)
+		return (reportSyntaxError("Invalid number of arguments for " + specs.name + " directive"));
+	if (args[0].type != TOKEN_STRING || (args[0].value != "on" && args[0].value != "off"))
+		return (reportSyntaxError("Wrong type of argument: " + args[0].value + " for " + specs.name + " directive. 'on' and 'off' only accepted."));
+	std::cout << "AUTOINDEX : " << args[0].value << std::endl;
+	return (true);
+}
+
+bool ConfigParser::checkFastCgiParam(const std::vector<DirArgument> &args, DirectiveSpec specs)
+{
+	if (args[0].type != TOKEN_STRING)
+		return (reportSyntaxError("First parameter of " + specs.name + " directive should be a string"));
+	if (args.size() > specs.maxArgs)
+	{
+		int nbOfVar = 0;
+		for (std::vector<DirArgument>::const_iterator it = args.begin() + 1; it != args.end(); it++)
+		{
+			if (it->type == TOKEN_VARIABLE)
+				nbOfVar++;
+		}
+		std::cout << "NbOfVar : " << nbOfVar << std::endl;
+		if (!nbOfVar || (nbOfVar && (args.size() - nbOfVar) != 1))
+			return (reportSyntaxError("Invalid number of arguments for " + specs.name + " directive"));
 	}
 	return (true);
 }

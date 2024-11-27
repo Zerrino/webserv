@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 15:12:33 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/27 15:04:46 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/27 16:01:31 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,6 +173,8 @@ public:
 	bool checkClientMaxBodySize(const std::vector<DirArgument> &args, DirectiveSpec spec);
 	bool checkListen(const std::vector<DirArgument> &args, DirectiveSpec specs);
 	bool checkLimitExcept(const std::vector<DirArgument> &args, DirectiveSpec specs);
+	bool checkBoolDirective(const std::vector<DirArgument> &args, DirectiveSpec specs);
+	bool checkFastCgiParam(const std::vector<DirArgument> &args, DirectiveSpec specs);
 
 	/* TESTING PURPOSE */
 	void printConfig();
@@ -233,36 +235,50 @@ static const DirectiveSpec directives[] = {
 		{TOKEN_STRING, SENTINELLE},
 		&ConfigParser::checkLimitExcept,
 	},
-	{"autoindex",
-	 1,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"client_body_temp_path",
-	 1,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"client_body_in_file_only",
-	 1,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"fastcgi_pass",
-	 1,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
-	{"fastcgi_param",
-	 1,
-	 {TOKEN_STRING, TOKEN_VARIABLE, SENTINELLE},
-	 nullptr},
-	{"index",
-	 5,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
+	{
+		"autoindex",
+		1,
+		{TOKEN_STRING, SENTINELLE},
+		&ConfigParser::checkBoolDirective,
+	},
+	{
+		"client_body_temp_path",
+		1,
+		{TOKEN_STRING, SENTINELLE},
+		&ConfigParser::checkStandardDirective,
+	},
+	{
+		"client_body_in_file_only",
+		1,
+		{TOKEN_STRING, SENTINELLE},
+		&ConfigParser::checkBoolDirective,
+	},
+	{
+		"fastcgi_pass",
+		1,
+		{TOKEN_STRING, SENTINELLE},
+		&ConfigParser::checkStandardDirective,
+	},
+	{
+		"fastcgi_param",
+		2,
+		{TOKEN_STRING, TOKEN_VARIABLE, SENTINELLE},
+		&ConfigParser::checkFastCgiParam,
+	},
+	{
+		"index",
+		5,
+		{TOKEN_STRING, SENTINELLE},
+		&ConfigParser::checkStandardDirective,
+	},
 	{"return",
 	 2,
 	 {TOKEN_NUMBER, TOKEN_STRING, SENTINELLE},
 	 nullptr},
-	{"include",
-	 1,
-	 {TOKEN_STRING, SENTINELLE},
-	 nullptr},
+	{
+		"include",
+		1,
+		{TOKEN_STRING, SENTINELLE},
+		&ConfigParser::checkStandardDirective,
+	},
 };
