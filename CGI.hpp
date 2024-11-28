@@ -13,14 +13,15 @@
 
 class CGI {
 	public:
-		CGI(const std::string type, const HTTPRequest& request, int fd);
+		CGI(const std::string suffix, const std::string cmd, const HTTPRequest& request, int fd);
 		~CGI();
 
 		int execute();
 
 	private:
 		HTTPRequest _request;
-		std::string _type;
+		std::string _suffix;
+		std::string _cmd;
 		int _fd;
 
 		bool createPipes(int pipe_in[2], int pipe_out[2]);

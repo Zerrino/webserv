@@ -68,6 +68,7 @@
 		"numeric": "cpp",
 		"random": "cpp",
 		"string_view": "cpp",
-		"numbers": "cpp"
+		"numbers": "cpp",
+		"ranges": "cpp"
 	}
 }

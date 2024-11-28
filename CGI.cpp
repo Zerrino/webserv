@@ -1,6 +1,6 @@
 #include "CGI.hpp"
 
-CGI::CGI(const std::string type, const HTTPRequest& request, int fd): _type(type), _request(request), _fd(fd) {}
+CGI::CGI(const std::string suffix, const std::string cmd, const HTTPRequest& request, int fd): _suffix(suffix), _cmd(cmd), _request(request), _fd(fd) {}
 
 CGI::~CGI() {}
 
@@ -62,27 +62,8 @@ void CGI::sendResponse(const std::string& result) const {
 }
 
 int CGI::execute() {
-    if (_type != "PHP" && _type != "PYTHON")
-        return 1;
-
     std::string localPath, fileToExecute;
     splitPath(_request.getUrl(), localPath, fileToExecute);
-
-    std::string cmd;
-    if(_type == "PHP"){ 
-        cmd = "php-cgi";
-        if(!isPHPInstalled()){
-            std::cerr << "Error: php-cgi is not installed.";
-            return 1;
-        }
-    }
-	else if(_type == "PYTHON"){ 
-        cmd = "python3";
-        if(!isPythonInstalled()){
-            std::cerr << "Error: python3 is not installed.";
-            return 1;
-        }
-    };
 
     int pipe_in[2], pipe_out[2];
     if (!createPipes(pipe_in, pipe_out)) {
@@ -103,7 +84,7 @@ int CGI::execute() {
         chdir(localPath.c_str());
         setEnvironmentVariables(localPath, fileToExecute);
 
-        execlp(cmd.c_str(), cmd.c_str(), fileToExecute.c_str(), (char*)NULL);
+        execlp(_cmd.c_str(), _cmd.c_str(), fileToExecute.c_str(), (char*)NULL);
         exit(1);
     } else if (pid > 0) {
         close(pipe_in[0]);
