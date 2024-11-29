@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 15:12:33 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/28 21:28:23 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/11/29 22:40:49 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,8 +227,8 @@ static const DirectiveSpec directives[] = {
 	},
 	{
 		"root",
-		1,
-		{TOKEN_STRING, SENTINELLE},
+		2,
+		{TOKEN_STRING, TOKEN_VARIABLE, SENTINELLE},
 		&ConfigParser::checkStandardDirective,
 	},
 	{

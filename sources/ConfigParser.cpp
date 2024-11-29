@@ -132,7 +132,7 @@ ConfigParser::ConfigError ConfigParser::parse()
 		return (PARSING_ERROR);
 
 	// TESTING
-	// printConfig();
+	printConfig();
 
 	return (SUCCESS);
 }
@@ -695,7 +695,6 @@ bool ConfigParser::checkReturn(const std::vector<DirArgument> &args, DirectiveSp
 
 void ConfigParser::printConfig()
 {
-
 	// Print HTTP directives
 	std::cout << "--- HTTP DIRECTIVES ---" << std::endl;
 	std::cout << std::endl;
