@@ -1,5 +1,5 @@
 <?php
-$path = $_SERVER["DOCUMENT_ROOT"]; // Chemin du dossier à lister, ici dossier racine (data)
+$path = $_SERVER["DOCUMENT_ROOT"]; // Chemin du dossier à lister, ici dossier racine (data). 
 $files = scandir($path);
 
 $result = [];
