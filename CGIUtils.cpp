@@ -9,7 +9,7 @@ int CGIchecker(std::string clientInfo, std::string PATH_ABS, int fd){
         std::string suffix = mainRequest.getUrl().substr(pos + 1);
         if(getTypeName(suffix) == "NULL")
             return 2;
-        CGI cgi(getTypeName(suffix), mainRequest, fd);
+        CGI cgi(getTypeName(suffix), getTypeCommand(suffix), mainRequest, fd);
         return cgi.execute();
     } else return 2;
 }
@@ -29,6 +29,13 @@ std::string getTypeName(std::string suffix) {
     return "NULL";
 }
 
+std::string getTypeCommand(std::string suffix) {
+    if (suffix == "php") return "php-cgi";
+    if (suffix == "phtml") return "python3";
+    if (suffix == "py") return "PYTHON";
+    return "NULL";
+}
+
 
 void splitPath(const std::string& fullPath, std::string& path, std::string& file) {
     std::size_t lastSlashPos = fullPath.find_last_of("/");
@@ -42,13 +49,6 @@ void splitPath(const std::string& fullPath, std::string& path, std::string& file
     }
 }
 
-bool isPHPInstalled() {
-    return std::system("php-cgi -v > /dev/null 2>&1") == 0;
-}
-
-bool isPythonInstalled() {
-    return std::system("python3 -V >nul 2>nul") == 0;
-}
 
 int stoi(std::string s) {
     int i;

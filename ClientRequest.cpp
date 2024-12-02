@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/02 15:38:55 by root             ###   ########.fr       */
+/*   Updated: 2024/12/02 16:32:50 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ void	ClientRequest::pollExecute()
 
 				std::string PATH_ABS = "/var/www/html";
 				PATH_ABS.append(str);
-				std::cout << PATH_ABS << std::endl;
+				std::cout << "0 " << PATH_ABS << std::endl;
 				if (str == "")
 				{}
 				else if (str == "/")
@@ -86,7 +86,7 @@ void	ClientRequest::pollExecute()
 					std::string file_index = "index.html";
 					PATH_ABS.append("src/");
 					PATH_ABS.append(file_index);
-					std::cout << PATH_ABS << std::endl;
+					std::cout << "1 " << PATH_ABS << std::endl;
 					
 					int cgi = CGIchecker(this->_clientInfo, PATH_ABS, this->_fds[i].fd);
 					if(cgi == 2){
@@ -104,6 +104,8 @@ void	ClientRequest::pollExecute()
 						write(this->_fds[i].fd, req.c_str(), req.length());
 					} else if (cgi == 1)
 						std::cerr << "Error while executing CGI request." << std::endl;
+					else if (cgi == 0)
+						std::cerr << "Execution complete." << std::endl;
 				}
 				else if (request_done)
 				{
