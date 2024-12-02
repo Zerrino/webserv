@@ -49,3 +49,9 @@ bool isPHPInstalled() {
 bool isPythonInstalled() {
     return std::system("python3 -V >nul 2>nul") == 0;
 }
+
+int stoi(std::string s) {
+    int i;
+    std::istringstream(s) >> i;
+    return i;
+}

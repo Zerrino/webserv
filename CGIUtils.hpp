@@ -15,5 +15,6 @@ std::string getTypeName(std::string suffix);
 void splitPath(const std::string& fullPath, std::string& path, std::string& file);
 bool isPHPInstalled();
 bool isPythonInstalled();
+int stoi(std::string s);
 
 #endif

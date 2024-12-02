@@ -6,44 +6,11 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/22 12:17:57 by root             ###   ########.fr       */
+/*   Updated: 2024/12/02 15:38:55 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ClientRequest.hpp"
-
-std::string getTestRequestGETPYTHON() {
-    return "POST /hello.py HTTP/1.1\n"
-           "Host: example.com\n"
-           "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36\n"
-           "Content-Type: application/x-www-form-urlencoded\n"
-           "Content-Length: 28\n"
-           "Connection: keep-alive\n\n"
-           "body=alice";
-}
-
-std::string getTestRequestPOSTPHP(std::string info) {
-    return "POST / HTTP/1.1\n"
-			"Host: localhost:5000\n"
-			"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0\n"
-			"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n"
-			"Accept-Language: fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3\n"
-			"Accept-Encoding: gzip, deflate, br, zstd\n"
-			"Content-Type: application/x-www-form-urlencoded\n"
-			"Content-Length: 8\n"
-			"Origin: http://localhost:5000\n"
-			"DNT: 1\n"
-			"Connection: keep-alive\n"
-			"Referer: http://localhost:5000/\n"
-			"Cookie: PHPSESSID=0op581bmb0jflctvek4uidgqhb\n"
-			"Upgrade-Insecure-Requests: 1\n"
-			"Sec-Fetch-Dest: document\n"
-			"Sec-Fetch-Mode: navigate\n"
-			"Sec-Fetch-Site: same-origin\n"
-			"Sec-Fetch-User: ?1\n"
-			"Priority: u=0, i\n\n"
-			"name=hey";
-}
 
 ClientRequest::ClientRequest(std::vector<int> fdSocket)
 	:	SendToClient(), _fdSocket(fdSocket)
@@ -109,26 +76,54 @@ void	ClientRequest::pollExecute()
 					else flag = 1;
 				}
 
-				std::string PATH_ABS = "/var/www/html/data";
+				std::string PATH_ABS = "/var/www/html";
 				PATH_ABS.append(str);
 				std::cout << PATH_ABS << std::endl;
 				if (str == "")
 				{}
 				else if (str == "/")
 				{
-					std::string file_index = "welcome.php";
+					std::string file_index = "index.html";
 					PATH_ABS.append("src/");
 					PATH_ABS.append(file_index);
 					std::cout << PATH_ABS << std::endl;
 					
 					int cgi = CGIchecker(this->_clientInfo, PATH_ABS, this->_fds[i].fd);
-					if(cgi == 2)
+					if(cgi == 2){
 						std::cerr << "File is not php or py and can't be handled by the CGI." << std::endl;
-					else if (cgi == 1)
+						std::string req = "HTTP/1.1 200 OK\r\n";
+						req.append(getDate());
+						req.append("Set-Cookie: session_id=");
+						req.append(createCookieId());
+						req.append("; HttpOnly\r\n");
+						std::string file = getFile(PATH_ABS);
+						req.append(getContentType(PATH_ABS));
+						req.append(this->_length);
+						req.append("\r\n\r\n");
+						req.append(file);
+						write(this->_fds[i].fd, req.c_str(), req.length());
+					} else if (cgi == 1)
 						std::cerr << "Error while executing CGI request." << std::endl;
 				}
 				else if (request_done)
 				{
+					int cgi = CGIchecker(this->_clientInfo, PATH_ABS, this->_fds[i].fd);
+					if(cgi == 2){
+						std::cerr << "File is not php or py and can't be handled by the CGI." << std::endl;
+						std::string req = "HTTP/1.1 200 OK\r\n";
+						req.append(getDate());
+						req.append("Set-Cookie: session_id=");
+						req.append(createCookieId());
+						req.append("; HttpOnly\r\n");
+						std::string file = getFile(PATH_ABS);
+						req.append(getContentType(PATH_ABS));
+						req.append(this->_length);
+						req.append("\r\n\r\n");
+						req.append(file);
+						write(this->_fds[i].fd, req.c_str(), req.length());
+					} else if (cgi == 1)
+						std::cerr << "Error while executing CGI request." << std::endl;
+						
 					cook = isCookied(this->_clientInfo);
 					//std::cout << isRegister(getRequestData(rest)) << std::endl;
 					//std::cout << "cookie : " << cook << std::endl;
@@ -143,12 +138,30 @@ void	ClientRequest::pollExecute()
 				}
 				else // SI aucune informations en plus
 				{
-					std::string content = getContentType(PATH_ABS);
-					cook = isCookied(this->_clientInfo);
-					//std::cout << "Cookie " << cook << " is " << isCookies("login", "true", cook) << std::endl;
-					// std::cout << PATH_ABS << std::endl;
-					// if ((content != "Content-Type: text/html\r\n") || (isCookies("login", "true", cook) == 1))
-						this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
+
+					int cgi = CGIchecker(this->_clientInfo, PATH_ABS, this->_fds[i].fd);
+					if(cgi == 2){
+						std::cerr << "File is not php or py and can't be handled by the CGI." << std::endl;
+						std::string req = "HTTP/1.1 200 OK\r\n";
+						req.append(getDate());
+						req.append("Set-Cookie: session_id=");
+						req.append(createCookieId());
+						req.append("; HttpOnly\r\n");
+						std::string file = getFile(PATH_ABS);
+						req.append(getContentType(PATH_ABS));
+						req.append(this->_length);
+						req.append("\r\n\r\n");
+						req.append(file);
+						write(this->_fds[i].fd, req.c_str(), req.length());
+					} else if (cgi == 1)
+						std::cerr << "Error while executing CGI request." << std::endl;
+
+					// std::string content = getContentType(PATH_ABS);
+					// cook = isCookied(this->_clientInfo);
+					// //std::cout << "Cookie " << cook << " is " << isCookies("login", "true", cook) << std::endl;
+					// // std::cout << PATH_ABS << std::endl;
+					// // if ((content != "Content-Type: text/html\r\n") || (isCookies("login", "true", cook) == 1))
+					// 	this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
 					// else
 					// 	this->sendClient(this->_fds[i].fd, 302, "/"); // redirige si il essaye d'aller autre pars que le debut .html et est pas login
 				}

@@ -46,14 +46,30 @@ void CGI::parseResult(const std::string& data, std::map<std::string, std::string
     }
 }
 
+void setStatus(std::string str, int &code, std::string &msg){
+    size_t spacePos = str.find(' ');
+    code = stoi(str.substr(0, spacePos));
+    msg = str.substr(spacePos + 1);
+}
+
 void CGI::sendResponse(const std::string& result) const {
     std::map<std::string, std::string> headers;
     std::string body;
+    int status_code = 200;
+    std::string status_message = "OK";
     parseResult(result, headers, body);
 
+    if(headers.size() > 0){
+        if (headers.find("Status") != headers.end()){
+            setStatus(headers["Status"], status_code, status_message);
+            headers.erase("Status");
+        }
+    }
+
     HTTPRequest resultRequest;
-    resultRequest.setStatusCode(200);
-    resultRequest.setStatusMessage("OK");
+    resultRequest.setStatusCode(status_code);
+    resultRequest.setStatusMessage(status_message);
+    std::cout << status_code << std::endl;
     resultRequest.setVersion("HTTP/1.1");
     resultRequest.setHeaders(headers);
     resultRequest.setBody(body);
@@ -67,7 +83,6 @@ int CGI::execute() {
 
     std::string localPath, fileToExecute;
     splitPath(_request.getUrl(), localPath, fileToExecute);
-
     std::string cmd;
     if(_type == "PHP"){ 
         cmd = "php-cgi";
@@ -120,7 +135,6 @@ int CGI::execute() {
             result.append(buffer, bytesRead);
         }
         close(pipe_out[0]);
-
         int status;
         waitpid(pid, &status, 0);
         sendResponse(result);
