@@ -1,6 +1,6 @@
 #include "CGI.hpp"
 
-CGI::CGI(const std::string suffix, const std::string cmd, const HTTPRequest& request, int fd): _suffix(suffix), _cmd(cmd), _request(request), _fd(fd) {}
+CGI::CGI(const std::string suffix, const std::string cmd, const CGIRequest& request, int fd): _suffix(suffix), _cmd(cmd), _request(request), _fd(fd) {}
 
 CGI::~CGI() {}
 
@@ -66,7 +66,7 @@ void CGI::sendResponse(const std::string& result) const {
         }
     }
 
-    HTTPRequest resultRequest;
+    CGIRequest resultRequest;
     resultRequest.setStatusCode(status_code);
     resultRequest.setStatusMessage(status_message);
     std::cout << status_code << std::endl;

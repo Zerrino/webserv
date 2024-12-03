@@ -1,5 +1,5 @@
-#ifndef HTTPREQUEST_HPP
-#define HTTPREQUEST_HPP
+#ifndef CGIREQUEST_HPP
+#define CGIREQUEST_HPP
 
 #include <string>
 #include <map>
@@ -8,11 +8,11 @@
 #include <iostream>
 # include "webserv.hpp"
 
-class HTTPRequest {
+class CGIRequest {
 	public:
-		HTTPRequest();
-		HTTPRequest(const std::string& request);
-		~HTTPRequest();
+		CGIRequest();
+		CGIRequest(const std::string& request);
+		~CGIRequest();
 
 		void send(int fd) const;
 		void setENVs() const;

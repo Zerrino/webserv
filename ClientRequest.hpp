@@ -15,7 +15,7 @@
 # include "webserv.hpp"
 # include "SendToClient.hpp"
 # include "Cookie.hpp"
-# include "HTTPRequest.hpp"
+# include "CGIRequest.hpp"
 # include "CGI.hpp"
 
 class	ClientRequest : public SendToClient, public Cookie

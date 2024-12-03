@@ -1,7 +1,7 @@
 #include "CGIUtils.hpp"
 
 int CGIchecker(std::string clientInfo, std::string PATH_ABS, int fd){
-    HTTPRequest mainRequest = HTTPRequest(clientInfo);
+    CGIRequest mainRequest = CGIRequest(clientInfo);
 
     mainRequest.setUrl(PATH_ABS);
     size_t pos = mainRequest.getUrl().rfind('.');
@@ -14,7 +14,7 @@ int CGIchecker(std::string clientInfo, std::string PATH_ABS, int fd){
     } else return 2;
 }
 
-std::string getTypeName(Types type) {
+std::string getTypeName(Types type) { //TODO to remove
     switch (type) {
         case PHP:    return "PHP";
         case PYTHON: return "PYTHON";
@@ -22,14 +22,14 @@ std::string getTypeName(Types type) {
     }
 }
 
-std::string getTypeName(std::string suffix) {
+std::string getTypeName(std::string suffix) { //TODO to remove
     if (suffix == "php") return "PHP";
     if (suffix == "phtml") return "PHP";
     if (suffix == "py") return "PYTHON";
     return "NULL";
 }
 
-std::string getTypeCommand(std::string suffix) {
+std::string getTypeCommand(std::string suffix) { //TODO to remove
     if (suffix == "php") return "php-cgi";
     if (suffix == "phtml") return "python3";
     if (suffix == "py") return "PYTHON";

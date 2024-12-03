@@ -1,18 +1,18 @@
-#include "HTTPRequest.hpp"
+#include "CGIRequest.hpp"
 
-HTTPRequest::HTTPRequest() {
+CGIRequest::CGIRequest() {
     _method = "";
     _url = "";
     _version = "";
     _body = "";
 }
 
-HTTPRequest::HTTPRequest(const std::string& request) {
+CGIRequest::CGIRequest(const std::string& request) {
     parseRequest(request);
 }
-HTTPRequest::~HTTPRequest() {}
+CGIRequest::~CGIRequest() {}
 
-void HTTPRequest::send(int fd) const {
+void CGIRequest::send(int fd) const {
 	std::string frequest;
 	frequest.append(getVersion() + " " + getStatusCodeString() + " " + getStatusMessage() + "\r\n");
 	std::map<std::string, std::string>::const_iterator it = _headers.begin();
@@ -24,7 +24,7 @@ void HTTPRequest::send(int fd) const {
 	write(fd, frequest.c_str(), frequest.length());
 }
 
-void HTTPRequest::setENVs() const {
+void CGIRequest::setENVs() const {
     setenv("REQUEST_METHOD", _method.c_str(), 1);
     setenv("REDIRECT_STATUS", "", 1);
     std::map<std::string, std::string>::const_iterator it = _headers.begin();
@@ -45,7 +45,7 @@ void HTTPRequest::setENVs() const {
     }
 }
 
-std::string HTTPRequest::reformat_request(const std::string& input) {
+std::string CGIRequest::reformat_request(const std::string& input) {
     std::string result = "";
     for (size_t i = 0; i < input.length(); ++i) {
         if (input[i] != '\r')
@@ -54,7 +54,7 @@ std::string HTTPRequest::reformat_request(const std::string& input) {
     return result;
 }
 
-void HTTPRequest::parseRequest(const std::string& request) {
+void CGIRequest::parseRequest(const std::string& request) {
     std::string fRequest = reformat_request(request);
     std::istringstream stream(fRequest);
     std::string line;
@@ -79,14 +79,14 @@ void HTTPRequest::parseRequest(const std::string& request) {
         _body = line;
 }
 
-std::string HTTPRequest::getHeader(std::string headerName) const {
+std::string CGIRequest::getHeader(std::string headerName) const {
     std::map<std::string, std::string>::const_iterator it = _headers.find(headerName);
     if (it != _headers.end())
         return it->second;
     return "";
 }
 
-void HTTPRequest::setHeader(std::string headerName, std::string headerValue){
+void CGIRequest::setHeader(std::string headerName, std::string headerValue){
 std::map<std::string, std::string>::const_iterator it = _headers.find(headerName);
 	if (it != _headers.end()) 
 		_headers[headerName] = headerValue;
@@ -94,7 +94,7 @@ std::map<std::string, std::string>::const_iterator it = _headers.find(headerName
 		_headers.insert(std::make_pair(headerName, headerValue));
 }
 
-void HTTPRequest::setHeader(std::string fullValue){
+void CGIRequest::setHeader(std::string fullValue){
 	std::string key;
 	std::string value;
 	size_t colonPos = fullValue.find(":");
@@ -110,23 +110,23 @@ void HTTPRequest::setHeader(std::string fullValue){
 }
 
 
-std::string HTTPRequest::getMethod() const { return _method; }
-std::string HTTPRequest::getUrl() const { return _url; }
-std::string HTTPRequest::getVersion() const { return _version; }
-const std::map<std::string, std::string>& HTTPRequest::getHeaders() const { return _headers; }
-std::string HTTPRequest::getBody() const { return _body; }
-int HTTPRequest::getStatusCode() const { return _status_code; }
-std::string HTTPRequest::getStatusCodeString() const { 
+std::string CGIRequest::getMethod() const { return _method; }
+std::string CGIRequest::getUrl() const { return _url; }
+std::string CGIRequest::getVersion() const { return _version; }
+const std::map<std::string, std::string>& CGIRequest::getHeaders() const { return _headers; }
+std::string CGIRequest::getBody() const { return _body; }
+int CGIRequest::getStatusCode() const { return _status_code; }
+std::string CGIRequest::getStatusCodeString() const { 
 	std::stringstream ss;
 	ss << _status_code;
 	return ss.str();
 }
-std::string HTTPRequest::getStatusMessage() const { return _status_message; }
+std::string CGIRequest::getStatusMessage() const { return _status_message; }
 
-void HTTPRequest::setMethod(std::string method) { _method = method; }
-void HTTPRequest::setUrl(std::string url) { _url = url; }
-void HTTPRequest::setVersion(std::string version) { _version = version; }
-void HTTPRequest::setHeaders(const std::map<std::string, std::string>& headers) { _headers = headers; }
-void HTTPRequest::setBody(std::string body) { _body = body; }
-void HTTPRequest::setStatusCode(int code) { _status_code = code; }
-void HTTPRequest::setStatusMessage(std::string message) { _status_message = message; }
+void CGIRequest::setMethod(std::string method) { _method = method; }
+void CGIRequest::setUrl(std::string url) { _url = url; }
+void CGIRequest::setVersion(std::string version) { _version = version; }
+void CGIRequest::setHeaders(const std::map<std::string, std::string>& headers) { _headers = headers; }
+void CGIRequest::setBody(std::string body) { _body = body; }
+void CGIRequest::setStatusCode(int code) { _status_code = code; }
+void CGIRequest::setStatusMessage(std::string message) { _status_message = message; }

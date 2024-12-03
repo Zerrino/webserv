@@ -28,7 +28,7 @@ SOURCES := \
 	 Cookie.cpp \
 	 CGI.cpp \
 	 Socket.cpp \
-	 HTTPRequest.cpp \
+	 CGIRequest.cpp \
 	 CGIUtils.cpp \
 	 main.cpp
 	 

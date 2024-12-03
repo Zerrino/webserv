@@ -8,18 +8,18 @@
 #include <sys/wait.h>
 #include <sstream>
 #include <cstdlib>
-#include "HTTPRequest.hpp"
+#include "CGIRequest.hpp"
 #include "CGIUtils.hpp"
 
 class CGI {
 	public:
-		CGI(const std::string suffix, const std::string cmd, const HTTPRequest& request, int fd);
+		CGI(const std::string suffix, const std::string cmd, const CGIRequest& request, int fd);
 		~CGI();
 
 		int execute();
 
 	private:
-		HTTPRequest _request;
+		CGIRequest _request;
 		std::string _suffix;
 		std::string _cmd;
 		int _fd;

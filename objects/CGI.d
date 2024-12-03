@@ -1,5 +1,5 @@
-objects/CGI.o: CGI.cpp CGI.hpp HTTPRequest.hpp webserv.hpp CGIUtils.hpp
+objects/CGI.o: CGI.cpp CGI.hpp CGIRequest.hpp webserv.hpp CGIUtils.hpp
 CGI.hpp:
-HTTPRequest.hpp:
+CGIRequest.hpp:
 webserv.hpp:
 CGIUtils.hpp:
