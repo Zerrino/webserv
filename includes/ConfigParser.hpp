@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 15:12:33 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/27 17:21:01 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/03 10:08:02 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ struct DirectiveSpec
 	std::string name;
 	size_t maxArgs;
 	TokenType argTypes[5];
-	bool (ConfigParser::*validator)(const std::vector<DirArgument> &args, DirectiveSpec spec);
+	bool (ConfigParser::*validator)(std::vector<DirArgument> &args, DirectiveSpec spec);
 };
 
 /* Parsing class */
@@ -168,14 +168,22 @@ public:
 	bool parseDirective(Context context);
 	bool isValidArgType(const Token &token);
 	bool reportSyntaxError(const std::string &error);
-	bool validateDirective(Directive directive);
-	bool checkStandardDirective(const std::vector<DirArgument> &args, DirectiveSpec specs);
-	bool checkClientMaxBodySize(const std::vector<DirArgument> &args, DirectiveSpec spec);
-	bool checkListen(const std::vector<DirArgument> &args, DirectiveSpec specs);
-	bool checkLimitExcept(const std::vector<DirArgument> &args, DirectiveSpec specs);
-	bool checkBoolDirective(const std::vector<DirArgument> &args, DirectiveSpec specs);
-	bool checkFastCgiParam(const std::vector<DirArgument> &args, DirectiveSpec specs);
-	bool checkReturn(const std::vector<DirArgument> &args, DirectiveSpec specs);
+	bool validateDirective(Directive &directive);
+	bool checkStandardDirective(std::vector<DirArgument> &args, DirectiveSpec specs);
+	bool checkClientMaxBodySize(std::vector<DirArgument> &args, DirectiveSpec spec);
+	bool checkListen(std::vector<DirArgument> &args, DirectiveSpec specs);
+	bool checkLimitExcept(std::vector<DirArgument> &args, DirectiveSpec specs);
+	bool checkBoolDirective(std::vector<DirArgument> &args, DirectiveSpec specs);
+	bool checkFastCgiParam(std::vector<DirArgument> &args, DirectiveSpec specs);
+	bool checkCgiPath(std::vector<DirArgument> &args, DirectiveSpec specs);
+	bool fileExistsAndAccessible(const std::string &filepath, const DirectiveSpec &specs);
+    std::string getEnvVariable(const char *varName);
+    std::vector<std::string> splitPaths(const std::string &pathsStr);
+	bool checkReturn(std::vector<DirArgument> &args, DirectiveSpec specs);
+	bool checkRoot(std::vector<DirArgument> &args, DirectiveSpec specs);
+	template <typename T>
+	void expandArg(std::vector<DirArgument> &args, T newVal);
+	std::string convertInBytes(std::string number);
 
 	/* Debugging and testing purspose only */
 	void printConfig();
@@ -203,7 +211,7 @@ static const DirectiveSpec directives[] = {
 	{
 		"client_max_body_size",
 		1,
-		{TOKEN_NUMBER_WITH_UNIT, SENTINELLE},
+		{TOKEN_NUMBER_WITH_UNIT, TOKEN_NUMBER, SENTINELLE},
 		&ConfigParser::checkClientMaxBodySize,
 	},
 	{
@@ -226,9 +234,9 @@ static const DirectiveSpec directives[] = {
 	},
 	{
 		"root",
-		1,
-		{TOKEN_STRING, SENTINELLE},
-		&ConfigParser::checkStandardDirective,
+		2,
+		{TOKEN_STRING, TOKEN_VARIABLE, SENTINELLE},
+		&ConfigParser::checkRoot,
 	},
 	{
 		"limit_except",
@@ -255,15 +263,9 @@ static const DirectiveSpec directives[] = {
 		&ConfigParser::checkBoolDirective,
 	},
 	{
-		"fastcgi_pass",
-		1,
-		{TOKEN_STRING, SENTINELLE},
-		&ConfigParser::checkStandardDirective,
-	},
-	{
 		"fastcgi_param",
 		2,
-		{TOKEN_STRING, TOKEN_VARIABLE, SENTINELLE},
+		{TOKEN_STRING, TOKEN_VARIABLE,  SENTINELLE},
 		&ConfigParser::checkFastCgiParam,
 	},
 	{

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 20:12:32 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/27 21:10:47 by marvin           ###   ########.fr       */
+/*   Updated: 2024/11/27 17:23:03 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,12 @@ int main(int ac, char **av)
 			Socket sock(AF_INET, SOCK_STREAM, 0);
 			sock.runSocket(57000, 10);
 
-			Socket sock2(AF_INET, SOCK_STREAM, 0);
-			sock2.runSocket(50000, 10);
+			// Socket sock2(AF_INET, SOCK_STREAM, 0);
+			// sock2.runSocket(5000, 10);
 
 			std::vector<int> ports;
 			ports.push_back(sock.get_fdSocket());
-			ports.push_back(sock2.get_fdSocket());
+			// ports.push_back(sock2.get_fdSocket());
 
 			ClientRequest request(ports);
 			while (true)
