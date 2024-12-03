@@ -130,6 +130,7 @@ ConfigParser::ConfigError ConfigParser::parse()
 	}
 	if (!parseHttp())
 		return (PARSING_ERROR);
+	_configFile.close();
 
 	// TESTING
 	printConfig();
