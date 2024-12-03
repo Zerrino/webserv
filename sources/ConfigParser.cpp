@@ -504,8 +504,6 @@ void ConfigParser::initializeUnits()
 	_units.push_back('K');
 	_units.push_back('m');
 	_units.push_back('M');
-	_units.push_back('g');
-	_units.push_back('G');
 }
 
 bool ConfigParser::isUnit(char c) const
@@ -560,13 +558,27 @@ bool ConfigParser::checkStandardDirective(std::vector<DirArgument> &args, Direct
 
 bool ConfigParser::checkClientMaxBodySize(std::vector<DirArgument> &args, DirectiveSpec specs)
 {
-	if (args.size() < 1 || args.size() > specs.maxArgs)
-		return (reportSyntaxError(
-			"Invalid number of arguments for " + specs.name + " directive"));
-	if (args[0].type != specs.argTypes[0])
-		return (reportSyntaxError(
-			"Wrong type of argument: " + args[0].value + " for " + specs.name + " directive"));
+	if (!checkStandardDirective(args, specs))
+		return (false);
+	if (args[0].type == TOKEN_NUMBER_WITH_UNIT)
+		expandArg(args, convertInBytes(args[0].value));
 	return (true);
+}
+
+std::string ConfigParser::convertInBytes(std::string number)
+{
+	int length = number.length() - 1;
+	std::string temp = number.substr(0, length);
+	int nb;
+
+	std::istringstream(temp) >> nb;
+	if (number[number.length() - 1] == 'M' || number[number.length() - 1] == 'm')
+		nb *= (1024 * 1024);
+	else if (number[number.length() - 1] == 'K' || number[number.length() - 1] == 'k')
+		nb *= 1024;
+	std::ostringstream convert;
+	convert << nb;
+	return (convert.str());
 }
 
 bool ConfigParser::checkListen(std::vector<DirArgument> &args, DirectiveSpec specs)
@@ -653,7 +665,6 @@ bool ConfigParser::checkCgiPath(std::vector<DirArgument> &args, DirectiveSpec sp
 		for (std::vector<std::string>::iterator it = vecPaths.begin(); it != vecPaths.end(); ++it)
 		{
 			std::string fullPath = *it + "/" + path;
-			std::cout << fullPath << std::endl;
 			if (access(fullPath.c_str(), F_OK | R_OK | X_OK) == 0)
 			{
 				pathOk = true;
@@ -723,10 +734,10 @@ bool ConfigParser::checkReturn(std::vector<DirArgument> &args, DirectiveSpec spe
 	if (args.size() < 1 || args.size() > specs.maxArgs)
 		return (reportSyntaxError(
 			"Invalid number of arguments for " + specs.name + " directive"));
-	if (args[0].type != TOKEN_NUMBER)
+	if (args[0].type != TOKEN_NUMBER && (args[0].value != "301" || args[0].value != "302"))
 		return (reportSyntaxError(
 			"Wrong type of argument: " + args[0].value + " for " + specs.name +
-			" directive. Code (number) expected"));
+			" directive. Code (number 301 or 302) expected"));
 	if (args[1].type != TOKEN_STRING)
 		return (reportSyntaxError(
 			"Wrong type of argument: " + args[1].value + " for " + specs.name +

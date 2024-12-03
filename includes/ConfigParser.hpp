@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 15:12:33 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/12/02 21:20:49 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/03 10:08:02 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,6 +183,7 @@ public:
 	bool checkRoot(std::vector<DirArgument> &args, DirectiveSpec specs);
 	template <typename T>
 	void expandArg(std::vector<DirArgument> &args, T newVal);
+	std::string convertInBytes(std::string number);
 
 	/* Debugging and testing purspose only */
 	void printConfig();
