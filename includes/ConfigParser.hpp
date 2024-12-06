@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigParser.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 15:12:33 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/12/03 10:08:02 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/04 13:48:35 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,7 +187,8 @@ public:
 
 	/* Debugging and testing purspose only */
 	void printConfig();
-
+	void printConfigAlex();
+	HttpBlock getHTTP();
 private:
 	std::string _configPath;
 	std::ifstream _configFile;

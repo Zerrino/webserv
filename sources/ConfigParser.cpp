@@ -132,8 +132,8 @@ ConfigParser::ConfigError ConfigParser::parse()
 		return (PARSING_ERROR);
 
 	// TESTING
-	printConfig();
-
+	// printConfigAlex();
+	_configFile.close();
 	return (SUCCESS);
 }
 
@@ -824,4 +824,49 @@ void ConfigParser::printConfig()
 		std::cout << "--- END OF HTTP SERVER ---" << std::endl;
 		std::cout << std::endl;
 	}
+}
+
+void ConfigParser::printConfigAlex()
+{
+	std::cout << "HTTP {" << std::endl;
+	for (std::vector<Directive>::const_iterator i = _http.directives.begin(); i != _http.directives.end(); i++)
+	{
+		std::cout << "\t" << i->name << " ";
+		for (std::vector<DirArgument>::const_iterator j = i->arguments.begin(); j != i->arguments.end(); j++)
+			std::cout << j->value << " ";
+		std::cout << std::endl;
+	}
+	for (std::vector<ServerBlock>::const_iterator i = _http.servers.begin(); i != _http.servers.end(); i++)
+	{
+		std::cout << std::endl;
+		std::cout << "\tSERVER {" << std::endl;
+		for (std::vector<Directive>::const_iterator j = i->directives.begin(); j != i->directives.end(); j++)
+		{
+			std::cout << "\t\t" << j->name << " ";
+			for (std::vector<DirArgument>::const_iterator k = j->arguments.begin(); k != j->arguments.end(); k++)
+				std::cout << k->value << " ";
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
+		for (std::vector<LocationBlock>::const_iterator j = i->locations.begin(); j != i->locations.end(); j++)
+		{
+			std::cout << "\t\tlocation " << j->uri << " " << j->modifier << " {" << std::endl;
+			for (std::vector<Directive>::const_iterator l = j->directives.begin(); l != j->directives.end(); l++)
+			{
+				std::cout << "\t\t\t" << l->name << " ";
+				for (std::vector<DirArgument>::const_iterator k = l->arguments.begin(); k != l->arguments.end(); k++)
+					std::cout << k->value << " ";
+				std::cout << std::endl;
+			}
+			std::cout << "\t\t}" << std::endl << std::endl;
+		}
+		std::cout << std::endl;
+		std::cout << "\t}" << std::endl;
+	}
+	std::cout << "}" << std::endl;
+}
+
+HttpBlock ConfigParser::getHTTP()
+{
+	return (this->_http);
 }
