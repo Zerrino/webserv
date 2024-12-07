@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/06 00:36:16 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/07 06:34:54 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,12 +123,11 @@ bool	ClientRequest::RulesApply(setOfRuleHTTP rules, int i)
 		}
 		if (flag == false)
 		{
-			sendClient(this->_fds[i].fd, 404, "./data/ressources/empty.txt");
+			sendClient(this->_fds[i].fd, 405, "./data/ressources/empty.txt");
 			return true;
 		}
 
 	}
-
 	return false;
 }
 void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
@@ -156,6 +155,7 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 					}
 					else
 					{
+						std::cout << "loc " << locToFollow << std::endl;
 						setRulesLoc(locToFollow, rules, fileConfig);
 					}
 					//std::cout << "------------------------------------------------------------" << std::endl;
@@ -166,9 +166,10 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 						;
 					else
 					{
-						if (!rules.sub_root.empty())
+						if (!rules.sub_root.empty() && rules.index.size() == 0)
 						{
 							rules.sub_root.append(_clMap["URI"].substr(_clMap["URI"].find_last_of('/')));
+							std::cout << "test" << std::endl;
 						}
 						if (_clMap.find("GET") != _clMap.end())
 						{
@@ -356,24 +357,47 @@ void	ClientRequest::handlingGET(int i, setOfRuleHTTP rules)
 {
 
 	std::string PATH_ABS = rules.root;
+
 	if (rules.sub_root.empty())
+	{
 		PATH_ABS.append(_clMap["URI"]);
+		//std::cout << "sub root est empty : " << PATH_ABS << std::endl;
+	}
 	else
+	{
 		PATH_ABS.append(rules.sub_root);
-	std::string cook;
-	if (_clMap["URI"].substr(_clMap["URI"].size() - 1) == "/")
+		std::cout << "sub root : " << rules.sub_root << std::endl;
+		//std::cout << "sub root : " << rules.sub_root << std::endl;
+		//std::cout << "sub root est  pas empty : " << PATH_ABS << std::endl;
+
+	}
+	if (rules.index.size() > 0)
 	{
 		std::string file_index = rules.index.front();
+		if (!(_clMap["URI"].substr(_clMap["URI"].size() - 1) == "/"))
+			PATH_ABS.append("/");
 		PATH_ABS.append(file_index);
-		if (_clMap.find("Cookie") != _clMap.end())
+	}
+	//std::cout << PATH_ABS << std::endl;
+	std::string cook;
+	if ((_clMap["URI"].substr(_clMap["URI"].size() - 1) == "/") || getContentType(_clMap["URI"]).empty())
+	{
+		if (rules.index.size() == 0)
+		{
+			this->sendClient(this->_fds[i].fd, 302, rules.error_page["404"]);
+		}
+		else //if (_clMap.find("Cookie") != _clMap.end())
+		{
 			this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
+		}
+		/*
 		else
 		{
 			std::string req = "HTTP/1.1 200 OK\r\n";
-			req.append(getDate());
-			req.append("Set-Cookie: session_id=");
-			req.append(createCookieId());
-			req.append("; HttpOnly\r\n");
+			//req.append(getDate());
+			//req.append("Set-Cookie: session_id=");
+			//req.append(createCookieId());
+			//req.append("; HttpOnly\r\n");
 			std::string file = getFile(PATH_ABS);
 			req.append(getContentType(PATH_ABS));
 			req.append(this->_length);
@@ -381,6 +405,7 @@ void	ClientRequest::handlingGET(int i, setOfRuleHTTP rules)
 			req.append(file);
 			write(this->_fds[i].fd, req.c_str(), req.length());
 		}
+		*/
 	}
 	else // SI aucune informations en plus
 	{

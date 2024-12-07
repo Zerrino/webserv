@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 22:20:30 by zerrino           #+#    #+#             */
-/*   Updated: 2024/12/06 00:56:49 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/07 06:29:30 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ std::string	SendToClient::requestOne(int request)
 		throw std::runtime_error("error type not handled");
 		break;
 	}
-	this->_request.append(this->getDate());
+	//this->_request.append(this->getDate());
 	this->_request.append("\r\n");
 	return (this->_request);
 }
@@ -63,7 +63,7 @@ std::string	SendToClient::requestTwo(int request, std::string path)
 	{
 	case 200:
 		this->_request = "HTTP/1.1 200 OK\r\n";
-		this->_request.append(this->getDate());
+		//this->_request.append(this->getDate());
 		this->_request.append(this->getContentType(path));
 		file = getFile(path);
 		this->_request.append(this->_length);
@@ -72,7 +72,7 @@ std::string	SendToClient::requestTwo(int request, std::string path)
 		break;
 	case 201:
 		this->_request = "HTTP/1.1 201 Created\r\n";
-		this->_request.append(this->getDate());
+		//this->_request.append(this->getDate());
 		this->_request.append(this->getContentType(path));
 		this->_request.append("Location : ");
 		this->_request.append(_locationCreate);
@@ -82,7 +82,7 @@ std::string	SendToClient::requestTwo(int request, std::string path)
 		break;
 	case 204:
 		this->_request = "HTTP/1.1 204 No Content\r\n";
-		this->_request.append(this->getDate());
+		//this->_request.append(this->getDate());
 		this->_request.append("\r\n");
 		break;
 	default:
@@ -109,7 +109,7 @@ std::string	SendToClient::requestThree(int request, std::string path)
 		break;
 	case 304:
 		this->_request = "HTTP/1.1 304 Not Modified\r\n";
-		this->_request.append(this->getDate());
+		//this->_request.append(this->getDate());
 		this->_request.append("\r\nContent-Length: 0\r\n\r\n");
 		break;
 	default:
@@ -118,7 +118,7 @@ std::string	SendToClient::requestThree(int request, std::string path)
 	}
 	if (request != 304)
 	{
-		this->_request.append(this->getDate());
+		//this->_request.append(this->getDate());
 		this->_request.append("Location: ");
 		this->_request.append(path);
 		this->_request.append("\r\nContent-Length: 0\r\n\r\n");
@@ -139,11 +139,17 @@ std::string	SendToClient::requestFour(int request, std::string path)
 	case 404:
 		this->_request = "HTTP/1.1 404 Not Found\r\n";
 		break;
+	case 405:
+		this->_request = "HTTP/1.1 405 Method Not Allowed\r\n";
+		break;
+	case 413:
+		this->_request = "HTTP/1.1 413 Payload Too Large\r\n";
+		break;
 	default:
 		throw std::runtime_error("error type not handled");
 		break;
 	}
-	this->_request.append(this->getDate());
+	//this->_request.append(this->getDate());
 	this->_request.append(this->getContentType(path));
 	file = getFile(path);
 	this->_request.append(this->_length);
@@ -203,7 +209,8 @@ std::string SendToClient::getContentType(std::string path)
 	if (pos != std::string::npos)
 		str = path.substr(pos + 1);
 	else
-		throw std::runtime_error("file has no extension");
+		return ("");
+		//throw std::runtime_error("file has no extension");
 	std::map<std::string, std::string>::const_iterator it = contentTypes.find(str);
 	if (it != contentTypes.end())
 	{
@@ -221,6 +228,8 @@ std::string	SendToClient::getFile(std::string path)
 	std::stringstream ss;
 	std::stringstream len_ss;
 	std::string file_data;
+
+	std::cout << path << std::endl;
 
 	if (!file.is_open())
 		throw std::runtime_error("couldn't open the file");
@@ -240,6 +249,8 @@ const std::map<std::string, std::string>& SendToClient::getContentTypesMap()
 	if (contentTypes.empty())
 	{
 		contentTypes["html"] = "text/html";
+		contentTypes["bad_extension"] = "text/html";
+		contentTypes["bla"] = "text/html";
 		contentTypes["htm"] = "text/html";
 		contentTypes["txt"] = "text/plain";
 		contentTypes["csv"] = "text/csv";
