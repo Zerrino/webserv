@@ -19,9 +19,9 @@ class CGI {
 		int execute();
 
 	private:
-		CGIRequest _request;
 		std::string _suffix;
 		std::string _cmd;
+		CGIRequest _request;
 		int _fd;
 
 		bool createPipes(int pipe_in[2], int pipe_out[2]);

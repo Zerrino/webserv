@@ -6,7 +6,7 @@
 #    By: root <root@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/02 23:04:50 by lolemmen          #+#    #+#              #
-#    Updated: 2024/12/10 13:42:20 by root             ###   ########.fr        #
+#    Updated: 2024/12/10 13:46:36 by root             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,7 @@ NAME := webserv
 
 RM = rm -rf
 CXX = c++
-CXXFLAGS = -std=c++98 -Iincludes #-Wall -Werror -Wextra -Wno-shadow
+CXXFLAGS = -std=c++98 -Wall -Werror -Wextra
 
 SRCDIR := sources
 INCDIR := includes
@@ -54,7 +54,7 @@ $(OBJDIR):
 
 $(NAME): $(OBJECTS)
 	echo "$(LOG_CLEAR)$(NAME)... $(LOG_CYAN)assembling... $(LOG_NOCOLOR)$(LOG_UP)"
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CXXFLAGS) -Iincludes $^ -o $@
 	echo "$(LOG_CLEAR)$(NAME)... $(LOG_GREEN)compiled $(LOG_GREEN)✓$(LOG_NOCOLOR)"
 
 clean:
@@ -72,4 +72,4 @@ run: all
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp Makefile
 	@echo "$(LOG_CLEAR)$(NAME)... $(LOG_YELLOW)$<$(LOG_NOCOLOR)$(LOG_UP)"
-	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
+	$(CXX) $(CXXFLAGS) -Iincludes -MMD -MP -c $< -o $@
