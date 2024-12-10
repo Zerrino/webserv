@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SendToClient.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 22:20:30 by zerrino           #+#    #+#             */
-/*   Updated: 2024/12/07 06:29:30 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/10 15:03:19 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -251,6 +251,7 @@ const std::map<std::string, std::string>& SendToClient::getContentTypesMap()
 		contentTypes["html"] = "text/html";
 		contentTypes["bad_extension"] = "text/html";
 		contentTypes["bla"] = "text/html";
+		contentTypes["php"] = "text/html";
 		contentTypes["htm"] = "text/html";
 		contentTypes["txt"] = "text/plain";
 		contentTypes["csv"] = "text/csv";

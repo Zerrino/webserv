@@ -6,7 +6,7 @@
 #    By: root <root@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/02 23:04:50 by lolemmen          #+#    #+#              #
-#    Updated: 2024/12/10 13:46:36 by root             ###   ########.fr        #
+#    Updated: 2024/12/10 14:55:39 by root             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,7 @@ NAME := webserv
 
 RM = rm -rf
 CXX = c++
-CXXFLAGS = -std=c++98 -Wall -Werror -Wextra
+CXXFLAGS = -std=c++98 #-Wall -Werror -Wextra
 
 SRCDIR := sources
 INCDIR := includes

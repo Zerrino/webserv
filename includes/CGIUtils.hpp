@@ -1,6 +1,7 @@
 #ifndef CGIUTILS_HPP
 # define CGIUTILS_HPP
 
+# include "ClientRequest.hpp"
 # include "CGI.hpp"
 
 enum Types {
@@ -9,10 +10,7 @@ enum Types {
 	Null
 };
 
-int CGIchecker(std::string clientInfo, std::string PATH_ABS, int fd);
-std::string getTypeName(Types type);
-std::string getTypeName(std::string suffix);
-std::string getTypeCommand(std::string suffix);
+int CGIchecker(std::string clientInfo, std::string FILE_PATH, setOfRuleHTTP rules, int fd);
 void splitPath(const std::string& fullPath, std::string& path, std::string& file);
 bool isPHPInstalled();
 bool isPythonInstalled();

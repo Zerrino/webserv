@@ -1,6 +1,6 @@
 #include "../includes/CGI.hpp"
 
-CGI::CGI(const std::string suffix, const std::string cmd, const CGIRequest& request, int fd): _suffix(suffix), _cmd(cmd), _request(request), _fd(fd) {}
+CGI::CGI(const std::string cmd, const CGIRequest& request, int fd): _cmd(cmd), _request(request), _fd(fd) {}
 
 CGI::~CGI() {}
 

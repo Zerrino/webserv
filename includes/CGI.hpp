@@ -13,13 +13,12 @@
 
 class CGI {
 	public:
-		CGI(const std::string suffix, const std::string cmd, const CGIRequest& request, int fd);
+		CGI(const std::string cmd, const CGIRequest& request, int fd);
 		~CGI();
 
 		int execute();
 
 	private:
-		std::string _suffix;
 		std::string _cmd;
 		CGIRequest _request;
 		int _fd;
