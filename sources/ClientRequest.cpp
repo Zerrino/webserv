@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/08 16:21:20 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/10 14:45:04 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,6 +151,7 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 					//setRulesLoc(locToFollow, rules, fileConfig);
 					if (locToFollow == "cgi")
 					{
+						printMap(_clMap);
 						// Gerer le CGI
 						//
 					}
