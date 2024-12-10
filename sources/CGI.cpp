@@ -73,7 +73,6 @@ void CGI::sendResponse(const std::string& result) const {
     resultRequest.setVersion("HTTP/1.1");
     resultRequest.setHeaders(headers);
     resultRequest.setBody(body);
-
     resultRequest.send(_fd);
 }
 
@@ -86,6 +85,7 @@ int CGI::execute() {
         std::cerr << "Failed to create pipes.\n";
         return 1;
     }
+    std::cout << "cmd: " << _cmd << std::endl;
     pid_t pid = fork();
     if (pid == 0) {
         close(pipe_in[1]);
@@ -116,6 +116,7 @@ int CGI::execute() {
         while ((bytesRead = read(pipe_out[0], buffer, sizeof(buffer))) > 0) {
             result.append(buffer, bytesRead);
         }
+        std::cout << "result: \n" << result << " end of result" << std::endl;
         close(pipe_out[0]);
         int status;
         waitpid(pid, &status, 0);

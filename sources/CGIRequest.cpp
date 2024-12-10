@@ -21,12 +21,15 @@ void CGIRequest::send(int fd) const {
         it++;
     }
 	frequest.append("\r\n" + getBody());
+    std::cout << "finalRequest: \n" << frequest << std::endl;
 	write(fd, frequest.c_str(), frequest.length());
 }
 
 void CGIRequest::setENVs() const {
     setenv("REQUEST_METHOD", _method.c_str(), 1);
     setenv("REDIRECT_STATUS", "", 1);
+    setenv("SERVER_PROTOCOL", "HTTP/1.1", 1);
+    setenv("PATH_INFO", _url.c_str(), 1);
     std::map<std::string, std::string>::const_iterator it = _headers.begin();
     while (it != _headers.end()) {
 		if(it->first == "User-Agent")

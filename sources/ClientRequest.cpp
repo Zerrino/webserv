@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/10 15:16:24 by root             ###   ########.fr       */
+/*   Updated: 2024/12/10 15:42:33 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,27 +167,27 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 						;
 					else
 					{
-						if (!rules.sub_root.empty() && rules.index.size() == 0)
-						{
-							rules.sub_root.append(_clMap["URI"].substr(_clMap["URI"].find_last_of('/')));
-							std::cout << "test" << std::endl;
-						}
-						if (_clMap.find("GET") != _clMap.end())
-						{
-							handlingGET(i, rules);
-						}
-						else if (_clMap.find("POST") != _clMap.end())
-						{
-							handlingPOST(i, rules);
-						}
-						else if (_clMap.find("PUT") != _clMap.end())
-						{
-							handlingPUT(i, rules);
-						}
-						else if (_clMap.find("DELETE") != _clMap.end())
-						{
-							handlingDELETE(i, rules);
-						}
+						// if (!rules.sub_root.empty() && rules.index.size() == 0)
+						// {
+						// 	rules.sub_root.append(_clMap["URI"].substr(_clMap["URI"].find_last_of('/')));
+						// 	std::cout << "test" << std::endl;
+						// }
+						// if (_clMap.find("GET") != _clMap.end())
+						// {
+						// 	handlingGET(i, rules);
+						// }
+						// else if (_clMap.find("POST") != _clMap.end())
+						// {
+						// 	handlingPOST(i, rules);
+						// }
+						// else if (_clMap.find("PUT") != _clMap.end())
+						// {
+						// 	handlingPUT(i, rules);
+						// }
+						// else if (_clMap.find("DELETE") != _clMap.end())
+						// {
+						// 	handlingDELETE(i, rules);
+						// }
 					}
 				}
 				catch(const std::exception& e)
