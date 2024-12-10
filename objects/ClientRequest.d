@@ -1,9 +1,19 @@
-objects/ClientRequest.o: ClientRequest.cpp ClientRequest.hpp webserv.hpp \
- SendToClient.hpp Cookie.hpp CGIRequest.hpp CGI.hpp CGIUtils.hpp
-ClientRequest.hpp:
-webserv.hpp:
-SendToClient.hpp:
-Cookie.hpp:
-CGIRequest.hpp:
-CGI.hpp:
-CGIUtils.hpp:
+objects/ClientRequest.o: sources/ClientRequest.cpp \
+ sources/../includes/ClientRequest.hpp sources/../includes/webserv.hpp \
+ sources/../includes/SendToClient.hpp sources/../includes/Cookie.hpp \
+ sources/../includes/Request.hpp sources/../includes/ConfigParser.hpp \
+ sources/../includes/ParseHttp.hpp sources/../includes/ClientRequest.hpp \
+ sources/../includes/CGIUtils.hpp sources/../includes/CGI.hpp \
+ sources/../includes/CGIRequest.hpp sources/../includes/CGIUtils.hpp
+sources/../includes/ClientRequest.hpp:
+sources/../includes/webserv.hpp:
+sources/../includes/SendToClient.hpp:
+sources/../includes/Cookie.hpp:
+sources/../includes/Request.hpp:
+sources/../includes/ConfigParser.hpp:
+sources/../includes/ParseHttp.hpp:
+sources/../includes/ClientRequest.hpp:
+sources/../includes/CGIUtils.hpp:
+sources/../includes/CGI.hpp:
+sources/../includes/CGIRequest.hpp:
+sources/../includes/CGIUtils.hpp:

@@ -1,3 +1,4 @@
-objects/Socket.o: Socket.cpp Socket.hpp webserv.hpp
-Socket.hpp:
-webserv.hpp:
+objects/Socket.o: sources/Socket.cpp sources/../includes/Socket.hpp \
+ sources/../includes/webserv.hpp
+sources/../includes/Socket.hpp:
+sources/../includes/webserv.hpp:

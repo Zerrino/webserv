@@ -6,7 +6,7 @@
 #    By: root <root@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/02 23:04:50 by lolemmen          #+#    #+#              #
-#    Updated: 2024/11/22 12:30:16 by root             ###   ########.fr        #
+#    Updated: 2024/12/10 13:35:28 by root             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,19 +19,16 @@ NAME := btc
 
 RM = rm -rf
 CXX = c++
-CXXFLAGS = -std=c++98 #-Wall -Werror -Wextra -Wno-shadow
+CXXFLAGS = -std=c++98 -Iincludes #-Wall -Werror -Wextra -Wno-shadow
 
-SOURCES := \
-	 SendToClient.cpp \
-	 ClientRequest.cpp \
-	 ConfigParser.cpp \
-	 Cookie.cpp \
-	 CGI.cpp \
-	 Socket.cpp \
-	 CGIRequest.cpp \
-	 CGIUtils.cpp \
-	 main.cpp
-	 
+SRCDIR := sources
+INCDIR := includes
+OBJDIR := objects
+
+SOURCES := $(wildcard $(SRCDIR)/*.cpp)
+OBJECTS := $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SOURCES))
+DEPENDS := $(OBJECTS:.o=.d)
+
 # **************************************************************************** #
 
 # Special Chars
@@ -50,10 +47,6 @@ LOG_WHITE = \033[1;37m
 
 # **************************************************************************** #
 
-OBJDIR := objects
-OBJECTS := $(addprefix $(OBJDIR)/,$(SOURCES:.cpp=.o))
-DEPENDS := $(addprefix $(OBJDIR)/,$(SOURCES:.cpp=.d))
-
 all: $(OBJDIR) $(NAME)
 
 $(OBJDIR):
@@ -70,14 +63,13 @@ clean:
 fclean: clean
 	$(RM) $(NAME)
 
-re : fclean all
+re: fclean all
 
 run: all 
-		./$(NAME)
+	./$(NAME)
 
 -include $(DEPENDS)
 
-$(OBJDIR)/%.o: %.cpp Makefile
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp Makefile
 	@echo "$(LOG_CLEAR)$(NAME)... $(LOG_YELLOW)$<$(LOG_NOCOLOR)$(LOG_UP)"
 	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
-	

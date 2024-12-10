@@ -1,3 +1,4 @@
-objects/SendToClient.o: SendToClient.cpp SendToClient.hpp webserv.hpp
-SendToClient.hpp:
-webserv.hpp:
+objects/SendToClient.o: sources/SendToClient.cpp \
+ sources/../includes/SendToClient.hpp sources/../includes/webserv.hpp
+sources/../includes/SendToClient.hpp:
+sources/../includes/webserv.hpp:

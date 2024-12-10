@@ -1,3 +1,4 @@
-objects/Cookie.o: Cookie.cpp Cookie.hpp webserv.hpp
-Cookie.hpp:
-webserv.hpp:
+objects/Cookie.o: sources/Cookie.cpp sources/../includes/Cookie.hpp \
+ sources/../includes/webserv.hpp
+sources/../includes/Cookie.hpp:
+sources/../includes/webserv.hpp:

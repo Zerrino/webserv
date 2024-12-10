@@ -1,12 +1,18 @@
-objects/main.o: main.cpp Socket.hpp webserv.hpp ClientRequest.hpp \
- SendToClient.hpp Cookie.hpp CGIRequest.hpp CGI.hpp CGIUtils.hpp \
- ConfigParser.hpp
-Socket.hpp:
-webserv.hpp:
-ClientRequest.hpp:
-SendToClient.hpp:
-Cookie.hpp:
-CGIRequest.hpp:
-CGI.hpp:
-CGIUtils.hpp:
-ConfigParser.hpp:
+objects/main.o: sources/main.cpp sources/../includes/ParseHttp.hpp \
+ sources/../includes/webserv.hpp sources/../includes/ConfigParser.hpp \
+ sources/../includes/ClientRequest.hpp \
+ sources/../includes/SendToClient.hpp sources/../includes/Cookie.hpp \
+ sources/../includes/Request.hpp sources/../includes/Socket.hpp \
+ sources/../includes/ClientRequest.hpp \
+ sources/../includes/SendToClient.hpp sources/../includes/Cookie.hpp
+sources/../includes/ParseHttp.hpp:
+sources/../includes/webserv.hpp:
+sources/../includes/ConfigParser.hpp:
+sources/../includes/ClientRequest.hpp:
+sources/../includes/SendToClient.hpp:
+sources/../includes/Cookie.hpp:
+sources/../includes/Request.hpp:
+sources/../includes/Socket.hpp:
+sources/../includes/ClientRequest.hpp:
+sources/../includes/SendToClient.hpp:
+sources/../includes/Cookie.hpp:
