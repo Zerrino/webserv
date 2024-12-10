@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/07 06:34:54 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/08 16:21:20 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,6 +148,7 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 				try
 				{
 					std::string locToFollow = rulingHttp(rules, fileConfig);
+					//setRulesLoc(locToFollow, rules, fileConfig);
 					if (locToFollow == "cgi")
 					{
 						// Gerer le CGI
