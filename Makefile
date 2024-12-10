@@ -6,14 +6,14 @@
 #    By: root <root@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/02 23:04:50 by lolemmen          #+#    #+#              #
-#    Updated: 2024/12/10 13:35:28 by root             ###   ########.fr        #
+#    Updated: 2024/12/10 13:42:20 by root             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 .SILENT:
 .PHONY: NAME re all fclean clean run
 
-NAME := btc
+NAME := webserv
 
 # Compilation
 
