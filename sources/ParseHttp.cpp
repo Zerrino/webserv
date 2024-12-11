@@ -42,6 +42,16 @@ int	ParseHttp::fromSTRtoINT(std::string str)
 	return result;
 }
 
+long long	ParseHttp::fromSTRtoLONG(std::string str)
+{
+	std::stringstream ss(str);
+	long long result;
+	ss >> result;
+	if (ss.fail())
+		throw std::invalid_argument("Error in conversion fromSTRtoINT");
+	return result;
+}
+
 std::vector<int>	ParseHttp::getListenVec(HttpBlock fileConfig, setOfRuleHTTP &rules)
 {
 	std::vector<int> ret;

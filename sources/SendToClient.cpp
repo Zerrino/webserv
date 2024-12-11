@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 22:20:30 by zerrino           #+#    #+#             */
-/*   Updated: 2024/12/07 06:29:30 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/11 01:03:56 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,6 +219,10 @@ std::string SendToClient::getContentType(std::string path)
 		str.append("\r\n");
 		return (str);
 	}
+	str = "Content-Type: ";
+	str.append("text/plain");
+	str.append("\r\n");
+	return (str);
 	throw std::runtime_error("unsupported type of file");
 }
 
@@ -228,9 +232,6 @@ std::string	SendToClient::getFile(std::string path)
 	std::stringstream ss;
 	std::stringstream len_ss;
 	std::string file_data;
-
-	std::cout << path << std::endl;
-
 	if (!file.is_open())
 		throw std::runtime_error("couldn't open the file");
 	ss << file.rdbuf();
@@ -250,6 +251,7 @@ const std::map<std::string, std::string>& SendToClient::getContentTypesMap()
 	{
 		contentTypes["html"] = "text/html";
 		contentTypes["bad_extension"] = "text/html";
+		contentTypes["pouic"] = "text/html";
 		contentTypes["bla"] = "text/html";
 		contentTypes["htm"] = "text/html";
 		contentTypes["txt"] = "text/plain";

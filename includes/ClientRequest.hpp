@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/05 23:44:52 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/11 01:51:15 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,17 @@
 # include "Cookie.hpp"
 # include "Request.hpp"
 # include "ConfigParser.hpp"
+# include "CGIRequest.hpp"
+
+struct retLoc
+{
+	std::string loc;
+	std::string loc2;
+};
 
 struct setOfRuleHTTP
 {
-	int											client_max_body_size;
+	long long									client_max_body_size;
 	std::map<std::string, int>					listen; // ne pas remplir
 	std::map<std::string, std::string>			error_page;
 	std::string									server_name;
@@ -54,6 +61,7 @@ class	ClientRequest : public SendToClient, public Cookie, public Request
 	protected:
 		std::vector<pollfd>	_fds;
 		std::vector<int>	_fdSocket;
+		std::string			_path;
 		int					_fdClient;
 		int					_i;
 		// char				_buffer[256];
@@ -82,9 +90,14 @@ class	ClientRequest : public SendToClient, public Cookie, public Request
 		void	handlingPUT(int i, setOfRuleHTTP rules);
 		void	handlingDELETE(int i, setOfRuleHTTP rules);
 		void	handlingPOST(int i, setOfRuleHTTP rules);
-		std::string	rulingHttp(setOfRuleHTTP &rules, HttpBlock fileConfig);
+		retLoc	rulingHttp(setOfRuleHTTP &rules, HttpBlock fileConfig);
 		void	setRulesLoc(std::string locToFollow, setOfRuleHTTP &rules, HttpBlock fileConfig);
 		bool	RulesApply(setOfRuleHTTP rules, int i);
+		std::string	getPath(setOfRuleHTTP rules, std::string locToFollow);
+		std::string subPath(std::string basePath, std::string fullPath);
+		bool	readBytesFromStringOrFd(std::string &buffer, int fd, std::size_t length, std::string &data);
+		bool	readLineFromStringOrFd(std::string &buffer, int fd, std::string &line);
+		std::string	readChunkedBody(int fd, std::string &initialBuffer, std::size_t &contentLength);
 };
 
 #endif
