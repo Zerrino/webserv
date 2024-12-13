@@ -3,18 +3,17 @@
 CGIRequest::CGIRequest() {
     _method = "";
     _url = "";
-    _version = "";
     _body = "";
 }
 
-CGIRequest::CGIRequest(const std::string& request) {
-    parseRequest(request);
+CGIRequest::CGIRequest(const std::map<std::string, std::string> &clMap) {
+    parseRequest(clMap);
 }
 CGIRequest::~CGIRequest() {}
 
 void CGIRequest::send(int fd) const {
 	std::string frequest;
-	frequest.append(getVersion() + " " + getStatusCodeString() + " " + getStatusMessage() + "\r\n");
+	frequest.append("HTTP/1.1 " + getStatusCodeString() + " " + getStatusMessage() + "\r\n");
 	std::map<std::string, std::string>::const_iterator it = _headers.begin();
     while (it != _headers.end()) {
 		frequest.append(it->first + ": " + it->second + "\r\n");
@@ -57,30 +56,43 @@ std::string CGIRequest::reformat_request(const std::string& input) {
     return result;
 }
 
-void CGIRequest::parseRequest(const std::string& request) {
-    std::string fRequest = reformat_request(request);
-    std::istringstream stream(fRequest);
-    std::string line;
-
-    if (std::getline(stream, line)) {
-        std::istringstream lineStream(line);
-        lineStream >> _method;
-        lineStream >> _url;
-        lineStream >> _version;
+void CGIRequest::parseRequest(const std::map<std::string, std::string> &clMap) {
+    for (std::map<std::string, std::string>::const_iterator it = clMap.begin(); it != clMap.end(); ++it) {
+        if(it->first == "METHOD")
+            _method = it->second;
+        else if(it->first == "URI")
+            _url = it->second;
+        else if(it->first == "Content")
+            _body = it->second;
+        else 
+            _headers[it->first] = it->second;
     }
-
-    while (std::getline(stream, line) && !line.empty() && line != "\r") {
-        size_t colonPos = line.find(": ");
-        if (colonPos != std::string::npos) {
-            std::string headerName = line.substr(0, colonPos);
-            std::string headerValue = line.substr(colonPos + 2);
-            _headers[headerName] = headerValue;
-        }
-    }
-
-    if (std::getline(stream, line))
-        _body = line;
 }
+
+// void CGIRequest::parseRequest(const std::string& request) {
+//     std::string fRequest = reformat_request(request);
+//     std::istringstream stream(fRequest);
+//     std::string line;
+
+//     if (std::getline(stream, line)) {
+//         std::istringstream lineStream(line);
+//         lineStream >> _method;
+//         lineStream >> _url;
+//         lineStream >> _version;
+//     }
+
+//     while (std::getline(stream, line) && !line.empty() && line != "\r") {
+//         size_t colonPos = line.find(": ");
+//         if (colonPos != std::string::npos) {
+//             std::string headerName = line.substr(0, colonPos);
+//             std::string headerValue = line.substr(colonPos + 2);
+//             _headers[headerName] = headerValue;
+//         }
+//     }
+
+//     if (std::getline(stream, line))
+//         _body = line;
+// }
 
 std::string CGIRequest::getHeader(std::string headerName) const {
     std::map<std::string, std::string>::const_iterator it = _headers.find(headerName);
@@ -115,7 +127,6 @@ void CGIRequest::setHeader(std::string fullValue){
 
 std::string CGIRequest::getMethod() const { return _method; }
 std::string CGIRequest::getUrl() const { return _url; }
-std::string CGIRequest::getVersion() const { return _version; }
 const std::map<std::string, std::string>& CGIRequest::getHeaders() const { return _headers; }
 std::string CGIRequest::getBody() const { return _body; }
 int CGIRequest::getStatusCode() const { return _status_code; }
@@ -128,7 +139,6 @@ std::string CGIRequest::getStatusMessage() const { return _status_message; }
 
 void CGIRequest::setMethod(std::string method) { _method = method; }
 void CGIRequest::setUrl(std::string url) { _url = url; }
-void CGIRequest::setVersion(std::string version) { _version = version; }
 void CGIRequest::setHeaders(const std::map<std::string, std::string>& headers) { _headers = headers; }
 void CGIRequest::setBody(std::string body) { _body = body; }
 void CGIRequest::setStatusCode(int code) { _status_code = code; }

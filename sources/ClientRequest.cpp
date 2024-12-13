@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/10 15:42:33 by root             ###   ########.fr       */
+/*   Updated: 2024/12/13 13:14:56 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,7 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 					if (locToFollow == "cgi")
 					{
 						std::string path_of_php_file = "";
-						int cgi = CGIchecker(_clientInfo, path_of_php_file, rules, this->_fds[i].fd);
+						int cgi = CGIchecker(_clMap, path_of_php_file, rules, this->_fds[i].fd);
 					}
 					else
 					{

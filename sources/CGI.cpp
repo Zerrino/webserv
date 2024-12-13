@@ -69,8 +69,6 @@ void CGI::sendResponse(const std::string& result) const {
     CGIRequest resultRequest;
     resultRequest.setStatusCode(status_code);
     resultRequest.setStatusMessage(status_message);
-    std::cout << status_code << std::endl;
-    resultRequest.setVersion("HTTP/1.1");
     resultRequest.setHeaders(headers);
     resultRequest.setBody(body);
     resultRequest.send(_fd);
@@ -116,7 +114,7 @@ int CGI::execute() {
         while ((bytesRead = read(pipe_out[0], buffer, sizeof(buffer))) > 0) {
             result.append(buffer, bytesRead);
         }
-        std::cout << "result: \n" << result << " end of result" << std::endl;
+        std::cout << "result: \n" << result << std::endl << "end of result" << std::endl;
         close(pipe_out[0]);
         int status;
         waitpid(pid, &status, 0);
