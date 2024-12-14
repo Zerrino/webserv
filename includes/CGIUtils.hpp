@@ -10,7 +10,7 @@ enum Types {
 	Null
 };
 
-int CGIchecker(std::string clientInfo, std::string FILE_PATH, setOfRuleHTTP rules, int fd);
+int CGIchecker(std::map<std::string, std::string> clMap, std::string FILE_PATH, setOfRuleHTTP rules, int fd);
 void splitPath(const std::string& fullPath, std::string& path, std::string& file);
 bool isPHPInstalled();
 bool isPythonInstalled();

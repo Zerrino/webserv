@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/11 01:56:31 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/14 05:08:12 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,7 +242,10 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 						}
 						else
 						{
-							cgi_result = CGIchecker(_clientInfo, _path, rules, _fds[i].fd);
+							std::cout << "Length : " << _clMap["Content-Length"] << std::endl; // 100 000 000
+							write(1, _clMap["Content"].c_str(), 100);
+							std::cout << std::endl;
+							cgi_result = CGIchecker(_clMap , _path, rules, _fds[i].fd);
 							(void)cgi_result;
 							//std::cout << "cgi result : " << _clMap["Content"] << std::endl;
 						}

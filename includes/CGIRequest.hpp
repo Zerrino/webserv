@@ -6,12 +6,13 @@
 #include <sstream>
 #include <unistd.h>
 #include <iostream>
+#include <map>
 # include "webserv.hpp"
 
 class CGIRequest {
 	public:
 		CGIRequest();
-		CGIRequest(const std::string& request);
+		CGIRequest(const std::map<std::string, std::string> &clMap);
 		~CGIRequest();
 
 		void send(int fd) const;
@@ -19,7 +20,6 @@ class CGIRequest {
 
 		std::string getMethod() const;
 		std::string getUrl() const;
-		std::string getVersion() const;
 		const std::map<std::string, std::string>& getHeaders() const;
 		std::string getBody() const;
 		std::string getHeader(std::string headerName) const;
@@ -29,7 +29,6 @@ class CGIRequest {
 
 		void setMethod(std::string body);
 		void setUrl(std::string body);
-		void setVersion(std::string body);
 		void setHeaders(const std::map<std::string, std::string>& headers);
 		void setBody(std::string body);
 		void setHeader(std::string headerName, std::string headerValue);
@@ -37,14 +36,13 @@ class CGIRequest {
 		void setStatusCode(int code);
 		void setStatusMessage(std::string code);
 	private:
-		void parseRequest(const std::string& request);
+		void parseRequest(const std::map<std::string, std::string> &clMap);
 		std::string reformat_request(const std::string& input);
 
 		std::string _method;
 		int			_status_code;
 		std::string _status_message;
 		std::string _url;
-		std::string _version;
 		std::map<std::string, std::string> _headers;
 		std::string _body;
 };

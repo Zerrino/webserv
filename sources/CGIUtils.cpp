@@ -1,7 +1,7 @@
 #include "../includes/CGIUtils.hpp"
 
-int CGIchecker(std::string clientInfo, std::string FILE_PATH, setOfRuleHTTP rules, int fd){
-    CGIRequest mainRequest = CGIRequest(clientInfo);
+int CGIchecker(std::map<std::string, std::string> clMap, std::string FILE_PATH, setOfRuleHTTP rules, int fd){
+    CGIRequest mainRequest = CGIRequest(clMap);
     mainRequest.setUrl(FILE_PATH);
     CGI cgi(rules.fastcgi_param, mainRequest, fd);
     return cgi.execute();
@@ -24,3 +24,4 @@ int stoi(std::string s) {
     std::istringstream(s) >> i;
     return i;
 }
+
