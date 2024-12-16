@@ -3,17 +3,19 @@
 CGI::CGI(const std::string cmd, const CGIRequest& request, int fd): _cmd(cmd), _request(request), _fd(fd) {}
 
 CGI::~CGI() {}
-
-int CGI::sendPostBody(int pipe_in[2]){
-	if (_request.getMethod() == "POST") {
-		ssize_t bytesWritten = write(pipe_in[1], _request.getBody().c_str(), _request.getBody().length());
-		if (bytesWritten == -1)
-			return 1;
-	}
+#include <signal.h> //TODO
+#include <sys/select.h> //TODO
+int CGI::sendPostBody(int pipe_in[2]) {
+    ssize_t bytesWritten = write(pipe_in[1], _request.getBody().c_str(), _request.getBody().length());
+    if (bytesWritten == -1) {
+        perror("Erreur d'écriture dans pipe");
+        return 1;
+    }
+    std::cout << "Requête envoyée via pipe\n";
     return 0;
 }
 
-bool CGI::createPipes(int pipe_in[2], int pipe_out[2]) {
+bool CGI::createPipes(int pipe_in[2], int pipe_out[2], int pipe_signal[2]) {
     if (pipe(pipe_in) == -1 || pipe(pipe_out) == -1) {
         return false;
     }
@@ -74,16 +76,34 @@ void CGI::sendResponse(const std::string& result) const {
     resultRequest.send(_fd);
 }
 
+#include <iostream>
 int CGI::execute() {
     std::string localPath, fileToExecute;
     splitPath(_request.getUrl(), localPath, fileToExecute);
 
-    int pipe_in[2], pipe_out[2];
-    if (!createPipes(pipe_in, pipe_out)) {
+    const std::string tempFilePath = "tmp/webserv.txt";
+    int isPiped = -1;
+    if(_request.getMethod() == "POST" || _request.getMethod() == "PUT")
+        isPiped = 0;
+    long pipe_max_size = 100000;
+    if (_request.getBody().length() > pipe_max_size) {
+        std::ofstream tempFile(tempFilePath.c_str());
+        if (!tempFile) {
+            std::cerr << "Erreur lors de la création du fichier temporaire.\n";
+            return 1;
+        }
+        tempFile << _request.getBody();
+        tempFile.close();
+    } else
+        isPiped = 1;
+
+    int pipe_in[2], pipe_out[2], pipe_signal[2];
+    if (!createPipes(pipe_in, pipe_out, pipe_signal)) {
         std::cerr << "Failed to create pipes.\n";
         return 1;
     }
     std::cout << "cmd: " << _cmd << std::endl;
+    _request.printdebug();
     pid_t pid = fork();
     if (pid == 0) {
         close(pipe_in[1]);
@@ -95,17 +115,24 @@ int CGI::execute() {
         close(pipe_in[0]);
         close(pipe_out[1]);
 
+        if(isPiped == 0){
+            int fd = open(tempFilePath.c_str(), O_RDONLY);
+            dup2(fd, STDIN_FILENO);
+        }
+
         chdir(localPath.c_str());
         setEnvironmentVariables(localPath, fileToExecute);
 
         execlp(_cmd.c_str(), _cmd.c_str(), fileToExecute.c_str(), (char*)NULL);
-        exit(1);
+        perror("execlp failed");
+        exit(EXIT_FAILURE);
     } else if (pid > 0) {
         close(pipe_in[0]);
         close(pipe_out[1]);
 
-        if(sendPostBody(pipe_in) == 1)
-            return 1;
+        if(isPiped == 1)
+            if (sendPostBody(pipe_in) == 1)
+                return 1;
         close(pipe_in[1]);
 
         char buffer[4096];
@@ -114,7 +141,17 @@ int CGI::execute() {
         while ((bytesRead = read(pipe_out[0], buffer, sizeof(buffer))) > 0) {
             result.append(buffer, bytesRead);
         }
-        std::cout << "result: \n" << result << std::endl << "end of result" << std::endl;
+        std::cout << "Printing result" << std::endl;
+        // if(isPiped == 1 || isPiped == 0){
+        //     const std::string outFilePath = "tmp/out.txt";
+        //     std::ofstream outFile(outFilePath.c_str());
+        //     if (!outFile) {
+        //         std::cerr << "Erreur lors de la création du fichier temporaire.\n";
+        //         return 1;
+        //     }
+        //     outFile << result;
+        //     outFile.close();
+        // }
         close(pipe_out[0]);
         int status;
         waitpid(pid, &status, 0);
@@ -123,5 +160,7 @@ int CGI::execute() {
         std::cerr << "fork failed\n";
         return 1;
     }
+    if(isPiped == 0)
+        std::remove(tempFilePath.c_str());
     return 0;
 }

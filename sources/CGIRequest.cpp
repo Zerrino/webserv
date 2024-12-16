@@ -4,6 +4,7 @@ CGIRequest::CGIRequest() {
     _method = "";
     _url = "";
     _body = "";
+    _status_code = 0;
 }
 
 CGIRequest::CGIRequest(const std::map<std::string, std::string> &clMap) {
@@ -11,18 +12,83 @@ CGIRequest::CGIRequest(const std::map<std::string, std::string> &clMap) {
 }
 CGIRequest::~CGIRequest() {}
 
+void sendChunkedData(int fd, const std::string& body) {
+    size_t offset = 0;
+    size_t chunkSize = 4096;  // Taille du morceau
+    while (offset < body.length()) {
+        // Calculer la taille du morceau restant
+        size_t toWrite = (offset + chunkSize > body.length()) ? body.length() - offset : chunkSize;
+        
+        // Convertir la taille du morceau en hexadécimal
+        char chunkSizeHex[16];
+        snprintf(chunkSizeHex, sizeof(chunkSizeHex), "%zx", toWrite);
+        
+        // Envoyer la taille du morceau en hexadécimal
+        write(fd, chunkSizeHex, strlen(chunkSizeHex));
+        write(fd, "\r\n", 2);  // Saut de ligne après la taille
+        
+        // Envoyer les données du morceau
+        write(fd, body.c_str() + offset, toWrite);
+        
+        // Envoyer la fin du morceau (retour à la ligne)
+        write(fd, "\r\n", 2);
+        
+        // Mettre à jour l'offset pour le prochain morceau
+        offset += toWrite;
+    }
+    
+    // Indiquer la fin du corps avec un morceau de taille zéro
+    write(fd, "0\r\n\r\n", 5);  // Un morceau de taille zéro, suivi de \r\n\r\n pour indiquer la fin
+}
+
+std::string intToString(int value) {
+    std::stringstream ss;
+    ss << value;
+    return ss.str();
+}
+
 void CGIRequest::send(int fd) const {
-	std::string frequest;
-	frequest.append("HTTP/1.1 " + getStatusCodeString() + " " + getStatusMessage() + "\r\n");
-	std::map<std::string, std::string>::const_iterator it = _headers.begin();
+    std::string frequest;
+    std::string status = getStatusCodeString();
+    std::string message = getStatusMessage();
+    if(_body.empty()){
+        if(_status_code == 0){
+            status = intToString(204);
+            message = "No Content";
+        }
+    }
+    frequest.append("HTTP/1.1 " + status + " " + message + "\r\n");
+
+    std::map<std::string, std::string>::const_iterator it = _headers.begin();
+    bool useChunked = (getenv("TRANSFER_ENCODING") != NULL);
+
     while (it != _headers.end()) {
-		frequest.append(it->first + ": " + it->second + "\r\n");
+        if (it->first != "Content-Length" && it->first != "Transfer-Encoding")
+            frequest.append(it->first + ": " + it->second + "\r\n");
         it++;
     }
-	frequest.append("\r\n" + getBody());
-    std::cout << "finalRequest: \n" << frequest << std::endl;
-	write(fd, frequest.c_str(), frequest.length());
+
+    if(_body.empty()){
+        frequest.append("Content-Length: 0\r\n");
+    } else {
+        if (useChunked)
+            frequest.append("Transfer-Encoding: chunked\r\n");
+        else
+            frequest.append("Content-Length: " + intToString(getBody().length()) + "\r\n");
+    }
+
+    frequest.append("\r\n");
+
+    write(fd, frequest.c_str(), frequest.length());
+
+    if (!_body.empty()) {
+        if (useChunked)
+            sendChunkedData(fd, getBody());
+        else
+            write(fd, getBody().c_str(), getBody().length());
+    }
 }
+
 
 void CGIRequest::setENVs() const {
     setenv("REQUEST_METHOD", _method.c_str(), 1);
@@ -39,9 +105,16 @@ void CGIRequest::setENVs() const {
             setenv("HTTP_HOST", (it->second).c_str(), 1);
         else if(it->first == "Content-Type")
             setenv("CONTENT_TYPE", (it->second).c_str(), 1);
-        else if(it->first == "Content-Length"){
-            if(_method == "POST")
-                setenv("CONTENT_LENGTH", (it->second).c_str(), 1);
+        else if(it->first == "Content-Length") {
+            if (_method == "POST" || _method == "PUT") {
+                setenv("CONTENT_LENGTH", intToString(_body.length()).c_str(), 1);
+            }
+        } else if(it->first == "Cookie_ID") {
+            setenv("HTTP_COOKIE", it->second.c_str(), 1);
+        } else if(it->first == "Transfer-Encoding") {
+            setenv("TRANSFER_ENCODING", it->second.c_str(), 1);
+        } else if(it->first == "X-Secret-Header-For-Test") {
+            setenv("HTTP_X_SECRET_HEADER_FOR_TEST", it->second.c_str(), 1);
         }
         it++;
     }
@@ -62,37 +135,12 @@ void CGIRequest::parseRequest(const std::map<std::string, std::string> &clMap) {
             _method = it->second;
         else if(it->first == "URI")
             _url = it->second;
-        else if(it->first == "Content")
+        else if(it->first == "Content"){
             _body = it->second;
-        else 
+        } else 
             _headers[it->first] = it->second;
     }
 }
-
-// void CGIRequest::parseRequest(const std::string& request) {
-//     std::string fRequest = reformat_request(request);
-//     std::istringstream stream(fRequest);
-//     std::string line;
-
-//     if (std::getline(stream, line)) {
-//         std::istringstream lineStream(line);
-//         lineStream >> _method;
-//         lineStream >> _url;
-//         lineStream >> _version;
-//     }
-
-//     while (std::getline(stream, line) && !line.empty() && line != "\r") {
-//         size_t colonPos = line.find(": ");
-//         if (colonPos != std::string::npos) {
-//             std::string headerName = line.substr(0, colonPos);
-//             std::string headerValue = line.substr(colonPos + 2);
-//             _headers[headerName] = headerValue;
-//         }
-//     }
-
-//     if (std::getline(stream, line))
-//         _body = line;
-// }
 
 std::string CGIRequest::getHeader(std::string headerName) const {
     std::map<std::string, std::string>::const_iterator it = _headers.find(headerName);
@@ -102,7 +150,7 @@ std::string CGIRequest::getHeader(std::string headerName) const {
 }
 
 void CGIRequest::setHeader(std::string headerName, std::string headerValue){
-std::map<std::string, std::string>::const_iterator it = _headers.find(headerName);
+    std::map<std::string, std::string>::const_iterator it = _headers.find(headerName);
 	if (it != _headers.end()) 
 		_headers[headerName] = headerValue;
 	else 
@@ -143,3 +191,21 @@ void CGIRequest::setHeaders(const std::map<std::string, std::string>& headers) {
 void CGIRequest::setBody(std::string body) { _body = body; }
 void CGIRequest::setStatusCode(int code) { _status_code = code; }
 void CGIRequest::setStatusMessage(std::string message) { _status_message = message; }
+
+void CGIRequest::printdebug() const {
+    std::cout << "CGIRequest Debug Information:" << std::endl;
+    std::cout << "Method: " << _method << std::endl;
+    std::cout << "URL: " << _url << std::endl;
+    if(_body.length() < 1000)
+        std::cout << "Body: " << _body << std::endl;
+    std::cout << "Headers:" << std::endl;
+
+    std::map<std::string, std::string>::const_iterator it = _headers.begin();
+    while (it != _headers.end()) {
+        std::cout << "  " << it->first << ": " << it->second << std::endl;
+        it++;
+    }
+
+    std::cout << "Status Code: " << getStatusCode() << std::endl;
+    std::cout << "Status Message: " << getStatusMessage() << std::endl;
+}

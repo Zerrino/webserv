@@ -5,71 +5,52 @@
 #                                                     +:+ +:+         +:+      #
 #    By: root <root@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/01/02 23:04:50 by lolemmen          #+#    #+#              #
-#    Updated: 2024/12/10 14:55:39 by root             ###   ########.fr        #
+#    Created: 2024/11/14 15:23:12 by gdelvign          #+#    #+#              #
+#    Updated: 2024/12/16 14:36:53 by root             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-.SILENT:
-.PHONY: NAME re all fclean clean run
+CC			:= c++
+CPPFLAGS	:= -std=c++98 #-Wall -Wextra -Werror
+SRC_DIR		:= sources/
+BUILD_DIR	:= .build/
+SRC			:= $(addsuffix .cpp, $(addprefix $(SRC_DIR), main ConfigParser Socket SendToClient ClientRequest Cookie Request ParseHttp CGI CGIRequest CGIUtils))
+OBJ			:= $(addprefix $(BUILD_DIR), $(notdir $(SRC:.cpp=.o)))
+DEP			:= $(OBJ:.o=.d)
+NAME		:= webserv
 
-NAME := webserv
+# Cible principale
+all: $(NAME)
 
-# Compilation
+# Compilation de l'exécutable à partir des objets
+$(NAME): $(OBJ)
+	@$(CC) $(CPPFLAGS) -o $@ $(OBJ)
+	@printf "Compiling..."
+	@sleep 1
+	@printf "\r$(NAME) compiled successfully!\n"
 
-RM = rm -rf
-CXX = c++
-CXXFLAGS = -std=c++98 #-Wall -Werror -Wextra
+# Inclusion des fichiers de dépendances
+-include $(DEP)
 
-SRCDIR := sources
-INCDIR := includes
-OBJDIR := objects
+# Compilation des fichiers objets et génération des fichiers de dépendances
+$(BUILD_DIR)%.o: $(SRC_DIR)%.cpp | MKDIR
+	@$(CC) $(CPPFLAGS) -MMD -c $< -o $@
 
-SOURCES := $(wildcard $(SRCDIR)/*.cpp)
-OBJECTS := $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SOURCES))
-DEPENDS := $(OBJECTS:.o=.d)
+# Création du répertoire de build si nécessaire
+MKDIR:
+	@mkdir -p $(BUILD_DIR)
 
-# **************************************************************************** #
-
-# Special Chars
-
-LOG_CLEAR = \033[2K
-LOG_UP = \033[A
-LOG_NOCOLOR = \033[0m
-LOG_BLACK = \033[1;30m
-LOG_RED = \033[1;31m
-LOG_GREEN = \033[1;32m
-LOG_YELLOW = \033[1;33m
-LOG_BLUE = \033[1;34m
-LOG_VIOLET = \033[1;35m
-LOG_CYAN = \033[1;36m
-LOG_WHITE = \033[1;37m
-
-# **************************************************************************** #
-
-all: $(OBJDIR) $(NAME)
-
-$(OBJDIR):
-	mkdir -p $(OBJDIR)
-
-$(NAME): $(OBJECTS)
-	echo "$(LOG_CLEAR)$(NAME)... $(LOG_CYAN)assembling... $(LOG_NOCOLOR)$(LOG_UP)"
-	$(CXX) $(CXXFLAGS) -Iincludes $^ -o $@
-	echo "$(LOG_CLEAR)$(NAME)... $(LOG_GREEN)compiled $(LOG_GREEN)✓$(LOG_NOCOLOR)"
-
+# Nettoyage des objets et des fichiers de dépendances
 clean:
-	$(RM) $(OBJECTS) $(DEPENDS) $(OBJDIR)
+	@rm -rf $(BUILD_DIR)
+	@printf "$(BUILD_DIR) folder removed.\n"
 
+# Nettoyage complet
 fclean: clean
-	$(RM) $(NAME)
+	@rm -rf $(NAME)
+	@printf "$(NAME) deleted.\nProject fully cleaned.\n"
 
+# Recompilation complète
 re: fclean all
 
-run: all 
-	./$(NAME)
-
--include $(DEPENDS)
-
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp Makefile
-	@echo "$(LOG_CLEAR)$(NAME)... $(LOG_YELLOW)$<$(LOG_NOCOLOR)$(LOG_UP)"
-	$(CXX) $(CXXFLAGS) -Iincludes -MMD -MP -c $< -o $@
+.PHONY: all clean fclean re

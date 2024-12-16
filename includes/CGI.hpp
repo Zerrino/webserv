@@ -23,7 +23,7 @@ class CGI {
 		CGIRequest _request;
 		int _fd;
 
-		bool createPipes(int pipe_in[2], int pipe_out[2]);
+		bool createPipes(int pipe_in[2], int pipe_out[2], int pipe_signal[2]);
 		void setEnvironmentVariables(std::string localPath, std::string fileToExecute);
    		void sendResponse(const std::string& result) const;
 		int  sendPostBody(int pipe_in[2]);

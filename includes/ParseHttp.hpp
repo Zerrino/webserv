@@ -27,6 +27,7 @@ class	ParseHttp
 		ParseHttp& operator= (const ParseHttp &cp);
 
 		int	fromSTRtoINT(std::string str);
+		long long	fromSTRtoLONG(std::string str);
 		std::vector<int>	getListenVec(HttpBlock fileConfig, setOfRuleHTTP &rules);
 		void	getDirRules(std::vector<Directive> dir,setOfRuleHTTP &rules, bool k);
 		void	printSetOfRuleHTTP(setOfRuleHTTP config);
