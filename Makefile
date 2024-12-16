@@ -6,12 +6,12 @@
 #    By: root <root@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/14 15:23:12 by gdelvign          #+#    #+#              #
-#    Updated: 2024/12/16 14:36:53 by root             ###   ########.fr        #
+#    Updated: 2024/12/16 17:53:24 by root             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC			:= c++
-CPPFLAGS	:= -std=c++98 #-Wall -Wextra -Werror
+CPPFLAGS	:= -std=c++98 -Wall -Wextra -Werror
 SRC_DIR		:= sources/
 BUILD_DIR	:= .build/
 SRC			:= $(addsuffix .cpp, $(addprefix $(SRC_DIR), main ConfigParser Socket SendToClient ClientRequest Cookie Request ParseHttp CGI CGIRequest CGIUtils))

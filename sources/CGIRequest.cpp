@@ -1,4 +1,5 @@
 #include "../includes/CGIRequest.hpp"
+# include "../includes/CGIUtils.hpp"
 
 CGIRequest::CGIRequest() {
     _method = "";
@@ -12,39 +13,20 @@ CGIRequest::CGIRequest(const std::map<std::string, std::string> &clMap) {
 }
 CGIRequest::~CGIRequest() {}
 
-void sendChunkedData(int fd, const std::string& body) {
+void CGIRequest::sendChunkedData(int fd, const std::string& body) const {
     size_t offset = 0;
-    size_t chunkSize = 4096;  // Taille du morceau
+    size_t chunkSize = 4096;
     while (offset < body.length()) {
-        // Calculer la taille du morceau restant
         size_t toWrite = (offset + chunkSize > body.length()) ? body.length() - offset : chunkSize;
-        
-        // Convertir la taille du morceau en hexadécimal
         char chunkSizeHex[16];
         snprintf(chunkSizeHex, sizeof(chunkSizeHex), "%zx", toWrite);
-        
-        // Envoyer la taille du morceau en hexadécimal
         write(fd, chunkSizeHex, strlen(chunkSizeHex));
-        write(fd, "\r\n", 2);  // Saut de ligne après la taille
-        
-        // Envoyer les données du morceau
-        write(fd, body.c_str() + offset, toWrite);
-        
-        // Envoyer la fin du morceau (retour à la ligne)
         write(fd, "\r\n", 2);
-        
-        // Mettre à jour l'offset pour le prochain morceau
+        write(fd, body.c_str() + offset, toWrite);
+        write(fd, "\r\n", 2);
         offset += toWrite;
     }
-    
-    // Indiquer la fin du corps avec un morceau de taille zéro
-    write(fd, "0\r\n\r\n", 5);  // Un morceau de taille zéro, suivi de \r\n\r\n pour indiquer la fin
-}
-
-std::string intToString(int value) {
-    std::stringstream ss;
-    ss << value;
-    return ss.str();
+    write(fd, "0\r\n\r\n", 5);
 }
 
 void CGIRequest::send(int fd) const {

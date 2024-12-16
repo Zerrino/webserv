@@ -15,5 +15,6 @@ void splitPath(const std::string& fullPath, std::string& path, std::string& file
 bool isPHPInstalled();
 bool isPythonInstalled();
 int stoi(std::string s);
+std::string intToString(int value);
 
 #endif

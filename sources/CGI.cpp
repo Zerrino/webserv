@@ -15,7 +15,7 @@ int CGI::sendPostBody(int pipe_in[2]) {
     return 0;
 }
 
-bool CGI::createPipes(int pipe_in[2], int pipe_out[2], int pipe_signal[2]) {
+bool CGI::createPipes(int pipe_in[2], int pipe_out[2]) {
     if (pipe(pipe_in) == -1 || pipe(pipe_out) == -1) {
         return false;
     }
@@ -85,7 +85,7 @@ int CGI::execute() {
     int isPiped = -1;
     if(_request.getMethod() == "POST" || _request.getMethod() == "PUT")
         isPiped = 0;
-    long pipe_max_size = 100000;
+    long unsigned int pipe_max_size = 100000;
     if (_request.getBody().length() > pipe_max_size) {
         std::ofstream tempFile(tempFilePath.c_str());
         if (!tempFile) {
@@ -97,8 +97,8 @@ int CGI::execute() {
     } else
         isPiped = 1;
 
-    int pipe_in[2], pipe_out[2], pipe_signal[2];
-    if (!createPipes(pipe_in, pipe_out, pipe_signal)) {
+    int pipe_in[2], pipe_out[2];
+    if (!createPipes(pipe_in, pipe_out)) {
         std::cerr << "Failed to create pipes.\n";
         return 1;
     }
