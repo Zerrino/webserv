@@ -6,17 +6,17 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/14 05:08:12 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/17 13:58:48 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/ClientRequest.hpp"
 #include "../includes/ParseHttp.hpp"
 #include "../includes/CGIUtils.hpp"
-
+#include <ctime>
 
 ClientRequest::ClientRequest(std::vector<int> fdSocket)
-	:	SendToClient(), _fdSocket(fdSocket)
+	:	SendToClient(), _fdSocket(fdSocket), _globReq(0)
 {
 	for (std::vector<int>::iterator it = fdSocket.begin(); it != fdSocket.end(); ++it)
 	{
@@ -30,7 +30,7 @@ ClientRequest::ClientRequest(std::vector<int> fdSocket)
 
 void	ClientRequest::pollRequest()
 {
-	int	ret = poll(this->_fds.data(), this->_fds.size(), 30000);
+	int	ret = poll(this->_fds.data(), this->_fds.size(), 1000);
 	if (ret == -1)
 		throw std::runtime_error("poll failed");
 }
@@ -81,7 +81,7 @@ retLoc	ClientRequest::rulingHttp(setOfRuleHTTP &rules, HttpBlock fileConfig)
 	return val;
 }
 
-void	ClientRequest::setRulesLoc(std::string locToFollow, setOfRuleHTTP &rules, HttpBlock fileConfig)
+setOfRuleHTTP	ClientRequest::setRulesLoc(std::string locToFollow, setOfRuleHTTP &rules, HttpBlock fileConfig)
 {
 	std::string port = _clMap.at("Host").substr(_clMap.at("Host").find(":") + 1);
 	ServerBlock serv = *(fileConfig.servers.begin() + rules.listen[port]);
@@ -92,7 +92,7 @@ void	ClientRequest::setRulesLoc(std::string locToFollow, setOfRuleHTTP &rules, H
 		if (i->uri == locToFollow)
 		{
 			parser.getDirRules(i->directives, rules, true);
-			return;
+			return rules;
 		}
 	}
 	for (std::vector<LocationBlock>::iterator i = rules.loc[rules.listen[port]].begin(); i != rules.loc[rules.listen[port]].end(); i++)
@@ -100,7 +100,7 @@ void	ClientRequest::setRulesLoc(std::string locToFollow, setOfRuleHTTP &rules, H
 		if (i->uri == locToFollow)
 		{
 			parser.getDirRules(i->directives, rules, true);
-			return;
+			return rules;
 		}
 	}
 	for (std::vector<LocationBlock>::iterator i = rules.loc_cgi[rules.listen[port]].begin(); i != rules.loc_cgi[rules.listen[port]].end(); i++)
@@ -108,13 +108,13 @@ void	ClientRequest::setRulesLoc(std::string locToFollow, setOfRuleHTTP &rules, H
 		if (i->uri == locToFollow)
 		{
 			parser.getDirRules(i->directives, rules, true);
-			return;
+			return rules;
 		}
 	}
 	throw std::runtime_error("No location found.");
 }
 
-bool	ClientRequest::RulesApply(setOfRuleHTTP rules, int i)
+bool	ClientRequest::RulesApply(setOfRuleHTTP rules, int fd)
 {
 	ParseHttp parser;
 	if (rules.root.empty())
@@ -122,14 +122,14 @@ bool	ClientRequest::RulesApply(setOfRuleHTTP rules, int i)
 	if (!rules.return_code.empty()) // on check le return
 	{
 		std::cout << "return used!" << std::endl;
-		sendClient(this->_fds[i].fd, parser.fromSTRtoINT(rules.return_code), rules.return_page);
+		sendClient(fd, parser.fromSTRtoINT(rules.return_code), rules.return_page);
 		return true;
 	}
 	if (!_clMap["Content-Length"].empty() && rules.client_max_body_size != -1)
 	{
 		if (parser.fromSTRtoLONG(_clMap["Content-Length"]) > rules.client_max_body_size)
 		{
-			sendClient(this->_fds[i].fd, 413, "./data/ressources/empty.txt");
+			sendClient(fd, 413, "./data/ressources/empty.txt");
 			return true;
 		}
 	}
@@ -143,7 +143,7 @@ bool	ClientRequest::RulesApply(setOfRuleHTTP rules, int i)
 		}
 		if (flag == false)
 		{
-			sendClient(this->_fds[i].fd, 405, "./data/ressources/empty.txt");
+			sendClient(fd, 405, "./data/ressources/empty.txt");
 			return true;
 		}
 
@@ -212,7 +212,6 @@ std::string ClientRequest::getPath(setOfRuleHTTP rules, std::string locToFollow)
 
 void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 {
-	(void)rules;
 	for (size_t i = 0; i < this->_fds.size(); ++i)
 	{
 		if (this->_fds[i].revents & POLLIN)
@@ -228,66 +227,63 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 				try
 				{
 					int	cgi_result;
-					retLoc loc = rulingHttp(rules, fileConfig);
-					std::string locToFollow = loc.loc;
-					setRulesLoc(locToFollow, rules, fileConfig);
-
-					this->_path = getPath(rules, locToFollow);
-					if (loc.loc2 == "cgi")
+					std::string locToFollow;
+					if (_urlMap.find(_clMap["URI"]) == _urlMap.end())
 					{
-						//printMap(_clMap);
-						if (RulesApply(rules, i))
+						_urlMap[_clMap["URI"]].loc = rulingHttp(rules, fileConfig);
+						locToFollow = _urlMap[_clMap["URI"]].loc.loc;
+						setRulesLoc(locToFollow, rules, fileConfig);
+						_urlMap[_clMap["URI"]].rules = rules;
+						_urlMap[_clMap["URI"]].str0 = getPath(rules, locToFollow);
+						_urlMap[_clMap["URI"]].str1 = _clMap["URI"].substr(_clMap["URI"].size() - 1);
+						_urlMap[_clMap["URI"]].str2 = getContentType(_clMap["URI"]);
+					}
+					locToFollow = _urlMap[_clMap["URI"]].loc.loc;
+					rules = _urlMap[_clMap["URI"]].rules;
+					this->_path = _urlMap[_clMap["URI"]].str0;
+					if (_urlMap[_clMap["URI"]].loc.loc2 == "cgi")
+					{
+						if (RulesApply(rules, this->_fds[i].fd))
 						{
-
 						}
 						else
 						{
-							std::cout << "Length : " << _clMap["Content-Length"] << std::endl; // 100 000 000
-							write(1, _clMap["Content"].c_str(), 100);
-							std::cout << std::endl;
 							cgi_result = CGIchecker(_clMap , _path, rules, _fds[i].fd);
 							(void)cgi_result;
-							//std::cout << "cgi result : " << _clMap["Content"] << std::endl;
 						}
-						//cgi == 1 -> FAIL (fork, pipe, etc..)
-						//cgi == 0 -> SUCCESS (cela renvoie succes si la requete a été envoyée)
-						//printMap(_clMap);
-						// Gerer le CGI
-						//
 					}
 					else
 					{
-
-						//std::cout << "------------------------------------------------------------" << std::endl;
-						//std::cout << _clMap["URI"] << std::endl;
-						//parser.printSetOfRuleHTTP(rules);
-						//printMap(_clMap);
-						if (RulesApply(rules, i))
+						if (RulesApply(rules, this->_fds[i].fd))
 						{
-							std::cout << "Hey" << std::endl;
 						}
 						else
 						{
 							struct stat buffer;
 							if (stat(_path.c_str(), &buffer) != 0)
 							{
-								sendClient(this->_fds[i].fd, 404, "./data/ressources/empty.txt"); // verifier si la ressource existe bien sur le serveur
+								if (_clMap.find("GET") != _clMap.end())
+									sendClient(this->_fds[i].fd, 404, "./data/ressources/empty.txt"); // verifier si la ressource existe bien sur le serveur
+								else
+								{
+									sendClient(this->_fds[i].fd, 200, "./data/ressources/empty.txt");
+								}
 							}
 							else if (_clMap.find("GET") != _clMap.end())
 							{
-								handlingGET(i, rules);
+								handlingGET(this->_fds[i].fd, rules);
 							}
 							else if (_clMap.find("POST") != _clMap.end())
 							{
-								handlingPOST(i, rules);
+								handlingPOST(this->_fds[i].fd, rules);
 							}
 							else if (_clMap.find("PUT") != _clMap.end())
 							{
-								handlingPUT(i, rules);
+								handlingPUT(this->_fds[i].fd, rules);
 							}
 							else if (_clMap.find("DELETE") != _clMap.end())
 							{
-								handlingDELETE(i, rules);
+								handlingDELETE(this->_fds[i].fd, rules);
 							}
 						}
 					}
@@ -397,11 +393,42 @@ std::string ClientRequest::get_clientInfo(int fd)
 	return requestData;
 }
 
+
+bool ClientRequest::finder(const std::vector<char> &buffer, std::size_t &pos)
+{
+	for (std::size_t i = 0; i + 1 < buffer.size(); ++i)
+	{
+		if (buffer[i] == '\r' && buffer[i + 1] == '\n')
+		{
+			pos = i;
+			return true;
+		}
+	}
+	return false;
+}
+
+
+bool ClientRequest::readLine(std::vector<char> &buffer, int fd, std::vector<char> &line)
+{
+	while (true)
+	{
+		std::size_t pos;
+		if (finder(buffer, pos)) {
+			line.assign(buffer.begin(), buffer.begin() + pos);
+			buffer.erase(buffer.begin(), buffer.begin() + pos + 2);
+			return true;
+		}
+		char buf[4096];
+		ssize_t len = read(fd, buf, sizeof(buf));
+		if (len <= 0)
+			return false;
+		buffer.insert(buffer.end(), buf, buf + len);
+	}
+}
 std::string ClientRequest::readChunkedBody(int fd, std::string &initialBuffer, std::size_t &contentLength)
 {
-	std::string body;
+	std::vector<char> tmp_body(0);
 	std::string temp = initialBuffer;
-
 	while (true)
 	{
 		std::string line;
@@ -421,18 +448,20 @@ std::string ClientRequest::readChunkedBody(int fd, std::string &initialBuffer, s
 			break;
 		}
 		std::string chunkData;
+		chunkData.reserve(chunkSize);
 		if (!readBytesFromStringOrFd(temp, fd, chunkSize, chunkData))
 			break;
-		body.append(chunkData);
+		tmp_body.insert(tmp_body.end(), chunkData.begin(), chunkData.end());
 		std::string emptyLine;
 		readLineFromStringOrFd(temp, fd, emptyLine);
 	}
-
+	std::string body(tmp_body.begin(), tmp_body.end());
 	return body;
 }
 
 bool ClientRequest::readLineFromStringOrFd(std::string &buffer, int fd, std::string &line)
 {
+	int a = 0;
 	while (true)
 	{
 		std::size_t pos = buffer.find("\r\n");
@@ -447,11 +476,14 @@ bool ClientRequest::readLineFromStringOrFd(std::string &buffer, int fd, std::str
 		if (len <= 0)
 			return false;
 		buffer.append(buf, len);
+		a++;
 	}
+	std::cout << "a : " << a << std::endl;
 }
 
 bool ClientRequest::readBytesFromStringOrFd(std::string &buffer, int fd, std::size_t length, std::string &data)
 {
+	//std::cout << length << std::endl;
 	while (buffer.size() < length)
 	{
 		char buf[4096];
@@ -492,14 +524,14 @@ void	ClientRequest::printRequestAnswear(int request, std::string path)
 	int col3Width = 80;
 	int col4Width = 6;
 
-
 	std::cout << std::left
 	<< std::setw(col1Width) << _clMap.at("METHOD")
 	<< std::setw(col2Width) << truncate(_clMap.at("URI"), col2Width)
 	<< "| " << request << " " << std::setw(col3Width) << truncate(path, col3Width)
 	<< "| port " << std::setw(col4Width) <<truncate(_clMap.at("Host").substr(_clMap.at("Host").find(":") + 1), col4Width)
-	<< "| cookie " << _clMap["Cookie_ID"]
+	<< "| cookie " << _clMap["Cookie_ID"] << " | " << _globReq
 	<< std::endl;
+	_globReq++;
 }
 
 void	ClientRequest::sendClient(int fd, int request, std::string path)
@@ -515,7 +547,6 @@ void	ClientRequest::sendClient(int fd, int request, std::string path)
 		str = this->requestFour(request, path);
 	else if ((request >= 500) && (request < 600))
 		str = this->requestFive(request, path);
-	//printMap(_clMap);
 	printRequestAnswear(request, path);
 	write(fd, str.c_str(), str.length());
 }
@@ -528,20 +559,18 @@ void	ClientRequest::sendClient(int fd, int request, std::string path)
 //		void	handlingDELETE();
 //		void	handlingPOST();
 
-void	ClientRequest::handlingGET(int i, setOfRuleHTTP rules)
+void	ClientRequest::handlingGET(int fd, setOfRuleHTTP rules)
 {
 
-	std::string PATH_ABS = this->_path;
-;
-	if ((_clMap["URI"].substr(_clMap["URI"].size() - 1) == "/") || getContentType(_clMap["URI"]).empty())
+	if (_urlMap[_clMap["URI"]].str1 == "/" || _urlMap[_clMap["URI"]].str2.empty())
 	{
 		if (rules.index.size() == 0)
 		{
-			this->sendClient(this->_fds[i].fd, 302, rules.error_page["404"]);
+			this->sendClient(fd, 302, rules.error_page["404"]);
 		}
 		else //if (_clMap.find("Cookie") != _clMap.end())
 		{
-			this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
+			this->sendClient(fd, 200, this->_path);
 		}
 		/*
 		else
@@ -562,10 +591,10 @@ void	ClientRequest::handlingGET(int i, setOfRuleHTTP rules)
 	}
 	else // SI aucune informations en plus
 	{
-		this->sendClient(this->_fds[i].fd, 200, PATH_ABS);
+		this->sendClient(fd, 200, this->_path);
 	}
 }
-void	ClientRequest::handlingPUT(int i, setOfRuleHTTP rules)
+void	ClientRequest::handlingPUT(int fd, setOfRuleHTTP rules)
 {
 	(void)rules;
 	std::string path = this->_path;
@@ -573,28 +602,28 @@ void	ClientRequest::handlingPUT(int i, setOfRuleHTTP rules)
 	std::ofstream file(path.c_str());
 	if (!file.is_open())
 	{
-		sendClient(this->_fds[i].fd, 404, "./data/ressources/empty.txt");
+		sendClient(fd, 404, "./data/ressources/empty.txt");
 		return ;
 	}
 	std::istringstream iss(_clMap["Content-Length"]);
 	iss >> number;
 	file.write(_clMap["Content"].c_str(), number);
 	file.close();
-	sendClient(this->_fds[i].fd, 204, "");
+	sendClient(fd, 204, "");
 }
-void	ClientRequest::handlingDELETE(int i, setOfRuleHTTP rules)
+void	ClientRequest::handlingDELETE(int fd, setOfRuleHTTP rules)
 {
 	std::string path = this->_path;
 	if (std::remove(path.c_str()) == 0)
 	{
-		sendClient(this->_fds[i].fd, 204, "");
+		sendClient(fd, 204, "");
 	}
 	else
 	{
-		sendClient(this->_fds[i].fd, 302, rules.error_page["404"]);
+		sendClient(fd, 302, rules.error_page["404"]);
 	}
 }
-void	ClientRequest::handlingPOST(int i, setOfRuleHTTP rules)
+void	ClientRequest::handlingPOST(int fd, setOfRuleHTTP rules)
 {
 	(void)rules;
 	parseContent(_clMap);
@@ -608,15 +637,15 @@ void	ClientRequest::handlingPOST(int i, setOfRuleHTTP rules)
 			{
 				cookiedUpdate("login", "true", path_cookies.append(_clMap["Cookie_ID"]));
 				cookiedUpdate("session", _clMap["email"].substr(0, _clMap["email"].find('@')), path_cookies);
-				sendClient(this->_fds[i].fd, 204, "");
+				sendClient(fd, 204, "");
 			}
 			else
 			{
 				cookiedUpdate("login", "false", path_cookies.append(_clMap["Cookie_ID"]));
 				if (resultCook == -1)
-					sendClient(this->_fds[i].fd, 404, "./data/ressources/responses/errors/errorkey.txt");
+					sendClient(fd, 404, "./data/ressources/responses/errors/errorkey.txt");
 				else
-					sendClient(this->_fds[i].fd, 404, "./data/ressources/responses/errors/errorval.txt");
+					sendClient(fd, 404, "./data/ressources/responses/errors/errorval.txt");
 			}
 		}
 		else if (_clMap["action"].find("modify") != std::string::npos)
@@ -624,20 +653,20 @@ void	ClientRequest::handlingPOST(int i, setOfRuleHTTP rules)
 			if (isCookies(_clMap["email"], "a", "database/profiles.txt") == 0)
 			{
 				cookiedUpdate(_clMap["email"], _clMap["password"], "database/profiles.txt");
-				sendClient(this->_fds[i].fd, 204, "");
+				sendClient(fd, 204, "");
 			}
 			else
-				sendClient(this->_fds[i].fd, 404, "./data/ressources/empty.txt");
+				sendClient(fd, 404, "./data/ressources/empty.txt");
 		}
 		else if (_clMap["action"].find("create") != std::string::npos)
 		{
 			if (isCookies(_clMap["email"], "", "database/profiles.txt") == -1)
 			{
 				cookiedUpdate(_clMap["email"], _clMap["password"], "database/profiles.txt");
-				sendClient(this->_fds[i].fd, 204, "");
+				sendClient(fd, 204, "");
 			}
 			else
-				sendClient(this->_fds[i].fd, 404, "./data/ressources/empty.txt");
+				sendClient(fd, 404, "./data/ressources/empty.txt");
 		}
 	}
 }

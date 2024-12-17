@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/11 01:51:15 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/17 13:42:57 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include "Request.hpp"
 # include "ConfigParser.hpp"
 # include "CGIRequest.hpp"
+# include <sys/epoll.h>
 
 struct retLoc
 {
@@ -27,6 +28,7 @@ struct retLoc
 
 struct setOfRuleHTTP
 {
+	int											_epoll_fd;
 	long long									client_max_body_size;
 	std::map<std::string, int>					listen; // ne pas remplir
 	std::map<std::string, std::string>			error_page;
@@ -54,20 +56,30 @@ struct setOfRuleHTTP
 		{}
 };
 
-
+struct retStr
+{
+	std::string str0;
+	std::string str1;
+	std::string str2;
+	setOfRuleHTTP	rules;
+	retLoc			loc;
+};
 
 class	ClientRequest : public SendToClient, public Cookie, public Request
 {
 	protected:
+		int					_epoll_fd;
 		std::vector<pollfd>	_fds;
 		std::vector<int>	_fdSocket;
 		std::string			_path;
 		int					_fdClient;
 		int					_i;
+		int					_globReq;
 		// char				_buffer[256];
 		std::string			_clientInfo;
 		struct sockaddr_in 	_addr;
 		std::map<std::string, std::string>	_clMap;
+		std::map<std::string, retStr>	_urlMap;
 
 	public:
 		ClientRequest(std::vector<int> fdSocket);
@@ -91,13 +103,16 @@ class	ClientRequest : public SendToClient, public Cookie, public Request
 		void	handlingDELETE(int i, setOfRuleHTTP rules);
 		void	handlingPOST(int i, setOfRuleHTTP rules);
 		retLoc	rulingHttp(setOfRuleHTTP &rules, HttpBlock fileConfig);
-		void	setRulesLoc(std::string locToFollow, setOfRuleHTTP &rules, HttpBlock fileConfig);
+		setOfRuleHTTP	setRulesLoc(std::string locToFollow, setOfRuleHTTP &rules, HttpBlock fileConfig);
 		bool	RulesApply(setOfRuleHTTP rules, int i);
 		std::string	getPath(setOfRuleHTTP rules, std::string locToFollow);
 		std::string subPath(std::string basePath, std::string fullPath);
-		bool	readBytesFromStringOrFd(std::string &buffer, int fd, std::size_t length, std::string &data);
+		bool	readBytes(std::vector<char> &buffer, int fd, std::size_t length, std::vector<char> &data);
+		bool	readLine(std::vector<char> &buffer, int fd, std::vector<char> &line);
 		bool	readLineFromStringOrFd(std::string &buffer, int fd, std::string &line);
+		bool	readBytesFromStringOrFd(std::string &buffer, int fd, std::size_t length, std::string &data);
 		std::string	readChunkedBody(int fd, std::string &initialBuffer, std::size_t &contentLength);
+		bool finder(const std::vector<char> &buffer, std::size_t &pos);
 };
 
 #endif

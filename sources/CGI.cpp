@@ -11,7 +11,7 @@ int CGI::sendPostBody(int pipe_in[2]) {
         perror("Erreur d'écriture dans pipe");
         return 1;
     }
-    std::cout << "Requête envoyée via pipe\n";
+    //std::cout << "Requête envoyée via pipe\n";
     return 0;
 }
 
@@ -102,8 +102,8 @@ int CGI::execute() {
         std::cerr << "Failed to create pipes.\n";
         return 1;
     }
-    std::cout << "cmd: " << _cmd << std::endl;
-    _request.printdebug();
+    //std::cout << "cmd: " << _cmd << std::endl;
+    //_request.printdebug();
     pid_t pid = fork();
     if (pid == 0) {
         close(pipe_in[1]);
@@ -141,7 +141,7 @@ int CGI::execute() {
         while ((bytesRead = read(pipe_out[0], buffer, sizeof(buffer))) > 0) {
             result.append(buffer, bytesRead);
         }
-        std::cout << "Printing result" << std::endl;
+        //std::cout << "Printing result" << std::endl;
         // if(isPiped == 1 || isPiped == 0){
         //     const std::string outFilePath = "tmp/out.txt";
         //     std::ofstream outFile(outFilePath.c_str());
