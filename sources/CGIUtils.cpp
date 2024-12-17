@@ -25,3 +25,9 @@ int stoi(std::string s) {
     return i;
 }
 
+std::string intToString(int value) {
+    std::stringstream ss;
+    ss << value;
+    return ss.str();
+}
+

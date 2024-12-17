@@ -35,6 +35,8 @@ class CGIRequest {
 		void setHeader(std::string fullValue);
 		void setStatusCode(int code);
 		void setStatusMessage(std::string code);
+		void printdebug() const;
+		void sendChunkedData(int fd, const std::string& body) const;
 	private:
 		void parseRequest(const std::map<std::string, std::string> &clMap);
 		std::string reformat_request(const std::string& input);
