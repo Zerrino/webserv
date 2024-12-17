@@ -67,6 +67,8 @@ std::map<std::string, std::string> Request::parseRequest(std::string request)
 		req = cook.getRequestData(link.substr(pos1 + 1));
 		link = link.substr(0, pos1);
 	}
+	req["METHOD"] = request.substr(0, pos0);
+	req["URI"] = link;
 	req[request.substr(0, pos0)] = link;
 	req["Cookie_ID"] = cook.isCookied(request);
 	pos0 = request.find("WebKitFormBoundary");
