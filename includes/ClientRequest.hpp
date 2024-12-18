@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/17 13:42:57 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/18 12:08:59 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ class	ClientRequest : public SendToClient, public Cookie, public Request
 		int					_fdClient;
 		int					_i;
 		int					_globReq;
+		bool				_keepAlive;
 		// char				_buffer[256];
 		std::string			_clientInfo;
 		struct sockaddr_in 	_addr;
@@ -113,6 +114,8 @@ class	ClientRequest : public SendToClient, public Cookie, public Request
 		bool	readBytesFromStringOrFd(std::string &buffer, int fd, std::size_t length, std::string &data);
 		std::string	readChunkedBody(int fd, std::string &initialBuffer, std::size_t &contentLength);
 		bool finder(const std::vector<char> &buffer, std::size_t &pos);
+		void	epollExecute(setOfRuleHTTP rules, HttpBlock fileConfig);
+		void 	epollRequest(setOfRuleHTTP rules, HttpBlock fileConfig);
 };
 
 #endif

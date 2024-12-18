@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:35:13 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/17 10:43:03 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/18 11:34:10 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 Socket::Socket(int domain, int type, int protocol)
 	: _domain(domain), _type(type), _protocol(protocol)
 {
-	int opt = 1;
+	int opt = 32768;
 	this->_fdSocket = socket(this->_domain, this->_type, this->_protocol);
 	if (this->_fdSocket == -1)
 		throw std::runtime_error("Socket failed");
@@ -24,6 +24,7 @@ Socket::Socket(int domain, int type, int protocol)
 		throw std::runtime_error("setsockopt SO_REUSEPORT failed");
 	if (setsockopt(this->_fdSocket, SOL_SOCKET, SO_RCVBUF, &opt, sizeof(opt)) == -1)
 		throw std::runtime_error("setsockopt SO_RCVBUF failed");
+
 }
 
 

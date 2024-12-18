@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SendToClient.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 22:20:30 by zerrino           #+#    #+#             */
-/*   Updated: 2024/11/14 15:11:59 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/18 12:08:47 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,11 @@ class	SendToClient
 	SendToClient();
 	void	SayHey();
 
-	std::string	requestOne(int request);
-	std::string	requestTwo(int request, std::string path);
-	std::string	requestThree(int request, std::string path);
-	std::string	requestFour(int request, std::string path);
-	std::string	requestFive(int request, std::string path);
+	std::string	requestOne(int request, bool keepAlive);
+	std::string	requestTwo(int request, std::string path, bool keepAlive);
+	std::string	requestThree(int request, std::string path, bool keepAlive);
+	std::string	requestFour(int request, std::string path, bool keepAlive);
+	std::string	requestFive(int request, std::string path, bool keepAlive);
 
 	std::string	getDate();
 	std::string getFile(std::string path);
