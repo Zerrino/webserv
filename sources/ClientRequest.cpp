@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/19 13:47:52 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/19 20:32:28 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,8 @@
 #include "../includes/ParseHttp.hpp"
 #include "../includes/CGIUtils.hpp"
 #include <ctime>
-
+#include <dirent.h>
+#include <unistd.h>
 
 ClientRequest::ClientRequest(std::vector<int> fdSocket)
 	:	SendToClient(), _fdSocket(fdSocket), _globReq(0)
@@ -55,7 +56,7 @@ bool ClientRequest::isPrefix(std::string prefix, std::string target)
 	return target.substr(0, prefix.size()) == prefix;
 }
 
-retLoc	ClientRequest::rulingHttp(setOfRuleHTTP &rules, HttpBlock fileConfig)
+retLoc	ClientRequest::rulingHttp(setOfRuleHTTP &rules, HttpBlock fileConfig, std::string uri)
 {
 	retLoc	val;
 	std::string parentUrl = "";
@@ -67,7 +68,7 @@ retLoc	ClientRequest::rulingHttp(setOfRuleHTTP &rules, HttpBlock fileConfig)
 
 	for (std::vector<LocationBlock>::iterator i = rules.loc_cgi[rules.listen[port]].begin(); i != rules.loc_cgi[rules.listen[port]].end(); i++)
 	{
-		if (_clMap["URI"].size() >= i->uri.size() && _clMap["URI"].compare(_clMap["URI"].size() - i->uri.size(), i->uri.size(), i->uri) == 0)
+		if (uri.size() >= i->uri.size() && uri.compare(uri.size() - i->uri.size(), i->uri.size(), i->uri) == 0)
 		{
 			val.loc = i->uri;
 			val.loc2 = "cgi";
@@ -76,7 +77,7 @@ retLoc	ClientRequest::rulingHttp(setOfRuleHTTP &rules, HttpBlock fileConfig)
 	}
 	for (std::vector<LocationBlock>::iterator i = rules.loc_eq[rules.listen[port]].begin(); i != rules.loc_eq[rules.listen[port]].end(); i++)
 	{
-		if (i->uri == _clMap["URI"])
+		if (i->uri == uri)
 		{
 			val.loc = i->uri;
 			val.loc2 = "";
@@ -85,7 +86,7 @@ retLoc	ClientRequest::rulingHttp(setOfRuleHTTP &rules, HttpBlock fileConfig)
 	}
 	for (std::vector<LocationBlock>::iterator i = rules.loc[rules.listen[port]].begin(); i != rules.loc[rules.listen[port]].end(); i++)
 	{
-		if (isPrefix(i->uri, _clMap["URI"]) && i->uri.size() > len)
+		if (isPrefix(i->uri, uri) && i->uri.size() > len)
 		{
 			parentUrl = i->uri;
 			len = i->uri.size();
@@ -96,7 +97,7 @@ retLoc	ClientRequest::rulingHttp(setOfRuleHTTP &rules, HttpBlock fileConfig)
 	return val;
 }
 
-setOfRuleHTTP	ClientRequest::setRulesLoc(std::string locToFollow, setOfRuleHTTP &rules, HttpBlock fileConfig)
+setOfRuleHTTP	ClientRequest::setRulesLoc(std::string locToFollow, setOfRuleHTTP rules, HttpBlock fileConfig)
 {
 	std::string port = _clMap.at("Host").substr(_clMap.at("Host").find(":") + 1);
 	ServerBlock serv = *(fileConfig.servers.begin() + rules.listen[port]);
@@ -136,7 +137,7 @@ bool	ClientRequest::RulesApply(setOfRuleHTTP rules, int fd)
 		throw std::runtime_error("no root");
 	if (!rules.return_code.empty()) // on check le return
 	{
-		std::cout << "return used!" << std::endl;
+		//std::cout << "return used!" << std::endl;
 		sendClient(fd, parser.fromSTRtoINT(rules.return_code), rules.return_page);
 		return true;
 	}
@@ -175,6 +176,7 @@ std::string ClientRequest::subPath(std::string basePath, std::string fullPath)
 
 std::string ClientRequest::getPath(setOfRuleHTTP rules, std::string locToFollow)
 {
+	std::string path_copy;
 	if (rules.root.empty())
 		throw std::runtime_error("no root found.");
 	std::string path = rules.root;
@@ -195,6 +197,7 @@ std::string ClientRequest::getPath(setOfRuleHTTP rules, std::string locToFollow)
 	{
 		for (std::vector<std::string>::iterator i = rules.index.begin(); i != rules.index.end(); i++)
 		{
+			path = rules.root;
 			std::string index = *i;
 			if (rules.sub_root.empty())
 			{
@@ -203,6 +206,7 @@ std::string ClientRequest::getPath(setOfRuleHTTP rules, std::string locToFollow)
 				{
 					if (getContentType(_clMap["URI"]).empty())
 						path.append("/");
+					path_copy = path;
 					path.append(index);
 				}
 			}
@@ -214,6 +218,7 @@ std::string ClientRequest::getPath(setOfRuleHTTP rules, std::string locToFollow)
 				{
 					if (getContentType(_clMap["URI"]).empty())
 						path.append("/");
+					path_copy = path;
 					path.append(index);
 				}
 			}
@@ -222,6 +227,9 @@ std::string ClientRequest::getPath(setOfRuleHTTP rules, std::string locToFollow)
 				return path;
 		}
 	}
+	//std::cout << path_copy << std::endl;
+	if (!path_copy.empty())
+		return path_copy;
 	return path;
 }
 
@@ -261,19 +269,31 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 				{
 					int	cgi_result;
 					std::string locToFollow;
-					if (_urlMap.find(_clMap["URI"]) == _urlMap.end())
+					_urlMap[_clMap["URI"]].loc = rulingHttp(rules, fileConfig, _clMap["URI"]);
+					locToFollow = _urlMap[_clMap["URI"]].loc.loc;
+					rules = setRulesLoc(locToFollow, rules, fileConfig);
+					_urlMap[_clMap["URI"]].rules = rules;
+					_urlMap[_clMap["URI"]].str0 = getPath(rules, locToFollow);
+					_urlMap[_clMap["URI"]].str1 = _clMap["URI"].substr(_clMap["URI"].size() - 1);
+					_urlMap[_clMap["URI"]].str2 = getContentType(_clMap["URI"]);
+					_errorPage.clear();
+					for (std::map<std::string, std::string>::iterator it = rules.error_page.begin(); it != rules.error_page.end(); ++it)
 					{
-						_urlMap[_clMap["URI"]].loc = rulingHttp(rules, fileConfig);
-						locToFollow = _urlMap[_clMap["URI"]].loc.loc;
-						setRulesLoc(locToFollow, rules, fileConfig);
-						_urlMap[_clMap["URI"]].rules = rules;
-						_urlMap[_clMap["URI"]].str0 = getPath(rules, locToFollow);
-						_urlMap[_clMap["URI"]].str1 = _clMap["URI"].substr(_clMap["URI"].size() - 1);
-						_urlMap[_clMap["URI"]].str2 = getContentType(_clMap["URI"]);
+						setOfRuleHTTP errorRules;
+						std::string errorLoc;
+						retLoc errorRetLoc;
+						std::string	errorPath;
+						errorRetLoc = rulingHttp(rules, fileConfig, it->second);
+						errorLoc = errorRetLoc.loc;
+						errorRules = setRulesLoc(errorLoc, rules, fileConfig);
+						errorPath = getPath(errorRules, errorLoc) + it->second;
+						_errorPage[it->first] = errorPath;
 					}
+					//parser.printSetOfRuleHTTP(rules);
 					locToFollow = _urlMap[_clMap["URI"]].loc.loc;
 					rules = _urlMap[_clMap["URI"]].rules;
 					this->_path = _urlMap[_clMap["URI"]].str0;
+					//_globRules = rules;
 					if (_urlMap[_clMap["URI"]].loc.loc2 == "cgi")
 					{
 						if (RulesApply(rules, this->_fds[i].fd))
@@ -293,6 +313,7 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 						else
 						{
 							struct stat buffer;
+							//std::cout << _path << std::endl;
 							if (stat(_path.c_str(), &buffer) != 0)
 							{
 								if (_clMap.find("GET") != _clMap.end())
@@ -573,6 +594,18 @@ void	ClientRequest::printRequestAnswear(int request, std::string path)
 void	ClientRequest::sendClient(int fd, int request, std::string path)
 {
 	std::string	str = "";
+	std::string	request_str = "";
+	std::stringstream ss;
+	ss << request;
+	request_str = ss.str();
+	//std::cout << request_str << std::endl;
+	if (_errorPage.find(request_str) != _errorPage.end())
+	{
+		struct stat buffer;
+		if (stat(_errorPage[request_str].c_str(), &buffer) == 0)
+			path = _errorPage[request_str];
+	}
+
 	if ((request >= 100) && (request < 200))
 		str = this->requestOne(request, _keepAlive);
 	else if ((request >= 200) && (request < 300))
@@ -614,15 +647,77 @@ void	ClientRequest::sendClient(int fd, int request, std::string path)
 
 
 
+void ClientRequest::listDirconst(std::string &path, int fd)
+{
+	std::size_t count = 0;
+	DIR *dir = opendir(path.c_str());
+	if (!dir)
+	{
+		sendClient(fd, 404, "./data/ressources/empty.txt");
+		return;
+	}
+	std::ofstream file("./tmp/json_folder/tmp_autoindex.json", std::ios::out | std::ios::trunc);
+	if (!file)
+	{
+		sendClient(fd, 404, "./data/ressources/empty.txt");
+		return;
+	}
+	file << "{" << std::endl;
+	file << "\t\"files\": [" << std::endl;
+	struct dirent *entry;
+	while ((entry = readdir(dir)) != NULL)
+	{
+		if (count != 0)
+			file << "," << std::endl;
+		std::string fullPath = path;
+		if (fullPath[fullPath.size() - 1] != '/')
+			fullPath += "/";
+		fullPath += entry->d_name;
+
+		struct stat st;
+		if (stat(fullPath.c_str(), &st) == -1) // unable top open fichier/dossier
+			continue;
+		char type = '?';
+		if (S_ISREG(st.st_mode))  type = 'F'; // Fichier
+		if (S_ISDIR(st.st_mode))  type = 'D'; // Dossier
+		if (S_ISLNK(st.st_mode))  type = 'L'; // Lien symbolique
+		if (S_ISCHR(st.st_mode))  type = 'C'; // Peripherique caractere
+		if (S_ISBLK(st.st_mode))  type = 'B'; // Peripherique bloc
+		if (S_ISFIFO(st.st_mode)) type = 'P'; // FIFO/pipe nomme
+		if (S_ISSOCK(st.st_mode)) type = 'S'; // Socket
+		file << "\t\t{" << std::endl
+			<< "\t\t\t\"" << "name" << "\": \"" << entry->d_name << "\"," << std::endl
+			<< "\t\t\t\"" << "type" << "\": \"" << type << "\"," << std::endl
+			<< "\t\t\t\"" << "perm" << "\": \"" << (st.st_mode & 07777) << "\"," << std::endl
+			<< "\t\t\t\"" << "size" << "\": " << st.st_size << "" << std::endl
+			<< "\t\t}";
+		count++;
+	}
+	file << std::endl << "\t]";
+	file << std::endl << "}" << std::endl;
+	file.close();
+	closedir(dir);
+	sendClient(fd, 200, "./tmp/json_folder/tmp_autoindex.json");
+}
 
 void	ClientRequest::handlingGET(int fd, setOfRuleHTTP rules)
 {
-
-	if (_urlMap[_clMap["URI"]].str1 == "/" || _urlMap[_clMap["URI"]].str2.empty())
+	struct stat buffer;
+	stat(_path.c_str(), &buffer);
+	bool isFolder = S_ISDIR(buffer.st_mode);
+	if (rules.autoindex == "on" && isFolder)
+	{
+		listDirconst(_path, fd);
+	}
+	else if (rules.autoindex != "on" && isFolder)
+	{
+		sendClient(fd, 404, "./data/ressources/empty.txt");
+	}
+	else if (_urlMap[_clMap["URI"]].str1 == "/" || _urlMap[_clMap["URI"]].str2.empty())
 	{
 		if (rules.index.size() == 0)
 		{
-			this->sendClient(fd, 302, rules.error_page["404"]);
+			this->sendClient(fd, 404, "./data/ressources/empty.txt");
 		}
 		else if ((_clMap.find("Cookie") == _clMap.end()) && (_clMap.find("User-Agent") != _clMap.end()))
 		{
@@ -670,6 +765,7 @@ void	ClientRequest::handlingPUT(int fd, setOfRuleHTTP rules)
 }
 void	ClientRequest::handlingDELETE(int fd, setOfRuleHTTP rules)
 {
+	(void)rules;
 	std::string path = this->_path;
 	if (std::remove(path.c_str()) == 0)
 	{
@@ -677,7 +773,7 @@ void	ClientRequest::handlingDELETE(int fd, setOfRuleHTTP rules)
 	}
 	else
 	{
-		sendClient(fd, 302, rules.error_page["404"]);
+		sendClient(fd, 404, "./data/ressources/empty.txt");
 	}
 }
 void	ClientRequest::handlingPOST(int fd, setOfRuleHTTP rules)

@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/18 13:10:00 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/19 20:28:40 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,8 +81,9 @@ class	ClientRequest : public SendToClient, public Cookie, public Request
 		std::string			_clientInfo;
 		struct sockaddr_in 	_addr;
 		std::map<std::string, std::string>	_clMap;
+		std::map<std::string, std::string>	_errorPage;
 		std::map<std::string, retStr>	_urlMap;
-
+		//setOfRuleHTTP		_globRules;
 	public:
 		ClientRequest(std::vector<int> fdSocket);
 		~ClientRequest();
@@ -104,8 +105,8 @@ class	ClientRequest : public SendToClient, public Cookie, public Request
 		void	handlingPUT(int i, setOfRuleHTTP rules);
 		void	handlingDELETE(int i, setOfRuleHTTP rules);
 		void	handlingPOST(int i, setOfRuleHTTP rules);
-		retLoc	rulingHttp(setOfRuleHTTP &rules, HttpBlock fileConfig);
-		setOfRuleHTTP	setRulesLoc(std::string locToFollow, setOfRuleHTTP &rules, HttpBlock fileConfig);
+		retLoc	rulingHttp(setOfRuleHTTP &rules, HttpBlock fileConfig, std::string uri);
+		setOfRuleHTTP	setRulesLoc(std::string locToFollow, setOfRuleHTTP rules, HttpBlock fileConfig);
 		bool	RulesApply(setOfRuleHTTP rules, int i);
 		std::string	getPath(setOfRuleHTTP rules, std::string locToFollow);
 		std::string subPath(std::string basePath, std::string fullPath);
@@ -116,7 +117,8 @@ class	ClientRequest : public SendToClient, public Cookie, public Request
 		std::string	readChunkedBody(int fd, std::string &initialBuffer, std::size_t &contentLength);
 		bool finder(const std::vector<char> &buffer, std::size_t &pos);
 		void	epollExecute(setOfRuleHTTP rules, HttpBlock fileConfig);
-		void 	epollRequest(setOfRuleHTTP rules, HttpBlock fileConfig);
+		void	epollRequest(setOfRuleHTTP rules, HttpBlock fileConfig);
+		void	listDirconst(std::string &path, int fd);
 };
 
 #endif
