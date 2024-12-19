@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/18 12:08:59 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/18 13:10:00 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,7 @@ class	ClientRequest : public SendToClient, public Cookie, public Request
 		int					_i;
 		int					_globReq;
 		bool				_keepAlive;
+		int					_err;
 		// char				_buffer[256];
 		std::string			_clientInfo;
 		struct sockaddr_in 	_addr;

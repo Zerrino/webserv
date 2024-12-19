@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/18 12:13:58 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/19 13:47:52 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,166 +28,6 @@ ClientRequest::ClientRequest(std::vector<int> fdSocket)
 		this->_fds.push_back(pfd);
 	}
 }
-
-
-/*
-ClientRequest::ClientRequest(std::vector<int> fdSocket)
-	: SendToClient(), _fdSocket(fdSocket), _globReq(0)
-{
-	// Mise en place de l’epoll
-	this->_epoll_fd = epoll_create(1024);
-	if (this->_epoll_fd == -1)
-	{
-		throw std::runtime_error(std::string("epoll_create failed") + strerror(errno));
-	}
-
-	// Ajout des sockets d’écoute à l’epoll
-	for (size_t i = 0; i < fdSocket.size(); ++i)
-	{
-		int sfd = fdSocket[i];
-		epoll_event event;
-		memset(&event, 0, sizeof(event));
-		event.data.fd = sfd;
-		event.events = EPOLLIN;
-		if (epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, sfd, &event) == -1) {
-			throw std::runtime_error(std::string("epoll_ctl(ADD) failed: ") + strerror(errno));
-		}
-	}
-}
-*/
-
-void ClientRequest::epollRequest(setOfRuleHTTP rules, HttpBlock fileConfig)
-{
-	std::vector<epoll_event> events(1000);
-	int ret = epoll_wait(this->_epoll_fd, events.data(), (int)events.size(), 1000);
-	if (ret == -1)
-	{
-		if (errno == EINTR)
-		{
-			return;
-		}
-		throw std::runtime_error(std::string("epoll_wait failed: ") + strerror(errno));
-	}
-	for (int i = 0; i < ret; ++i)
-	{
-		int fd = events[i].data.fd;
-		if (std::find(this->_fdSocket.begin(), this->_fdSocket.end(), fd) != this->_fdSocket.end())
-		{
-			this->acceptRequest(fd);
-			int flags = fcntl(this->_fdClient, F_GETFL, 0);
-			std::cout << flags << std::endl;
-			if (flags == -1) flags = 0;
-			fcntl(this->_fdClient, F_SETFL, flags | O_NONBLOCK);
-		}
-		else
-		{
-			if (events[i].events & EPOLLIN)
-			{
-				ParseHttp parser;
-				this->get_clientInfo(fd);
-
-				try {
-					int	cgi_result;
-					std::string locToFollow;
-					if (_urlMap.find(_clMap["URI"]) == _urlMap.end())
-					{
-						_urlMap[_clMap["URI"]].loc = rulingHttp(rules, fileConfig);
-						locToFollow = _urlMap[_clMap["URI"]].loc.loc;
-						setRulesLoc(locToFollow, rules, fileConfig);
-						_urlMap[_clMap["URI"]].rules = rules;
-						_urlMap[_clMap["URI"]].str0 = getPath(rules, locToFollow);
-						_urlMap[_clMap["URI"]].str1 = _clMap["URI"].substr(_clMap["URI"].size() - 1);
-						_urlMap[_clMap["URI"]].str2 = getContentType(_clMap["URI"]);
-					}
-					locToFollow = _urlMap[_clMap["URI"]].loc.loc;
-					rules = _urlMap[_clMap["URI"]].rules;
-					this->_path = _urlMap[_clMap["URI"]].str0;
-					if (_urlMap[_clMap["URI"]].loc.loc2 == "cgi")
-					{
-						if (RulesApply(rules, fd))
-						{
-						}
-						else
-						{
-							cgi_result = CGIchecker(_clMap , _path, rules, fd);
-							(void)cgi_result;
-						}
-					}
-					else
-					{
-						if (RulesApply(rules, fd))
-						{
-						}
-						else
-						{
-							struct stat buffer;
-							if (stat(_path.c_str(), &buffer) != 0)
-							{
-								if (_clMap.find("GET") != _clMap.end())
-									sendClient(fd, 404, "./data/ressources/empty.txt");
-								else
-								{
-									sendClient(fd, 200, "./data/ressources/empty.txt");
-								}
-							}
-							else if (_clMap.find("GET") != _clMap.end())
-							{
-								handlingGET(fd, rules);
-							}
-							else if (_clMap.find("POST") != _clMap.end())
-							{
-								handlingPOST(fd, rules);
-							}
-							else if (_clMap.find("PUT") != _clMap.end())
-							{
-								handlingPUT(fd, rules);
-							}
-							else if (_clMap.find("DELETE") != _clMap.end())
-							{
-								handlingDELETE(fd, rules);
-							}
-						}
-					}
-				}
-				catch(const std::exception& e)
-				{
-					std::cerr << e.what() << '\n';
-				}
-				if (epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, fd, 0) == -1)
-				{
-					std::cerr << "epoll_ctl(DEL) failed: " << strerror(errno) << std::endl;
-				}
-				close(fd);
-			}
-		}
-	}
-}
-/*
-void ClientRequest::acceptRequest(int fd)
-{
-	struct sockaddr_in addr;
-	socklen_t addr_len = sizeof(addr);
-	this->_fdClient = accept(fd, (struct sockaddr *)&addr, &addr_len);
-	if (this->_fdClient == -1)
-	{
-		std::cerr << "accept failed: " << strerror(errno) << std::endl;
-		return;
-	}
-	epoll_event event;
-	memset(&event, 0, sizeof(event));
-	event.data.fd = this->_fdClient;
-	event.events = EPOLLIN;
-	if (epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, this->_fdClient, &event) == -1)
-	{
-		std::cerr << "epoll_ctl(ADD, client) failed: " << strerror(errno) << std::endl;
-		close(this->_fdClient);
-		return;
-	}
-
-	//fcntl(this->_fdClient, F_GETFL, 0);
-	//fcntl(this->_fdClient, F_SETFL, flags | O_NONBLOCK);
-}
-*/
 
 void	ClientRequest::acceptRequest(int fd)
 {
@@ -402,16 +242,21 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 			{
 				ParseHttp parser;
 				this->get_clientInfo(this->_fds[i].fd);
+				//printMap(_clMap);
 				_keepAlive = false;
-				if (_clMap["Connection"] != "close")
+				_err = 0;
+
+
+
+				if (_clMap["Connection"] == "keep-alive")
 				{
 					_keepAlive = true;
 				}
-				else if (_clMap["Connection"] == "keep-alive")
+				else if (_clMap["Connection"] != "close")
 				{
 					_keepAlive = true;
 				}
-				//std::cout << "alive " << keepAlive << std::endl;
+
 				try
 				{
 					int	cgi_result;
@@ -479,43 +324,25 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 				catch(const std::exception& e)
 
 				{
-					std::cerr << e.what() << '\n';
+					std::cerr << "error : " << e.what() << '\n';
 				}
 
-				/*
-				shutdown(this->_fds[i].fd, SHUT_WR);
-				char buf[1024];
-				while (read(this->_fds[i].fd, buf, sizeof(buf)) > 0)
-				*/
-				if (!_keepAlive)
+				if (!_keepAlive || _err == 1)
 				{
-					shutdown(_fds[i].fd, SHUT_WR);
-					char buf[1024];
-					while (read(this->_fds[i].fd, buf, sizeof(buf)) > 0)
-						;
+					//shutdown(_fds[i].fd, SHUT_WR);
+					//char buf[1024];
+					//while (read(this->_fds[i].fd, buf, sizeof(buf)) > 0)
+					//	;
 					close(this->_fds[i].fd);
 					this->_fds.erase(this->_fds.begin() + i);
 					i--;
+					_err = 0;
 				}
 			}
 		}
 	}
 }
 
-/*
-void	ClientRequest::acceptRequest(int fd)
-{
-	socklen_t addr_len = sizeof(this->_addr);
-	this->_fdClient = accept(fd, (struct sockaddr *)&this->_addr, &addr_len);
-	if (this->_fdClient == -1)
-		throw std::runtime_error("accept failed");
-	pollfd pfd;
-	pfd.fd = this->_fdClient;
-	pfd.events = POLLIN;
-	pfd.revents = 0;
-	this->_fds.push_back(pfd);
-}
-*/
 
 ClientRequest::~ClientRequest()
 {
@@ -598,7 +425,6 @@ std::string ClientRequest::get_clientInfo(int fd)
 			}
 		}
 	}
-
 	this->_clientInfo = requestData;
 	return requestData;
 }
@@ -640,7 +466,6 @@ std::string ClientRequest::readChunkedBody(int fd, std::string &initialBuffer, s
 	std::vector<char> tmp_body(0);
 	std::string temp = initialBuffer;
 
-	//printMap(_clMap);
 	while (true)
 	{
 		std::string line;
@@ -653,7 +478,6 @@ std::string ClientRequest::readChunkedBody(int fd, std::string &initialBuffer, s
 			ss >> chunkSize;
 		}
 		contentLength += chunkSize;
-		//std::cout << contentLength << std::endl;
 		if (chunkSize == 0)
 		{
 			std::string emptyLine;
@@ -671,7 +495,6 @@ std::string ClientRequest::readChunkedBody(int fd, std::string &initialBuffer, s
 
 
 	std::string body(tmp_body.begin(), tmp_body.end());
-	//std::cout << body << std::endl;
 	return body;
 }
 
@@ -773,13 +596,11 @@ void	ClientRequest::sendClient(int fd, int request, std::string path)
 		{
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 			{
-				std::cout << "Error" << std::endl;
 				break;
 			}
 			else
 			{
-				std::cout << "Error2" << std::endl;
-				close(fd);
+				_err = 1;
 				return;
 			}
 		}
@@ -789,17 +610,10 @@ void	ClientRequest::sendClient(int fd, int request, std::string path)
 			to_send -= sent;
 		}
 	}
-	//send(fd, str.c_str(), str.length(), MSG_NOSIGNAL);
-	//write(fd, str.c_str(), str.length());
 }
 
 
 
-
-//		void	handlingGET();
-//		void	handlingPUT();
-//		void	handlingDELETE();
-//		void	handlingPOST();
 
 void	ClientRequest::handlingGET(int fd, setOfRuleHTTP rules)
 {
@@ -810,26 +624,27 @@ void	ClientRequest::handlingGET(int fd, setOfRuleHTTP rules)
 		{
 			this->sendClient(fd, 302, rules.error_page["404"]);
 		}
-		else //if (_clMap.find("Cookie") != _clMap.end())
-		{
-			this->sendClient(fd, 200, this->_path);
-		}
-		/*
-		else
+		else if ((_clMap.find("Cookie") == _clMap.end()) && (_clMap.find("User-Agent") != _clMap.end()))
 		{
 			std::string req = "HTTP/1.1 200 OK\r\n";
-			//req.append(getDate());
-			//req.append("Set-Cookie: session_id=");
-			//req.append(createCookieId());
-			//req.append("; HttpOnly\r\n");
-			std::string file = getFile(PATH_ABS);
-			req.append(getContentType(PATH_ABS));
+			if (_keepAlive)
+				this->_request.append("Connection: keep-alive\r\n");
+			else
+				this->_request.append("Connection: close\r\n");
+			req.append("Set-Cookie: session_id=");
+			req.append(createCookieId());
+			req.append("; HttpOnly\r\n");
+			std::string file = getFile(this->_path);
+			req.append(getContentType(this->_path));
 			req.append(this->_length);
 			req.append("\r\n\r\n");
 			req.append(file);
-			write(this->_fds[i].fd, req.c_str(), req.length());
+			write(fd, req.c_str(), req.length());
 		}
-		*/
+		else
+		{
+			this->sendClient(fd, 200, this->_path);
+		}
 	}
 	else // SI aucune informations en plus
 	{
