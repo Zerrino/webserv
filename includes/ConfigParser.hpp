@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 15:12:33 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/12/03 10:08:02 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/20 14:46:44 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,7 +187,8 @@ public:
 
 	/* Debugging and testing purspose only */
 	void printConfig();
-
+	void printConfigAlex();
+	HttpBlock getHTTP();
 private:
 	std::string _configPath;
 	std::ifstream _configFile;

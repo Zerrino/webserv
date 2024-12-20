@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:35:13 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/11/22 12:34:53 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/20 14:43:53 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ uint16_t Socket::get_port()
 void Socket::bindSocket(sa_family_t sin_family, in_port_t sin_port, struct in_addr sin_addr)
 {
 	struct sockaddr_in addr = {
-		0, // <-- remove this argument (sin_len, required on macOS) on Linux...
+		//0, // <-- remove this argument (sin_len, required on macOS) on Linux...
 		sin_family,
 		sin_port,
 		sin_addr,

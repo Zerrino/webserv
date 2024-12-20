@@ -6,7 +6,7 @@
 #    By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/14 15:23:12 by gdelvign          #+#    #+#              #
-#    Updated: 2024/11/26 09:30:06 by gdelvign         ###   ########.fr        #
+#    Updated: 2024/12/20 14:42:28 by gdelvign         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ CC			:= c++
 CPPFLAGS	:= -Wall -Wextra -Werror -std=c++98
 SRC_DIR		:= sources/
 BUILD_DIR	:= .build/
-SRC			:= $(addsuffix .cpp, $(addprefix $(SRC_DIR), main ConfigParser Socket SendToClient ClientRequest Cookie Request))
+SRC			:= $(addsuffix .cpp, $(addprefix $(SRC_DIR), main ConfigParser Socket SendToClient ClientRequest Cookie Request ParseHttp CGI CGIRequest CGIUtils))
 OBJ			:= $(addprefix $(BUILD_DIR), $(notdir $(SRC:.cpp=.o)))
 DEP			:= $(OBJ:.o=.d)
 NAME		:= webserv

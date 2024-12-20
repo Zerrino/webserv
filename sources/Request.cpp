@@ -39,7 +39,8 @@ void	Request::printMap(std::map<std::string, std::string> myMap)
 	std::cout << "-------------------New Request--------------------" << std::endl;
 	for (std::map<std::string, std::string>::iterator it = myMap.begin(); it != myMap.end(); ++it)
 	{
-		std::cout << "[\"" << it->first << "\"] = \"" << it->second << "\"" << std::endl;
+		if (it->first != "Content")
+			std::cout << "[\"" << it->first << "\"] = \"" << it->second << "\"" << std::endl;
 	}
 	std::cout << "--------------------------------------------------" << std::endl << std::endl;
 }
@@ -66,6 +67,8 @@ std::map<std::string, std::string> Request::parseRequest(std::string request)
 		req = cook.getRequestData(link.substr(pos1 + 1));
 		link = link.substr(0, pos1);
 	}
+	req["METHOD"] = request.substr(0, pos0);
+	req["URI"] = link;
 	req[request.substr(0, pos0)] = link;
 	req["Cookie_ID"] = cook.isCookied(request);
 	pos0 = request.find("WebKitFormBoundary");
@@ -250,4 +253,41 @@ std::map<std::string, std::string> Request::reParseRequest(std::map<std::string,
 	if (pos1 == std::string::npos) return myMap;
 	myMap[tmp.substr(0, pos1)] = tmp.substr(pos1 + 2);
 	return myMap;
+}
+
+
+std::string Request::urlParsing(std::vector<std::string> listLocation, std::string url)
+{
+	std::size_t pos;
+
+	_pathUrl = url;
+	pos = url.find("/");
+	if (pos == std::string::npos)
+		return "none";
+	if (url.length() == 1)
+	{
+		_pathUrl = "";
+		return ("/");
+	}
+	while (true)
+	{
+		for (std::size_t i = 0; i < listLocation.size(); i++)
+		{
+			if (listLocation[i] == url)
+			{
+				_pathUrl = _pathUrl.substr(listLocation[i].length());
+				return listLocation[i];
+			}
+		}
+		pos = url.rfind("/");
+		if (pos == std::string::npos)
+			return "none";
+		if (url.substr(0, pos + 1) == "/")
+		{
+			_pathUrl = "";
+			return ("/");
+		}
+		url = url.substr(0, pos);
+	}
+	return url;
 }

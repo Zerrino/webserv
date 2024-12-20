@@ -20,6 +20,7 @@ class	Request
 	private:
 	std::map<std::string, std::string>	_requestMap;
 	std::string _this_file;
+	std::string	_pathUrl;
 	public:
 		Request();
 		~Request();
@@ -32,6 +33,7 @@ class	Request
 		std::map<std::string, std::string>	mergeMap(std::map<std::string, std::string> myMap, std::map<std::string, std::string> mySecondMap);
 		std::map<std::string, std::string>	reformat(std::map<std::string, std::string> myMap);
 		void	printMap(std::map<std::string, std::string> myMap);
+		std::string urlParsing(std::vector<std::string> listLocation, std::string url);
 };
 
 #endif
