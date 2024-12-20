@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/20 20:00:23 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/20 20:03:47 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 # include "Request.hpp"
 # include "ConfigParser.hpp"
 # include "CGIRequest.hpp"
-# include <sys/epoll.h>
 
 struct retLoc
 {

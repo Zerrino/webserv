@@ -6,15 +6,16 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 22:20:30 by zerrino           #+#    #+#             */
-/*   Updated: 2024/12/20 17:00:36 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/20 20:05:22 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SENDTOCLIENT_HPP
 # define SENDTOCLIENT_HPP
 # include "webserv.hpp"
+# include "Cookie.hpp"
 
-class	SendToClient
+class	SendToClient : public Cookie
 {
 	private:
 
@@ -26,11 +27,11 @@ class	SendToClient
 	SendToClient();
 	void	SayHey();
 
-	std::string	requestOne(int request);
-	std::string	requestTwo(int request, std::string path);
-	std::string	requestThree(int request, std::string path);
-	std::string	requestFour(int request, std::string path);
-	std::string	requestFive(int request, std::string path);
+	std::string	requestOne(int request, bool keepAlive, bool cookie);
+	std::string	requestTwo(int request, std::string path, bool keepAlive, bool cookie);
+	std::string	requestThree(int request, std::string path, bool keepAlive, bool cookie);
+	std::string	requestFour(int request, std::string path, bool keepAlive, bool cookie);
+	std::string	requestFive(int request, std::string path, bool keepAlive, bool cookie);
 
 	std::string	getDate();
 	std::string getFile(std::string path);

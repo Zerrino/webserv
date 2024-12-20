@@ -50,7 +50,7 @@ void CGI::parseResult(const std::string& data, std::map<std::string, std::string
 
 void setStatus(std::string str, int &code, std::string &msg){
     size_t spacePos = str.find(' ');
-    code = stoi(str.substr(0, spacePos));
+    code = std::stoi(str.substr(0, spacePos));
     msg = str.substr(spacePos + 1);
 }
 

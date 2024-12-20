@@ -6,11 +6,12 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 22:20:30 by zerrino           #+#    #+#             */
-/*   Updated: 2024/12/20 16:56:35 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/20 20:06:49 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/SendToClient.hpp"
+#include "../includes/Cookie.hpp"
 
 SendToClient::SendToClient()
 {
@@ -19,8 +20,8 @@ SendToClient::SendToClient()
 SendToClient::~SendToClient()
 {
 }
-
 SendToClient::SendToClient(const SendToClient& cp)
+	: Cookie()
 {
  	*this = cp;
 }
@@ -37,7 +38,7 @@ void	SendToClient::SayHey()
 	std::cout << "Hey!" << std::endl;
 }
 
-std::string	SendToClient::requestOne(int request)
+std::string	SendToClient::requestOne(int request, bool keepAlive, bool cookie)
 {
 	this->_request = "";
 	switch (request)
@@ -49,12 +50,22 @@ std::string	SendToClient::requestOne(int request)
 		throw std::runtime_error("error type not handled");
 		break;
 	}
+	if (keepAlive)
+		this->_request.append("Connection: keep-alive\r\n");
+	else
+		this->_request.append("Connection: close\r\n");
+	if (cookie)
+	{
+		this->_request.append("Set-Cookie: session_id=");
+		this->_request.append(createCookieId());
+		this->_request.append("; HttpOnly\r\n");
+	}
 	//this->_request.append(this->getDate());
 	this->_request.append("\r\n");
 	return (this->_request);
 }
 
-std::string	SendToClient::requestTwo(int request, std::string path)
+std::string	SendToClient::requestTwo(int request, std::string path, bool keepAlive, bool cookie)
 {
 	std::string file;
 	this->_request = "";
@@ -63,7 +74,16 @@ std::string	SendToClient::requestTwo(int request, std::string path)
 	{
 	case 200:
 		this->_request = "HTTP/1.1 200 OK\r\n";
-		//this->_request.append(this->getDate());
+		if (keepAlive)
+			this->_request.append("Connection: keep-alive\r\n");
+		else
+			this->_request.append("Connection: close\r\n");
+		if (cookie)
+		{
+			this->_request.append("Set-Cookie: session_id=");
+			this->_request.append(createCookieId());
+			this->_request.append("; HttpOnly\r\n");
+		}
 		this->_request.append(this->getContentType(path));
 		file = getFile(path);
 		this->_request.append(this->_length);
@@ -72,7 +92,16 @@ std::string	SendToClient::requestTwo(int request, std::string path)
 		break;
 	case 201:
 		this->_request = "HTTP/1.1 201 Created\r\n";
-		//this->_request.append(this->getDate());
+		if (keepAlive)
+			this->_request.append("Connection: keep-alive\r\n");
+		else
+			this->_request.append("Connection: close\r\n");
+		if (cookie)
+		{
+			this->_request.append("Set-Cookie: session_id=");
+			this->_request.append(createCookieId());
+			this->_request.append("; HttpOnly\r\n");
+		}
 		this->_request.append(this->getContentType(path));
 		this->_request.append("Location : ");
 		this->_request.append(_locationCreate);
@@ -82,7 +111,16 @@ std::string	SendToClient::requestTwo(int request, std::string path)
 		break;
 	case 204:
 		this->_request = "HTTP/1.1 204 No Content\r\n";
-		//this->_request.append(this->getDate());
+		if (cookie)
+		{
+			this->_request.append("Set-Cookie: session_id=");
+			this->_request.append(createCookieId());
+			this->_request.append("; HttpOnly\r\n");
+		}
+		if (keepAlive)
+			this->_request.append("Connection: keep-alive\r\n");
+		else
+			this->_request.append("Connection: close\r\n");
 		this->_request.append("\r\n");
 		break;
 	default:
@@ -92,7 +130,7 @@ std::string	SendToClient::requestTwo(int request, std::string path)
 	return (this->_request);
 }
 
-std::string	SendToClient::requestThree(int request, std::string path)
+std::string	SendToClient::requestThree(int request, std::string path, bool keepAlive, bool cookie)
 {
 	this->_request = "";
 	this->_length = "";
@@ -109,7 +147,16 @@ std::string	SendToClient::requestThree(int request, std::string path)
 		break;
 	case 304:
 		this->_request = "HTTP/1.1 304 Not Modified\r\n";
-		//this->_request.append(this->getDate());
+		if (keepAlive)
+			this->_request.append("Connection: keep-alive\r\n");
+		else
+			this->_request.append("Connection: close\r\n");
+		if (cookie)
+		{
+			this->_request.append("Set-Cookie: session_id=");
+			this->_request.append(createCookieId());
+			this->_request.append("; HttpOnly\r\n");
+		}
 		this->_request.append("\r\nContent-Length: 0\r\n\r\n");
 		break;
 	default:
@@ -118,7 +165,10 @@ std::string	SendToClient::requestThree(int request, std::string path)
 	}
 	if (request != 304)
 	{
-		//this->_request.append(this->getDate());
+		if (keepAlive)
+			this->_request.append("Connection: keep-alive\r\n");
+		else
+			this->_request.append("Connection: close\r\n");
 		this->_request.append("Location: ");
 		this->_request.append(path);
 		this->_request.append("\r\nContent-Length: 0\r\n\r\n");
@@ -126,7 +176,7 @@ std::string	SendToClient::requestThree(int request, std::string path)
 	return (this->_request);
 }
 
-std::string	SendToClient::requestFour(int request, std::string path)
+std::string	SendToClient::requestFour(int request, std::string path, bool keepAlive, bool cookie)
 {
 	std::string file;
 	this->_request = "";
@@ -149,7 +199,16 @@ std::string	SendToClient::requestFour(int request, std::string path)
 		throw std::runtime_error("error type not handled");
 		break;
 	}
-	//this->_request.append(this->getDate());
+	if (keepAlive)
+		this->_request.append("Connection: keep-alive\r\n");
+	else
+		this->_request.append("Connection: close\r\n");
+	if (cookie)
+	{
+		this->_request.append("Set-Cookie: session_id=");
+		this->_request.append(createCookieId());
+		this->_request.append("; HttpOnly\r\n");
+	}
 	this->_request.append(this->getContentType(path));
 	file = getFile(path);
 	this->_request.append(this->_length);
@@ -158,7 +217,7 @@ std::string	SendToClient::requestFour(int request, std::string path)
 	return (this->_request);
 }
 
-std::string	SendToClient::requestFive(int request, std::string path)
+std::string	SendToClient::requestFive(int request, std::string path, bool keepAlive, bool cookie)
 {
 	std::string file;
 	this->_request = "";
@@ -178,7 +237,16 @@ std::string	SendToClient::requestFive(int request, std::string path)
 		throw std::runtime_error("error type not handled");
 		break;
 	}
-	this->_request.append(this->getDate());
+	if (keepAlive)
+		this->_request.append("Connection: keep-alive\r\n");
+	else
+		this->_request.append("Connection: close\r\n");
+	if (cookie)
+	{
+		this->_request.append("Set-Cookie: session_id=");
+		this->_request.append(createCookieId());
+		this->_request.append("; HttpOnly\r\n");
+	}
 	this->_request.append(this->getContentType(path));
 	file = getFile(path);
 	this->_request.append(this->_length);
