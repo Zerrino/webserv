@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/19 20:32:28 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/20 10:07:07 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -598,14 +598,12 @@ void	ClientRequest::sendClient(int fd, int request, std::string path)
 	std::stringstream ss;
 	ss << request;
 	request_str = ss.str();
-	//std::cout << request_str << std::endl;
 	if (_errorPage.find(request_str) != _errorPage.end())
 	{
 		struct stat buffer;
 		if (stat(_errorPage[request_str].c_str(), &buffer) == 0)
 			path = _errorPage[request_str];
 	}
-
 	if ((request >= 100) && (request < 200))
 		str = this->requestOne(request, _keepAlive);
 	else if ((request >= 200) && (request < 300))
