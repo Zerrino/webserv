@@ -29,7 +29,8 @@ void CGIRequest::sendChunkedData(int fd, const std::string& body) const {
     write(fd, "0\r\n\r\n", 5);
 }
 
-void CGIRequest::send(int fd) const {
+void CGIRequest::send(int fd) const
+{
     std::string frequest;
     std::string status = getStatusCodeString();
     std::string message = getStatusMessage();
@@ -119,7 +120,7 @@ void CGIRequest::parseRequest(const std::map<std::string, std::string> &clMap) {
             _url = it->second;
         else if(it->first == "Content"){
             _body = it->second;
-        } else 
+        } else
             _headers[it->first] = it->second;
     }
 }
@@ -133,9 +134,9 @@ std::string CGIRequest::getHeader(std::string headerName) const {
 
 void CGIRequest::setHeader(std::string headerName, std::string headerValue){
     std::map<std::string, std::string>::const_iterator it = _headers.find(headerName);
-	if (it != _headers.end()) 
+	if (it != _headers.end())
 		_headers[headerName] = headerValue;
-	else 
+	else
 		_headers.insert(std::make_pair(headerName, headerValue));
 }
 
@@ -160,7 +161,7 @@ std::string CGIRequest::getUrl() const { return _url; }
 const std::map<std::string, std::string>& CGIRequest::getHeaders() const { return _headers; }
 std::string CGIRequest::getBody() const { return _body; }
 int CGIRequest::getStatusCode() const { return _status_code; }
-std::string CGIRequest::getStatusCodeString() const { 
+std::string CGIRequest::getStatusCodeString() const {
 	std::stringstream ss;
 	ss << _status_code;
 	return ss.str();

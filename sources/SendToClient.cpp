@@ -6,11 +6,12 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 22:20:30 by zerrino           #+#    #+#             */
-/*   Updated: 2024/12/18 12:08:35 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/20 12:20:50 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/SendToClient.hpp"
+#include "../includes/Cookie.hpp"
 
 SendToClient::SendToClient()
 {
@@ -19,8 +20,8 @@ SendToClient::SendToClient()
 SendToClient::~SendToClient()
 {
 }
-
 SendToClient::SendToClient(const SendToClient& cp)
+	: Cookie()
 {
  	*this = cp;
 }
@@ -37,7 +38,7 @@ void	SendToClient::SayHey()
 	std::cout << "Hey!" << std::endl;
 }
 
-std::string	SendToClient::requestOne(int request, bool keepAlive)
+std::string	SendToClient::requestOne(int request, bool keepAlive, bool cookie)
 {
 	this->_request = "";
 	switch (request)
@@ -53,12 +54,18 @@ std::string	SendToClient::requestOne(int request, bool keepAlive)
 		this->_request.append("Connection: keep-alive\r\n");
 	else
 		this->_request.append("Connection: close\r\n");
+	if (cookie)
+	{
+		this->_request.append("Set-Cookie: session_id=");
+		this->_request.append(createCookieId());
+		this->_request.append("; HttpOnly\r\n");
+	}
 	//this->_request.append(this->getDate());
 	this->_request.append("\r\n");
 	return (this->_request);
 }
 
-std::string	SendToClient::requestTwo(int request, std::string path, bool keepAlive)
+std::string	SendToClient::requestTwo(int request, std::string path, bool keepAlive, bool cookie)
 {
 	std::string file;
 	this->_request = "";
@@ -71,6 +78,12 @@ std::string	SendToClient::requestTwo(int request, std::string path, bool keepAli
 			this->_request.append("Connection: keep-alive\r\n");
 		else
 			this->_request.append("Connection: close\r\n");
+		if (cookie)
+		{
+			this->_request.append("Set-Cookie: session_id=");
+			this->_request.append(createCookieId());
+			this->_request.append("; HttpOnly\r\n");
+		}
 		this->_request.append(this->getContentType(path));
 		file = getFile(path);
 		this->_request.append(this->_length);
@@ -83,6 +96,12 @@ std::string	SendToClient::requestTwo(int request, std::string path, bool keepAli
 			this->_request.append("Connection: keep-alive\r\n");
 		else
 			this->_request.append("Connection: close\r\n");
+		if (cookie)
+		{
+			this->_request.append("Set-Cookie: session_id=");
+			this->_request.append(createCookieId());
+			this->_request.append("; HttpOnly\r\n");
+		}
 		this->_request.append(this->getContentType(path));
 		this->_request.append("Location : ");
 		this->_request.append(_locationCreate);
@@ -92,6 +111,12 @@ std::string	SendToClient::requestTwo(int request, std::string path, bool keepAli
 		break;
 	case 204:
 		this->_request = "HTTP/1.1 204 No Content\r\n";
+		if (cookie)
+		{
+			this->_request.append("Set-Cookie: session_id=");
+			this->_request.append(createCookieId());
+			this->_request.append("; HttpOnly\r\n");
+		}
 		if (keepAlive)
 			this->_request.append("Connection: keep-alive\r\n");
 		else
@@ -105,7 +130,7 @@ std::string	SendToClient::requestTwo(int request, std::string path, bool keepAli
 	return (this->_request);
 }
 
-std::string	SendToClient::requestThree(int request, std::string path, bool keepAlive)
+std::string	SendToClient::requestThree(int request, std::string path, bool keepAlive, bool cookie)
 {
 	this->_request = "";
 	this->_length = "";
@@ -126,6 +151,12 @@ std::string	SendToClient::requestThree(int request, std::string path, bool keepA
 			this->_request.append("Connection: keep-alive\r\n");
 		else
 			this->_request.append("Connection: close\r\n");
+		if (cookie)
+		{
+			this->_request.append("Set-Cookie: session_id=");
+			this->_request.append(createCookieId());
+			this->_request.append("; HttpOnly\r\n");
+		}
 		this->_request.append("\r\nContent-Length: 0\r\n\r\n");
 		break;
 	default:
@@ -145,7 +176,7 @@ std::string	SendToClient::requestThree(int request, std::string path, bool keepA
 	return (this->_request);
 }
 
-std::string	SendToClient::requestFour(int request, std::string path, bool keepAlive)
+std::string	SendToClient::requestFour(int request, std::string path, bool keepAlive, bool cookie)
 {
 	std::string file;
 	this->_request = "";
@@ -172,6 +203,12 @@ std::string	SendToClient::requestFour(int request, std::string path, bool keepAl
 		this->_request.append("Connection: keep-alive\r\n");
 	else
 		this->_request.append("Connection: close\r\n");
+	if (cookie)
+	{
+		this->_request.append("Set-Cookie: session_id=");
+		this->_request.append(createCookieId());
+		this->_request.append("; HttpOnly\r\n");
+	}
 	this->_request.append(this->getContentType(path));
 	file = getFile(path);
 	this->_request.append(this->_length);
@@ -180,7 +217,7 @@ std::string	SendToClient::requestFour(int request, std::string path, bool keepAl
 	return (this->_request);
 }
 
-std::string	SendToClient::requestFive(int request, std::string path, bool keepAlive)
+std::string	SendToClient::requestFive(int request, std::string path, bool keepAlive, bool cookie)
 {
 	std::string file;
 	this->_request = "";
@@ -204,6 +241,12 @@ std::string	SendToClient::requestFive(int request, std::string path, bool keepAl
 		this->_request.append("Connection: keep-alive\r\n");
 	else
 		this->_request.append("Connection: close\r\n");
+	if (cookie)
+	{
+		this->_request.append("Set-Cookie: session_id=");
+		this->_request.append(createCookieId());
+		this->_request.append("; HttpOnly\r\n");
+	}
 	this->_request.append(this->getContentType(path));
 	file = getFile(path);
 	this->_request.append(this->_length);

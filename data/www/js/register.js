@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   register.js                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 21:26:01 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/20 21:26:04 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/20 12:47:08 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,8 @@ const showModal = (status) => {
 
 async function createRequest(data) {
   try {
-    const request = await fetch("/data/ressources/database/profiles.txt", {
+    //const request = await fetch("/data/ressources/database/profiles.txt", {
+    const request = await fetch("/src", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

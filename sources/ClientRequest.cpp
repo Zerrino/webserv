@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/20 10:07:07 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/20 12:54:14 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -314,14 +314,16 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 						{
 							struct stat buffer;
 							//std::cout << _path << std::endl;
-							if (stat(_path.c_str(), &buffer) != 0)
+							if (stat(_path.c_str(), &buffer) != 0 && _clMap.find("GET") != _clMap.end())
 							{
-								if (_clMap.find("GET") != _clMap.end())
-									sendClient(this->_fds[i].fd, 404, "./data/ressources/empty.txt"); // verifier si la ressource existe bien sur le serveur
-								else
-								{
-									sendClient(this->_fds[i].fd, 200, "./data/ressources/empty.txt");
-								}
+								//std::cout << "hey" << std::endl;
+								//if (_clMap.find("GET") != _clMap.end())
+								std::cout << _path << std::endl;
+								sendClient(this->_fds[i].fd, 404, "./data/ressources/empty.txt"); // verifier si la ressource existe bien sur le serveur
+								//else
+								//{
+								//	sendClient(this->_fds[i].fd, 200, "./data/ressources/empty.txt");
+								//}
 							}
 							else if (_clMap.find("GET") != _clMap.end())
 							{
@@ -601,25 +603,76 @@ void	ClientRequest::sendClient(int fd, int request, std::string path)
 	if (_errorPage.find(request_str) != _errorPage.end())
 	{
 		struct stat buffer;
+		std::cout << _errorPage[request_str] << std::endl;
+		if (stat(_errorPage[request_str].c_str(), &buffer) == 0)
+			path = _errorPage[request_str];
+		std::cout << path << std::endl;
+	}
+	if ((request >= 100) && (request < 200))
+		str = this->requestOne(request, _keepAlive, 0);
+	else if ((request >= 200) && (request < 300))
+		str = this->requestTwo(request, path, _keepAlive, 0);
+	else if ((request >= 300) && (request < 400))
+		str = this->requestThree(request, path, _keepAlive, 0);
+	else if ((request >= 400) && (request < 500))
+		str = this->requestFour(request, path, _keepAlive, 0);
+	else if ((request >= 500) && (request < 600))
+		str = this->requestFive(request, path, _keepAlive, 0);
+	printRequestAnswear(request, path);
+	ssize_t total_sent = 0;
+	ssize_t to_send = str.length();
+	const char *buf = str.c_str();
+	while (0 < to_send)
+	{
+		ssize_t sent = send(fd, buf + total_sent, to_send, MSG_NOSIGNAL);
+		if (sent == -1)
+		{
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+			{
+				break;
+			}
+			else
+			{
+				_err = 1;
+				return;
+			}
+		}
+		else
+		{
+			total_sent += sent;
+			to_send -= sent;
+		}
+	}
+}
+
+void	ClientRequest::sendClient(int fd, int request, std::string path, bool cookie)
+{
+	std::string	str = "";
+	std::string	request_str = "";
+	std::stringstream ss;
+	ss << request;
+	request_str = ss.str();
+	if (_errorPage.find(request_str) != _errorPage.end())
+	{
+		struct stat buffer;
 		if (stat(_errorPage[request_str].c_str(), &buffer) == 0)
 			path = _errorPage[request_str];
 	}
 	if ((request >= 100) && (request < 200))
-		str = this->requestOne(request, _keepAlive);
+		str = this->requestOne(request, _keepAlive, cookie);
 	else if ((request >= 200) && (request < 300))
-		str = this->requestTwo(request, path, _keepAlive);
+		str = this->requestTwo(request, path, _keepAlive, cookie);
 	else if ((request >= 300) && (request < 400))
-		str = this->requestThree(request, path, _keepAlive);
+		str = this->requestThree(request, path, _keepAlive, cookie);
 	else if ((request >= 400) && (request < 500))
-		str = this->requestFour(request, path, _keepAlive);
+		str = this->requestFour(request, path, _keepAlive, cookie);
 	else if ((request >= 500) && (request < 600))
-		str = this->requestFive(request, path, _keepAlive);
+		str = this->requestFive(request, path, _keepAlive, cookie);
 	printRequestAnswear(request, path);
-
 	ssize_t total_sent = 0;
 	ssize_t to_send = str.length();
 	const char *buf = str.c_str();
-
+	std::cout << str << std::endl;
 	while (0 < to_send)
 	{
 		ssize_t sent = send(fd, buf + total_sent, to_send, MSG_NOSIGNAL);
@@ -648,20 +701,38 @@ void	ClientRequest::sendClient(int fd, int request, std::string path)
 void ClientRequest::listDirconst(std::string &path, int fd)
 {
 	std::size_t count = 0;
+	std::string path_json;
+	pid_t pid = getpid();
+
+	std::ostringstream oss;
+	oss << pid;
+	std::string pidStr = oss.str();
+
+
 	DIR *dir = opendir(path.c_str());
 	if (!dir)
 	{
 		sendClient(fd, 404, "./data/ressources/empty.txt");
 		return;
 	}
-	std::ofstream file("./tmp/json_folder/tmp_autoindex.json", std::ios::out | std::ios::trunc);
+
+	path_json = "./tmp/json_folder/tmp_";
+	path_json.append(pidStr);
+	path_json.append("_autoindex.html");
+
+	std::ofstream file(path_json.c_str(), std::ios::out | std::ios::trunc);
 	if (!file)
 	{
 		sendClient(fd, 404, "./data/ressources/empty.txt");
 		return;
 	}
-	file << "{" << std::endl;
-	file << "\t\"files\": [" << std::endl;
+	file << "<!DOCTYPE html>" << std::endl
+		<< "<html lang=\"en\">" << std::endl
+		<< "<head>" << std::endl
+		<< "<meta charset=\"UTF-8\">" << std::endl
+		<< "<title>Directory Listing</title>" << std::endl
+		<< "<script>" << std::endl;
+	file << "\tconst directoryData = [" << std::endl;
 	struct dirent *entry;
 	while ((entry = readdir(dir)) != NULL)
 	{
@@ -691,11 +762,16 @@ void ClientRequest::listDirconst(std::string &path, int fd)
 			<< "\t\t}";
 		count++;
 	}
-	file << std::endl << "\t]";
-	file << std::endl << "}" << std::endl;
+	file << std::endl << "\t];";
+	file << std::endl << "</script>" << std::endl
+		<< "<script src=\"/script.js\" defer></script>"
+		<< std::endl << "</head>" << std::endl
+		<< "<body>" << std::endl << "<div id=\"directory-container\"></div>"
+		<< std::endl << "</body>" << std::endl << "</html>" << std::endl;
 	file.close();
 	closedir(dir);
-	sendClient(fd, 200, "./tmp/json_folder/tmp_autoindex.json");
+	sendClient(fd, 200, path_json);
+	std::remove(path_json.c_str());
 }
 
 void	ClientRequest::handlingGET(int fd, setOfRuleHTTP rules)
@@ -719,6 +795,8 @@ void	ClientRequest::handlingGET(int fd, setOfRuleHTTP rules)
 		}
 		else if ((_clMap.find("Cookie") == _clMap.end()) && (_clMap.find("User-Agent") != _clMap.end()))
 		{
+			//this->sendClient(fd, 200, this->_path, 1);
+			/*
 			std::string req = "HTTP/1.1 200 OK\r\n";
 			if (_keepAlive)
 				this->_request.append("Connection: keep-alive\r\n");
@@ -733,6 +811,9 @@ void	ClientRequest::handlingGET(int fd, setOfRuleHTTP rules)
 			req.append("\r\n\r\n");
 			req.append(file);
 			write(fd, req.c_str(), req.length());
+			*/
+			std::cout << "pas de cookie!" << std::endl;
+			this->sendClient(fd, 200, this->_path, 1);
 		}
 		else
 		{
@@ -784,19 +865,27 @@ void	ClientRequest::handlingPOST(int fd, setOfRuleHTTP rules)
 		{
 			std::string path_cookies = "cookies/";
 			int resultCook = isCookies(_clMap["email"], _clMap["password"], "database/profiles.txt");
+			path_cookies.append(_clMap["Cookie_ID"]);
+			//struct stat buffer;
+			//bool cookieIsInvalid = (stat(path_cookies.c_str(), &buffer));
+			//std::cout << (stat(path_cookies.c_str(), &buffer)) << std::endl;
 			if (resultCook == 1)
 			{
-				cookiedUpdate("login", "true", path_cookies.append(_clMap["Cookie_ID"]));
-				cookiedUpdate("session", _clMap["email"].substr(0, _clMap["email"].find('@')), path_cookies);
 				sendClient(fd, 204, "");
+				cookiedUpdate("login", "true", path_cookies);
+				cookiedUpdate("session", _clMap["email"].substr(0, _clMap["email"].find('@')), path_cookies);
 			}
 			else
 			{
-				cookiedUpdate("login", "false", path_cookies.append(_clMap["Cookie_ID"]));
 				if (resultCook == -1)
+				{
 					sendClient(fd, 404, "./data/ressources/responses/errors/errorkey.txt");
+				}
 				else
+				{
 					sendClient(fd, 404, "./data/ressources/responses/errors/errorval.txt");
+				}
+				cookiedUpdate("login", "false", path_cookies);
 			}
 		}
 		else if (_clMap["action"].find("modify") != std::string::npos)

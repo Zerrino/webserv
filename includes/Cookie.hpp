@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cookie.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 04:06:02 by zerrino           #+#    #+#             */
-/*   Updated: 2024/11/14 15:12:02 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/20 12:00:37 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ class	Cookie
 {
 	private:
 		std::map<std::string, std::string> _requestData;
+	protected:
+		std::string	_cookiePathGlob;
 	public:
 		Cookie();
 		~Cookie();
