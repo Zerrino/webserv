@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/20 16:57:04 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/20 20:01:16 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ ClientRequest::ClientRequest(std::vector<int> fdSocket)
 	{
 		pollfd pfd;
 		pfd.fd = *it;
-		pfd.events = POLLIN;
+		pfd.events = POLLIN | POLLOUT;
 		pfd.revents = 0;
 		this->_fds.push_back(pfd);
 	}
@@ -38,7 +38,7 @@ void	ClientRequest::acceptRequest(int fd)
 		throw std::runtime_error("accept failed");
 	pollfd pfd;
 	pfd.fd = this->_fdClient;
-	pfd.events = POLLIN;
+	pfd.events = POLLIN | POLLOUT;
 	pfd.revents = 0;
 	this->_fds.push_back(pfd);
 }
@@ -233,6 +233,89 @@ std::string ClientRequest::getPath(setOfRuleHTTP rules, std::string locToFollow)
 	return path;
 }
 
+void	ClientRequest::readData(int i, setOfRuleHTTP rules, HttpBlock fileConfig)
+{
+	int	cgi_result;
+	std::string locToFollow;
+	_urlMap[_clMap["URI"]].loc = rulingHttp(rules, fileConfig, _clMap["URI"]);
+	locToFollow = _urlMap[_clMap["URI"]].loc.loc;
+	rules = setRulesLoc(locToFollow, rules, fileConfig);
+	_urlMap[_clMap["URI"]].rules = rules;
+	_urlMap[_clMap["URI"]].str0 = getPath(rules, locToFollow);
+	_urlMap[_clMap["URI"]].str1 = _clMap["URI"].substr(_clMap["URI"].size() - 1);
+	_urlMap[_clMap["URI"]].str2 = getContentType(_clMap["URI"]);
+	_errorPage.clear();
+	for (std::map<std::string, std::string>::iterator it = rules.error_page.begin(); it != rules.error_page.end(); ++it)
+	{
+		setOfRuleHTTP errorRules;
+		std::string errorLoc;
+		retLoc errorRetLoc;
+		std::string	errorPath;
+		errorRetLoc = rulingHttp(rules, fileConfig, it->second);
+		errorLoc = errorRetLoc.loc;
+		errorRules = setRulesLoc(errorLoc, rules, fileConfig);
+		errorPath = getPath(errorRules, errorLoc) + it->second;
+		_errorPage[it->first] = errorPath;
+	}
+	//parser.printSetOfRuleHTTP(rules);
+	locToFollow = _urlMap[_clMap["URI"]].loc.loc;
+	rules = _urlMap[_clMap["URI"]].rules;
+	this->_path = _urlMap[_clMap["URI"]].str0;
+	//_globRules = rules;
+	if (_urlMap[_clMap["URI"]].loc.loc2 == "cgi")
+	{
+		if (RulesApply(rules, this->_fds[i].fd))
+		{
+			return;
+		}
+		else
+		{
+			cgi_result = CGIchecker(_clMap , _path, rules, _fds[i].fd);
+			return;
+			(void)cgi_result;
+		}
+	}
+	else
+	{
+		if (RulesApply(rules, this->_fds[i].fd))
+		{
+			return;
+		}
+		else
+		{
+			struct stat buffer;
+			//std::cout << _path << std::endl;
+			if (stat(_path.c_str(), &buffer) != 0 && _clMap.find("GET") != _clMap.end())
+			{
+				//std::cout << _path << std::endl;
+				sendClient(this->_fds[i].fd, 404, "./data/ressources/empty.txt"); // verifier si la ressource existe bien sur le serveur
+				return;
+			}
+			else if (_clMap.find("GET") != _clMap.end())
+			{
+				//printMap(_clMap);
+				handlingGET(this->_fds[i].fd, rules);
+				return;
+			}
+			else if (_clMap.find("POST") != _clMap.end())
+			{
+				handlingPOST(this->_fds[i].fd, rules);
+				return;
+			}
+			else if (_clMap.find("PUT") != _clMap.end())
+			{
+				handlingPUT(this->_fds[i].fd, rules);
+				return;
+			}
+			else if (_clMap.find("DELETE") != _clMap.end())
+			{
+				handlingDELETE(this->_fds[i].fd, rules);
+				return;
+			}
+		}
+	}
+}
+
 void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 {
 	int	ret = poll(this->_fds.data(), this->_fds.size(), 3000);
@@ -250,116 +333,64 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 			{
 				ParseHttp parser;
 				this->get_clientInfo(this->_fds[i].fd);
-				//printMap(_clMap);
-				_keepAlive = false;
-				_err = 0;
-
-
-
+				_responseMap[this->_fds[i].fd].keepAlive = false;
+				_responseMap[this->_fds[i].fd].err = 0;
 				if (_clMap["Connection"] == "keep-alive")
 				{
-					_keepAlive = true;
+					_responseMap[this->_fds[i].fd].keepAlive = true;
 				}
 				else if (_clMap["Connection"] != "close")
 				{
-					_keepAlive = true;
+					_responseMap[this->_fds[i].fd].keepAlive = true;
 				}
-
 				try
 				{
-					int	cgi_result;
-					std::string locToFollow;
-					_urlMap[_clMap["URI"]].loc = rulingHttp(rules, fileConfig, _clMap["URI"]);
-					locToFollow = _urlMap[_clMap["URI"]].loc.loc;
-					rules = setRulesLoc(locToFollow, rules, fileConfig);
-					_urlMap[_clMap["URI"]].rules = rules;
-					_urlMap[_clMap["URI"]].str0 = getPath(rules, locToFollow);
-					_urlMap[_clMap["URI"]].str1 = _clMap["URI"].substr(_clMap["URI"].size() - 1);
-					_urlMap[_clMap["URI"]].str2 = getContentType(_clMap["URI"]);
-					_errorPage.clear();
-					for (std::map<std::string, std::string>::iterator it = rules.error_page.begin(); it != rules.error_page.end(); ++it)
-					{
-						setOfRuleHTTP errorRules;
-						std::string errorLoc;
-						retLoc errorRetLoc;
-						std::string	errorPath;
-						errorRetLoc = rulingHttp(rules, fileConfig, it->second);
-						errorLoc = errorRetLoc.loc;
-						errorRules = setRulesLoc(errorLoc, rules, fileConfig);
-						errorPath = getPath(errorRules, errorLoc) + it->second;
-						_errorPage[it->first] = errorPath;
-					}
-					//parser.printSetOfRuleHTTP(rules);
-					locToFollow = _urlMap[_clMap["URI"]].loc.loc;
-					rules = _urlMap[_clMap["URI"]].rules;
-					this->_path = _urlMap[_clMap["URI"]].str0;
-					//_globRules = rules;
-					if (_urlMap[_clMap["URI"]].loc.loc2 == "cgi")
-					{
-						if (RulesApply(rules, this->_fds[i].fd))
-						{
-						}
-						else
-						{
-							cgi_result = CGIchecker(_clMap , _path, rules, _fds[i].fd);
-							(void)cgi_result;
-						}
-					}
-					else
-					{
-						if (RulesApply(rules, this->_fds[i].fd))
-						{
-						}
-						else
-						{
-							struct stat buffer;
-							//std::cout << _path << std::endl;
-							if (stat(_path.c_str(), &buffer) != 0 && _clMap.find("GET") != _clMap.end())
-							{
-								//std::cout << "hey" << std::endl;
-								//if (_clMap.find("GET") != _clMap.end())
-								std::cout << _path << std::endl;
-								sendClient(this->_fds[i].fd, 404, "./data/ressources/empty.txt"); // verifier si la ressource existe bien sur le serveur
-								//else
-								//{
-								//	sendClient(this->_fds[i].fd, 200, "./data/ressources/empty.txt");
-								//}
-							}
-							else if (_clMap.find("GET") != _clMap.end())
-							{
-								handlingGET(this->_fds[i].fd, rules);
-							}
-							else if (_clMap.find("POST") != _clMap.end())
-							{
-								handlingPOST(this->_fds[i].fd, rules);
-							}
-							else if (_clMap.find("PUT") != _clMap.end())
-							{
-								handlingPUT(this->_fds[i].fd, rules);
-							}
-							else if (_clMap.find("DELETE") != _clMap.end())
-							{
-								handlingDELETE(this->_fds[i].fd, rules);
-							}
-						}
-					}
+					readData(i, rules, fileConfig);
 				}
 				catch(const std::exception& e)
-
 				{
 					std::cerr << "error : " << e.what() << '\n';
 				}
-
-				if (!_keepAlive || _err == 1)
+				if (_responseMap[this->_fds[i].fd].err == 1)
 				{
-					//shutdown(_fds[i].fd, SHUT_WR);
-					//char buf[1024];
-					//while (read(this->_fds[i].fd, buf, sizeof(buf)) > 0)
-					//	;
 					close(this->_fds[i].fd);
 					this->_fds.erase(this->_fds.begin() + i);
+					_responseMap.erase(this->_fds[i].fd);
 					i--;
-					_err = 0;
+					_responseMap[this->_fds[i].fd].err = 0;
+				}
+			}
+		}
+		if (this->_fds[i].revents & POLLOUT)
+		{
+			if (_responseMap[this->_fds[i].fd].isResponseReady)
+			{
+				ssize_t total_sent = 0;
+				ssize_t to_send = _responseMap[this->_fds[i].fd].requestResponse.length();
+				const char *buf = _responseMap[this->_fds[i].fd].requestResponse.c_str();
+				while (0 < to_send)
+				{
+					ssize_t sent = send(this->_fds[i].fd, buf + total_sent, to_send, MSG_NOSIGNAL);
+					if (sent == -1)
+					{
+						_responseMap[this->_fds[i].fd].err = 1;
+						break;
+					}
+					else
+					{
+						total_sent += sent;
+						to_send -= sent;
+					}
+				}
+				_responseMap[this->_fds[i].fd].requestResponse.clear();
+				_responseMap[this->_fds[i].fd].isResponseReady = false;
+				if (!_responseMap[this->_fds[i].fd].keepAlive || _responseMap[this->_fds[i].fd].err == 1)
+				{
+					close(this->_fds[i].fd);
+					this->_fds.erase(this->_fds.begin() + i);
+					_responseMap.erase(this->_fds[i].fd);
+					i--;
+					_responseMap[this->_fds[i].fd].err = 0;
 				}
 			}
 		}
@@ -398,9 +429,13 @@ std::string ClientRequest::get_clientInfo(int fd)
 
 	while (true)
 	{
-		std::size_t len = read(fd, buffer, sizeof(buffer));
+		ssize_t len = read(fd, buffer, sizeof(buffer));
 		if (len <= 0)
+		{
+			if (len == -1)
+				_responseMap[fd].err = 1;
 			break;
+		}
 		requestData.append(buffer, len);
 		if (!headersParsed)
 		{
@@ -609,40 +644,18 @@ void	ClientRequest::sendClient(int fd, int request, std::string path)
 		std::cout << path << std::endl;
 	}
 	if ((request >= 100) && (request < 200))
-		str = this->requestOne(request, _keepAlive, 0);
+		str = this->requestOne(request, _responseMap[fd].keepAlive, 0);
 	else if ((request >= 200) && (request < 300))
-		str = this->requestTwo(request, path, _keepAlive, 0);
+		str = this->requestTwo(request, path, _responseMap[fd].keepAlive, 0);
 	else if ((request >= 300) && (request < 400))
-		str = this->requestThree(request, path, _keepAlive, 0);
+		str = this->requestThree(request, path, _responseMap[fd].keepAlive, 0);
 	else if ((request >= 400) && (request < 500))
-		str = this->requestFour(request, path, _keepAlive, 0);
+		str = this->requestFour(request, path, _responseMap[fd].keepAlive, 0);
 	else if ((request >= 500) && (request < 600))
-		str = this->requestFive(request, path, _keepAlive, 0);
+		str = this->requestFive(request, path, _responseMap[fd].keepAlive, 0);
 	printRequestAnswear(request, path);
-	ssize_t total_sent = 0;
-	ssize_t to_send = str.length();
-	const char *buf = str.c_str();
-	while (0 < to_send)
-	{
-		ssize_t sent = send(fd, buf + total_sent, to_send, MSG_NOSIGNAL);
-		if (sent == -1)
-		{
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-			{
-				break;
-			}
-			else
-			{
-				_err = 1;
-				return;
-			}
-		}
-		else
-		{
-			total_sent += sent;
-			to_send -= sent;
-		}
-	}
+	_responseMap[fd].requestResponse = str;
+	_responseMap[fd].isResponseReady = true;
 }
 
 void	ClientRequest::sendClient(int fd, int request, std::string path, bool cookie)
@@ -659,41 +672,18 @@ void	ClientRequest::sendClient(int fd, int request, std::string path, bool cooki
 			path = _errorPage[request_str];
 	}
 	if ((request >= 100) && (request < 200))
-		str = this->requestOne(request, _keepAlive, cookie);
+		str = this->requestOne(request, _responseMap[fd].keepAlive, cookie);
 	else if ((request >= 200) && (request < 300))
-		str = this->requestTwo(request, path, _keepAlive, cookie);
+		str = this->requestTwo(request, path, _responseMap[fd].keepAlive, cookie);
 	else if ((request >= 300) && (request < 400))
-		str = this->requestThree(request, path, _keepAlive, cookie);
+		str = this->requestThree(request, path, _responseMap[fd].keepAlive, cookie);
 	else if ((request >= 400) && (request < 500))
-		str = this->requestFour(request, path, _keepAlive, cookie);
+		str = this->requestFour(request, path, _responseMap[fd].keepAlive, cookie);
 	else if ((request >= 500) && (request < 600))
-		str = this->requestFive(request, path, _keepAlive, cookie);
+		str = this->requestFive(request, path, _responseMap[fd].keepAlive, cookie);
 	printRequestAnswear(request, path);
-	ssize_t total_sent = 0;
-	ssize_t to_send = str.length();
-	const char *buf = str.c_str();
-	std::cout << str << std::endl;
-	while (0 < to_send)
-	{
-		ssize_t sent = send(fd, buf + total_sent, to_send, MSG_NOSIGNAL);
-		if (sent == -1)
-		{
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-			{
-				break;
-			}
-			else
-			{
-				_err = 1;
-				return;
-			}
-		}
-		else
-		{
-			total_sent += sent;
-			to_send -= sent;
-		}
-	}
+	_responseMap[fd].requestResponse = str;
+	_responseMap[fd].isResponseReady = true;
 }
 
 
@@ -795,23 +785,6 @@ void	ClientRequest::handlingGET(int fd, setOfRuleHTTP rules)
 		}
 		else if ((_clMap.find("Cookie") == _clMap.end()) && (_clMap.find("User-Agent") != _clMap.end()))
 		{
-			//this->sendClient(fd, 200, this->_path, 1);
-			/*
-			std::string req = "HTTP/1.1 200 OK\r\n";
-			if (_keepAlive)
-				this->_request.append("Connection: keep-alive\r\n");
-			else
-				this->_request.append("Connection: close\r\n");
-			req.append("Set-Cookie: session_id=");
-			req.append(createCookieId());
-			req.append("; HttpOnly\r\n");
-			std::string file = getFile(this->_path);
-			req.append(getContentType(this->_path));
-			req.append(this->_length);
-			req.append("\r\n\r\n");
-			req.append(file);
-			write(fd, req.c_str(), req.length());
-			*/
 			std::cout << "pas de cookie!" << std::endl;
 			this->sendClient(fd, 200, this->_path, 1);
 		}

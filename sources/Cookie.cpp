@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 04:06:02 by zerrino           #+#    #+#             */
-/*   Updated: 2024/12/20 16:56:55 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/20 20:01:42 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ std::string Cookie::createCookieId()
 	new_file << "login=false&" << std::endl;
 	file.close();
 	new_file.close();
-	_cookiePathGlob = tmp;
+	//_cookiePathGlob = tmp;
 	return (tmp);
 }
 
