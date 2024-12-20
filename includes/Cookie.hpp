@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 04:06:02 by zerrino           #+#    #+#             */
-/*   Updated: 2024/11/14 15:12:02 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/20 17:00:48 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ class	Cookie
 {
 	private:
 		std::map<std::string, std::string> _requestData;
+	protected:
+		std::string	_cookiePathGlob;
 	public:
 		Cookie();
 		~Cookie();

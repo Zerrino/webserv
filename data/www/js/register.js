@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 21:26:01 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/11/20 21:26:04 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/20 17:03:30 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,8 @@ const showModal = (status) => {
 
 async function createRequest(data) {
   try {
-    const request = await fetch("/data/ressources/database/profiles.txt", {
+    //const request = await fetch("/data/ressources/database/profiles.txt", {
+    const request = await fetch("/src", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

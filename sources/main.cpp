@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 20:12:32 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/12/20 14:44:07 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/20 16:56:48 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,11 @@
 #include "../includes/SendToClient.hpp"
 #include "../includes/Cookie.hpp"
 #include "../includes/ConfigParser.hpp"
+#include <csignal>
 
 int main(int ac, char **av)
 {
+	signal(SIGPIPE, SIG_IGN);
 	if (ac > 2)
 		return (std::cout << "Invalid number of arguments !" << std::endl, EXIT_FAILURE);
 	else
@@ -39,7 +41,7 @@ int main(int ac, char **av)
 
 			std::vector<int> ports;
 			ports.push_back(sock.get_fdSocket());
-			// ports.push_back(sock2.get_fdSocket());
+			ports.push_back(sock2.get_fdSocket());
 
 			ClientRequest request(ports);
 			setOfRuleHTTP	rules;
@@ -99,7 +101,7 @@ int main(int ac, char **av)
 			{
 				try
 				{
-					request.pollRequest();
+					//request.pollRequest();
 					request.pollExecute(rules, fileConfig);
 				}
 				catch (const std::exception &e)

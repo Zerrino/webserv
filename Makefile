@@ -5,13 +5,14 @@
 #                                                     +:+ +:+         +:+      #
 #    By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/11/14 15:23:12 by gdelvign          #+#    #+#              #
-#    Updated: 2024/12/20 14:42:28 by gdelvign         ###   ########.fr        #
+#    Created: Invalid date        by                   #+#    #+#              #
+#    Updated: 2024/12/20 17:01:53 by gdelvign         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
+
 CC			:= c++
-CPPFLAGS	:= -Wall -Wextra -Werror -std=c++98
+CPPFLAGS	:= -std=c++98 -Wall -Wextra -Werror
 SRC_DIR		:= sources/
 BUILD_DIR	:= .build/
 SRC			:= $(addsuffix .cpp, $(addprefix $(SRC_DIR), main ConfigParser Socket SendToClient ClientRequest Cookie Request ParseHttp CGI CGIRequest CGIUtils))

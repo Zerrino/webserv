@@ -1,0 +1,58 @@
+{
+	"files": [
+		{
+			"name": ".",
+			"type": "D",
+			"perm": "511",
+			"size": 4096
+		},
+		{
+			"name": "..",
+			"type": "D",
+			"perm": "511",
+			"size": 4096
+		},
+		{
+			"name": "400.html",
+			"type": "F",
+			"perm": "511",
+			"size": 1014
+		},
+		{
+			"name": "401.html",
+			"type": "F",
+			"perm": "511",
+			"size": 1015
+		},
+		{
+			"name": "403.html",
+			"type": "F",
+			"perm": "511",
+			"size": 998
+		},
+		{
+			"name": "404.html",
+			"type": "F",
+			"perm": "511",
+			"size": 1031
+		},
+		{
+			"name": "405.html",
+			"type": "F",
+			"perm": "511",
+			"size": 1006
+		},
+		{
+			"name": "413.html",
+			"type": "F",
+			"perm": "511",
+			"size": 1027
+		},
+		{
+			"name": "500.html",
+			"type": "F",
+			"perm": "511",
+			"size": 1073
+		}
+	]
+}

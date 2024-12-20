@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cookie.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 04:06:02 by zerrino           #+#    #+#             */
-/*   Updated: 2024/11/20 08:03:25 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/20 16:56:55 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ std::string Cookie::createCookieId()
 	new_file << "login=false&" << std::endl;
 	file.close();
 	new_file.close();
+	_cookiePathGlob = tmp;
 	return (tmp);
 }
 

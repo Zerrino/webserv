@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 19:57:51 by alexafer          #+#    #+#             */
-/*   Updated: 2024/12/20 14:45:49 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/20 16:57:30 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,6 @@
 # include <fcntl.h>
 # include <sys/syscall.h>
 # include <sys/stat.h>
-# include <sys/errno.h>
-# include <stdexcept>
 # include <iostream>
 # include <sys/socket.h>
 # include <netinet/in.h>
