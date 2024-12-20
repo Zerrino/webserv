@@ -6,7 +6,7 @@
 /*   By: gdelvign <gdelvign@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 20:12:32 by gdelvign          #+#    #+#             */
-/*   Updated: 2024/12/20 16:56:48 by gdelvign         ###   ########.fr       */
+/*   Updated: 2024/12/20 20:46:33 by gdelvign         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ int main(int ac, char **av)
 			{
 				try
 				{
-					request.pollRequest();
+					//request.pollRequest();
 					request.pollExecute(rules, fileConfig);
 				}
 				catch (const std::exception &e)
