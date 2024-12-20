@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 04:06:02 by zerrino           #+#    #+#             */
-/*   Updated: 2024/12/20 11:59:33 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/20 16:56:28 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ std::string Cookie::createCookieId()
 	new_file << "login=false&" << std::endl;
 	file.close();
 	new_file.close();
-	_cookiePathGlob = tmp;
+	//_cookiePathGlob = tmp;
 	return (tmp);
 }
 

@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/20 11:45:12 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/20 17:35:35 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,20 @@ struct retStr
 	retLoc			loc;
 };
 
+struct ClientData
+{
+	std::string requestResponse;
+	bool isResponseReady;
+	bool keepAlive;
+	int  err;
+	ClientData()
+	: requestResponse(""),
+	isResponseReady(false),
+	keepAlive(false)
+	{}
+};
+
+
 class	ClientRequest : public SendToClient, public Request
 {
 	protected:
@@ -72,6 +86,7 @@ class	ClientRequest : public SendToClient, public Request
 		std::vector<pollfd>	_fds;
 		std::vector<int>	_fdSocket;
 		std::string			_path;
+		std::string			_globStrReq;
 		int					_fdClient;
 		int					_i;
 		int					_globReq;
@@ -80,6 +95,7 @@ class	ClientRequest : public SendToClient, public Request
 		// char				_buffer[256];
 		std::string			_clientInfo;
 		struct sockaddr_in 	_addr;
+		std::map<int, ClientData>	_responseMap;
 		std::map<std::string, std::string>	_clMap;
 		std::map<std::string, std::string>	_errorPage;
 		std::map<std::string, retStr>	_urlMap;
@@ -117,6 +133,7 @@ class	ClientRequest : public SendToClient, public Request
 		std::string		readChunkedBody(int fd, std::string &initialBuffer, std::size_t &contentLength);
 		bool			finder(const std::vector<char> &buffer, std::size_t &pos);
 		void			listDirconst(std::string &path, int fd);
+		void			readData(int i, setOfRuleHTTP rules, HttpBlock fileConfig);
 };
 
 #endif
