@@ -6,7 +6,7 @@
 /*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 05:18:28 by Zerrino           #+#    #+#             */
-/*   Updated: 2024/12/20 17:59:42 by marvin           ###   ########.fr       */
+/*   Updated: 2024/12/20 18:17:15 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -351,6 +351,14 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 				{
 					std::cerr << "error : " << e.what() << '\n';
 				}
+				if (_responseMap[this->_fds[i].fd].err == 1)
+				{
+					close(this->_fds[i].fd);
+					this->_fds.erase(this->_fds.begin() + i);
+					_responseMap.erase(this->_fds[i].fd);
+					i--;
+					_responseMap[this->_fds[i].fd].err = 0;
+				}
 			}
 		}
 		if (this->_fds[i].revents & POLLOUT)
@@ -365,15 +373,8 @@ void	ClientRequest::pollExecute(setOfRuleHTTP rules, HttpBlock fileConfig)
 					ssize_t sent = send(this->_fds[i].fd, buf + total_sent, to_send, MSG_NOSIGNAL);
 					if (sent == -1)
 					{
-						if (errno == EAGAIN || errno == EWOULDBLOCK)
-						{
-							break;
-						}
-						else
-						{
-							_responseMap[this->_fds[i].fd].err = 1;
-							break;
-						}
+						_responseMap[this->_fds[i].fd].err = 1;
+						break;
 					}
 					else
 					{
@@ -428,9 +429,13 @@ std::string ClientRequest::get_clientInfo(int fd)
 
 	while (true)
 	{
-		std::size_t len = read(fd, buffer, sizeof(buffer));
+		ssize_t len = read(fd, buffer, sizeof(buffer));
 		if (len <= 0)
+		{
+			if (len == -1)
+				_responseMap[fd].err = 1;
 			break;
+		}
 		requestData.append(buffer, len);
 		if (!headersParsed)
 		{
